@@ -2,6 +2,7 @@ package it.infocamere.sipert.distrivoci;
 	
 import java.io.IOException;
 
+import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
 import it.infocamere.sipert.distrivoci.view.OverviewController;
@@ -34,6 +35,11 @@ public class Main extends Application {
      * i dati nel formato di observable list di Voce.
      */
     private ObservableList<Voce> voci = FXCollections.observableArrayList();
+    
+    /**
+     * i dati nel formato di observable list di Schema.
+     */
+    private ObservableList<Schema> schemi = FXCollections.observableArrayList();
 	
 	public Main() {
         // Aggiungo alcuni dati di esempio
@@ -42,6 +48,9 @@ public class Main extends Application {
     	
     	voci.add(new Voce("voce1", "first voice"));
     	voci.add(new Voce("voce2", "second voice"));
+    	
+    	schemi.add(new Schema("schema1", "first schemi"));
+    	schemi.add(new Schema("schema2", "second schemi"));
     }
     
 	@Override
@@ -126,6 +135,7 @@ public class Main extends Application {
             // Give the controller access to the main app.
             OverviewController controller = loader.getController();
             controller.setMain(this);
+            controller.setFilter();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -168,6 +178,27 @@ public class Main extends Application {
     public boolean addVoceToVociData (Voce voce) {
     	if (voce != null) {
     		this.voci.add(voce);
+    		return true;
+    	}
+    	return false;
+    }
+   
+    /**
+     * Ritorna i dati nel formato di observable list of Schema. 
+     * @return
+     */
+    public ObservableList<Schema> getSchemi() {
+        return schemi;
+    }
+    
+    public void setSchemi(ObservableList<Schema> schemi ) {
+		this.schemi = schemi;
+	}
+    
+    public boolean addSchemiData (Schema schema) {
+    	
+    	if (schema != null) {
+    		this.schemi.add(schema);
     		return true;
     	}
     	return false;

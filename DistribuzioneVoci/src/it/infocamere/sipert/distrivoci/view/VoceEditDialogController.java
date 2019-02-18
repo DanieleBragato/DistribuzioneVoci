@@ -37,7 +37,7 @@ public class VoceEditDialogController {
     
     @FXML
     private void initialize() {
-
+    	nomeField.requestFocus();
     }
     
     @FXML

@@ -1,13 +1,20 @@
 package it.infocamere.sipert.distrivoci.view;
 
 import it.infocamere.sipert.distrivoci.Main;
+import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TextField;
 
 public class OverviewController {
 	
@@ -18,6 +25,9 @@ public class OverviewController {
     private TableView<Voce> vociTable;
     
     @FXML
+    private TableView<Schema> schemiTable;
+    
+    @FXML
     private TableColumn<Tabella, String> codiceTabColumn;
     @FXML
     private TableColumn<Tabella, String> descrizioneTabColumn;
@@ -26,6 +36,17 @@ public class OverviewController {
     private TableColumn<Voce, String> codiceVoceColumn;
     @FXML
     private TableColumn<Voce, String> descrizioneVoceColumn;
+    
+    @FXML
+    private TableColumn<Schema, String> codiceSchemaColumn;
+    @FXML
+    private TableColumn<Schema, String> descrizioneSchemaColumn;
+	@FXML
+	private TextField filterField;
+    @FXML
+    private Button bntSelectAll;
+    @FXML
+    private Button bntDeselectAll;
     
     // Referimento al main 
     private Main main;
@@ -47,7 +68,18 @@ public class OverviewController {
     	codiceVoceColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
     	descrizioneVoceColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
     	
+        // Initializza la lista degli schemi con 2 colonne - codice e descrizione 
+    	codiceSchemaColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
+    	descrizioneSchemaColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
     	
+    	//
+    	tabelledbTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    	vociTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    	schemiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    	
+    	
+
+		
         // Listener per la selezione delle modifiche e della visualizzazione del dettaglio della query quando viene cambiata
 //    	tabelledbTable.getSelectionModel().selectedItemProperty().addListener(
 //                (observable, oldValue, newValue) -> showQueryDetails(newValue));
@@ -62,6 +94,46 @@ public class OverviewController {
         // aggiunta di una observable list alla table
         vociTable.setItems(main.getVociData());
         
+        // aggiunta di una observable list alla table
+        schemiTable.setItems(main.getSchemi());
+        
+    }
+    
+    public void setFilter() {
+    
+		// 1. Wrap the ObservableList in a FilteredList (initially display all data).
+		FilteredList<Schema> filteredData = new FilteredList<>(main.getSchemi(), p -> true);
+    	
+		// 2. Set the filter Predicate whenever the filter changes.
+		filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+			filteredData.setPredicate(schema -> {
+				// If filter text is empty, display all persons.
+				if (newValue == null || newValue.isEmpty()) {
+					return true;
+				}
+				
+				// Compare first name and last name of every person with filter text.
+				String lowerCaseFilter = newValue.toLowerCase();
+				
+				if (schema.getCodice().toLowerCase().indexOf(lowerCaseFilter) != -1) {
+					return true; // Filter matches first name.
+				} else if (schema.getDescrizione().toLowerCase().indexOf(lowerCaseFilter) != -1) {
+					return true; // Filter matches last name.
+				}
+				return false; // Does not match.
+			});
+		});
+		
+		// 3. Wrap the FilteredList in a SortedList. 
+		SortedList<Schema> sortedData = new SortedList<>(filteredData);
+		
+		// 4. Bind the SortedList comparator to the TableView comparator.
+		// 	  Otherwise, sorting the TableView would have no effect.
+		sortedData.comparatorProperty().bind(schemiTable.comparatorProperty());
+		
+		// 5. Add sorted (and filtered) data to the table.
+		schemiTable.setItems(sortedData);
+    	
     }
     
     /**
@@ -109,8 +181,8 @@ public class OverviewController {
             Alert alert = new Alert(AlertType.WARNING);
             alert.initOwner(main.getStagePrincipale());
             alert.setTitle("No Selection");
-            alert.setHeaderText("nessuna query selezionata");
-            alert.setContentText("Per cortesia, seleziona una query dalla lista ");
+            alert.setHeaderText("Nessuna Tabella selezionata");
+            alert.setContentText("Per cortesia, seleziona una Tabella dalla lista ");
             
             alert.showAndWait();
         }
@@ -168,5 +240,19 @@ public class OverviewController {
             alert.showAndWait();
         }
     }
+    
+    @FXML
+    private void handleSelectAllSchemi(ActionEvent event) {
+    	
+    	schemiTable.sel
+        //System.out.println("click on Exit button");
        
+    }
+       
+    @FXML
+    private void handleDeselectAllSchemi(ActionEvent event) {
+    	
+        //System.out.println("click on Exit button");
+       
+    }
 }
