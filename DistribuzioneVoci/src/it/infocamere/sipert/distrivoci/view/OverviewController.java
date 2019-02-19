@@ -244,7 +244,7 @@ public class OverviewController {
     @FXML
     private void handleSelectAllSchemi(ActionEvent event) {
     	
-    	schemiTable.sel
+    	schemiTable.getSelectionModel().setSelectionMode(value);
         //System.out.println("click on Exit button");
        
     }
