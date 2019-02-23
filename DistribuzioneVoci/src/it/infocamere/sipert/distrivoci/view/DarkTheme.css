@@ -23,6 +23,14 @@
     -fx-opacity: 1;
 }
 
+.label-header-tab {
+	-fx-background-color: #1d1d1d;
+    -fx-font-size: 11pt;
+    -fx-font-family: "Segoe UI Light";
+    -fx-text-fill: white;
+    -fx-opacity: 1;
+}
+
 .table-view {
     -fx-base: #1d1d1d;
     -fx-control-inner-background: #1d1d1d;

@@ -16,11 +16,11 @@
 
 <AnchorPane styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.infocamere.sipert.distrivoci.view.OverviewDistriVociController">
    <children>
-      <TabPane prefHeight="750.0" prefWidth="950.0" styleClass="background" tabClosingPolicy="UNAVAILABLE">
+      <TabPane prefHeight="750.0" prefWidth="950.0" styleClass="background" stylesheets="@DarkTheme.css" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Parametri">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="686.0" prefWidth="950.0">
                      <children>
                         <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                            <items>
@@ -119,6 +119,9 @@
                                  </children>
                               </AnchorPane>
                            </items>
+                           <opaqueInsets>
+                              <Insets top="20.0" />
+                           </opaqueInsets>
                         </SplitPane>
                      </children>
                   </AnchorPane>
