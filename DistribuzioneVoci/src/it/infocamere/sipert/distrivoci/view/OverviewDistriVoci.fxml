@@ -14,8 +14,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-
-<AnchorPane styleClass="background" stylesheets="@DarkTheme.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171">
+<AnchorPane styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.infocamere.sipert.distrivoci.view.OverviewDistriVociController">
    <children>
       <TabPane prefHeight="750.0" prefWidth="950.0" styleClass="background" tabClosingPolicy="UNAVAILABLE">
         <tabs>
@@ -84,13 +83,13 @@
                                        <children>
                                           <HBox prefHeight="50.0" prefWidth="200.0">
                                              <children>
-                                                <Label prefHeight="48.0" prefWidth="190.0" styleClass="label-header" text="Schemi Produzione" textAlignment="CENTER" />
+                                                <Label prefHeight="48.0" prefWidth="310.0" styleClass="label-header" text="Schemi Produzione" textAlignment="CENTER" />
                                                 <Label prefHeight="21.0" prefWidth="55.0" styleClass="label-bright" text="FILTRO:" textAlignment="RIGHT">
                                                    <HBox.margin>
-                                                      <Insets left="25.0" top="15.0" />
+                                                      <Insets left="55.0" top="15.0" />
                                                    </HBox.margin>
                                                 </Label>
-                                                <TextField fx:id="filterField" prefHeight="37.0" prefWidth="121.0">
+                                                <TextField fx:id="filterField" prefHeight="37.0" prefWidth="150.0">
                                                    <HBox.margin>
                                                       <Insets left="5.0" top="8.0" />
                                                    </HBox.margin>

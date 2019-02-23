@@ -5,7 +5,7 @@ import java.io.IOException;
 import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
-import it.infocamere.sipert.distrivoci.view.OverviewController;
+import it.infocamere.sipert.distrivoci.view.OverviewDistriVociController;
 import it.infocamere.sipert.distrivoci.view.RootLayoutController;
 import it.infocamere.sipert.distrivoci.view.TabellaEditDialogController;
 import it.infocamere.sipert.distrivoci.view.VoceEditDialogController;
@@ -51,6 +51,21 @@ public class Main extends Application {
     	
     	schemi.add(new Schema("schema1", "first schemi"));
     	schemi.add(new Schema("schema2", "second schemi"));
+    	schemi.add(new Schema("schema3", "terzo schemi"));
+    	schemi.add(new Schema("schema4", "quarto schemi"));
+    	schemi.add(new Schema("schema5", "quinto schemi"));
+    	schemi.add(new Schema("schema6", "sesto schemi"));
+    	schemi.add(new Schema("schema7", "Settimo schemi"));
+    	schemi.add(new Schema("schema8", "ottavo schemi"));
+    	schemi.add(new Schema("schema9", "nono schemi"));
+    	schemi.add(new Schema("schema10", "decimo schemi"));
+    	schemi.add(new Schema("schema11", "undicesimo schemi"));
+    	schemi.add(new Schema("schema12", "dodicesimo schemi"));
+    	schemi.add(new Schema("schema13", "tredicesimo schemi"));
+    	schemi.add(new Schema("schema14", "quattordicesimo schemi"));
+    	schemi.add(new Schema("schema15", "quindicesimo schemi"));
+    	schemi.add(new Schema("schema16", "sedicesimo schemi"));
+    	
     }
     
 	@Override
@@ -126,14 +141,14 @@ public class Main extends Application {
         try {
             // Load overview.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(Main.class.getResource("view/Overview.fxml"));
+            loader.setLocation(Main.class.getResource("view/OverviewDistriVoci.fxml"));
             AnchorPane overview = (AnchorPane) loader.load();
 
             // Set person overview into the center of root layout.
             rootLayout.setCenter(overview);
 
             // Give the controller access to the main app.
-            OverviewController controller = loader.getController();
+            OverviewDistriVociController controller = loader.getController();
             controller.setMain(this);
             controller.setFilter();
 

@@ -16,7 +16,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 
-public class OverviewController {
+public class OverviewDistriVociController {
 	
     @FXML
     private TableView<Tabella> tabelledbTable;
@@ -51,7 +51,7 @@ public class OverviewController {
     // Referimento al main 
     private Main main;
     
-    public OverviewController() {
+    public OverviewDistriVociController() {
     	
     }
     
