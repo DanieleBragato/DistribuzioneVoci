@@ -1,7 +1,16 @@
 package it.infocamere.sipert.distrivoci;
 	
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.prefs.Preferences;
 
+import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
+import it.infocamere.sipert.distrivoci.exception.ErroreColonneFileXlsSchemiKo;
+import it.infocamere.sipert.distrivoci.exception.ErroreFileSchemiNonTrovato;
+import it.infocamere.sipert.distrivoci.model.DeleteStatement;
+import it.infocamere.sipert.distrivoci.model.Model;
 import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
@@ -14,6 +23,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
@@ -41,6 +52,17 @@ public class Main extends Application {
      */
     private ObservableList<Schema> schemi = FXCollections.observableArrayList();
 	
+    /**
+     * i dati nel formato di observable list di DeleteStatement.
+     */
+    private ObservableList<DeleteStatement> deleteStatement = FXCollections.observableArrayList();
+	
+	/**
+     *  gli schemi dei data base oracle da trattare
+     */
+    private List<SchemaDTO> listSchemi = new ArrayList<SchemaDTO>();
+    
+    
 	public Main() {
         // Aggiungo alcuni dati di esempio
     	tabelleDB.add(new Tabella("tabella1", "la prima tabella"));
@@ -119,23 +141,61 @@ public class Main extends Application {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		// tentativo di caricamento dell'ultimo file delle query aperto 
-//		File file = getQueryFilePath();
-//		if (file != null) {
-//			loadQueryDataFromFile(file);
-//		}
-		// tentativo di caricamento dell'ultimo file degli schemi dei data base oracle aperto 
-//		File fileSchemiDB = getSchemiFilePath();
-//		if (fileSchemiDB != null) {
-//			loadSchemiDataBaseFromFile(fileSchemiDB);
-//		}
-		// tentativo di ricerca dell'ultimo file aperto dei risultati 
-//		File filePathRisultati = getFilePathRisultati();
-//		if (filePathRisultati != null) {
-//			setPathResultsFile(filePathRisultati.getAbsolutePath());
-//		}
+		
+		// tentativo di caricamento dell'ultimo file aperto degli schemi dei data base oracle  
+		File fileSchemiDB = getSchemiFilePath();
+		if (fileSchemiDB != null) {
+			loadSchemiDataBaseFromFile(fileSchemiDB);
+		}
 	}
+	
+	public File getSchemiFilePath() {
+		Preferences prefs = Preferences.userNodeForPackage(Main.class);
+		String filePathSchemiDB = prefs.get("filePathSchemiDB", null);
+		if (filePathSchemiDB != null) {
+			return new File(filePathSchemiDB);
+		} else {
+			return null;
+		}
+	}
+	
+	public void loadSchemiDataBaseFromFile(File fileSchemiXLS) {
+
+		Model model = new Model();
+
+		try {
+			listSchemi = model.getSchemi(fileSchemiXLS);
+			setSchemiDataBaseFilePath(fileSchemiXLS);
+
+		} catch (ErroreFileSchemiNonTrovato e) {
+
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setContentText("File excel degli schemi non trovato!");
+			alert.showAndWait();
+		} catch (ErroreColonneFileXlsSchemiKo e1) {
+
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setContentText("File excel degli schemi con colonne errate!");
+			alert.showAndWait();
+		} catch (RuntimeException e2) {
+
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setContentText(e2.toString());
+			alert.showAndWait();
+		}
+	}
+	
+    public void setSchemiDataBaseFilePath(File file) {
+        Preferences prefs = Preferences.userNodeForPackage(Main.class);
+        if (file != null) {
+            prefs.put("filePathSchemiDB", file.getPath());
+        } else {
+            prefs.remove("filePathSchemiDB");
+        }
+    }
 	
     public void showOverview() {
         try {
@@ -144,7 +204,7 @@ public class Main extends Application {
             loader.setLocation(Main.class.getResource("view/OverviewDistriVoci.fxml"));
             AnchorPane overview = (AnchorPane) loader.load();
 
-            // Set person overview into the center of root layout.
+            // Set distri voci overview into the center of root layout.
             rootLayout.setCenter(overview);
 
             // Give the controller access to the main app.
@@ -157,6 +217,10 @@ public class Main extends Application {
         }
     }
 	
+	public List<SchemaDTO> getListSchemi() {
+		return listSchemi;
+	}
+    
     /**
      * Ritorna i dati nel formato di observable list of Tabella. 
      * @return
@@ -214,6 +278,27 @@ public class Main extends Application {
     	
     	if (schema != null) {
     		this.schemi.add(schema);
+    		return true;
+    	}
+    	return false;
+    }
+    
+    /**
+     * Ritorna i dati nel formato di observable list of DeleteStatement. 
+     * @return
+     */
+    public ObservableList<DeleteStatement> getDeleteStatement() {
+        return deleteStatement;
+    }
+    
+    public void setDeleteStatement(ObservableList<DeleteStatement> deleteStatement ) {
+		this.deleteStatement = deleteStatement;
+	}
+    
+    public boolean addDeleteStatement (DeleteStatement deleteStatement) {
+    	
+    	if (deleteStatement != null) {
+    		this.deleteStatement.add(deleteStatement);
     		return true;
     	}
     	return false;

@@ -1,9 +1,13 @@
 package it.infocamere.sipert.distrivoci.view;
 
+import java.util.ArrayList;
+
 import it.infocamere.sipert.distrivoci.Main;
+import it.infocamere.sipert.distrivoci.model.DeleteStatement;
 import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
@@ -17,6 +21,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -29,10 +34,25 @@ public class OverviewDistriVociController {
     private TableView<Tabella> tabelledbTable;
     
     @FXML
+    private TextArea textAreaPreviewDelete;
+    
+    @FXML
+    private TextArea textAreaPreviewInsert;
+    
+    @FXML
     private TableView<Voce> vociTable;
     
     @FXML
     private TableView<Schema> schemiTable;
+    
+    @FXML
+    private TableView<DeleteStatement> deleteStatementTable;
+    
+    @FXML
+    private TableColumn<DeleteStatement, String> codiceTabDeleteColumn;
+    
+    @FXML
+    private TableColumn<DeleteStatement, String> statementDeleteColumn;
     
     @FXML
     private TableColumn<Tabella, String> codiceTabColumn;
@@ -79,19 +99,28 @@ public class OverviewDistriVociController {
     	codiceSchemaColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
     	descrizioneSchemaColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
     	
+        // Initializza la lista degli statement di delete (2 colonne - codice tabella e relativo statement) 
+    	codiceTabDeleteColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
+    	statementDeleteColumn.setCellValueFactory(cellData -> cellData.getValue().deleteStatementProperty());
+    	
     	//
     	tabelledbTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     	vociTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     	schemiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     	
-        // Listener per la selezione delle modifiche e della visualizzazione del dettaglio della query quando viene cambiata
-//    	tabelledbTable.getSelectionModel().selectedItemProperty().addListener(
-//                (observable, oldValue, newValue) -> showQueryDetails(newValue));
+        // Listener per la selezione del dettaglio dello sattement di delete e dei relativi statement di insert
+    	deleteStatementTable.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> showInsertsDetails(newValue));
     	
 		tabPane.getSelectionModel().selectedItemProperty().addListener((obs, ov, nv) -> handlePreviewElaborazione(nv));
     }
     
-    public void setMain(Main main) {
+    private Object showInsertsDetails(DeleteStatement newValue) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setMain(Main main) {
         this.main = main;
 
         // aggiunta di una observable list alla table
@@ -102,6 +131,9 @@ public class OverviewDistriVociController {
         
         // aggiunta di una observable list alla table
         schemiTable.setItems(main.getSchemi());
+
+        // aggiunta di una observable list alla table delle sql delete statement
+        deleteStatementTable.setItems(main.getDeleteStatement());
         
     }
     
@@ -267,16 +299,55 @@ public class OverviewDistriVociController {
     private void handlePreviewElaborazione(Tab nv) {
     	
     	if ("Preview Elaborazione".equalsIgnoreCase(nv.getText())) {
-    		if (!isInputValidForPreviewElaborazione()) {
+    		if (isInputValidForPreviewElaborazione()) {
+    			fillPreviewElaborazione();
+    		} else {
     			SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
     			selectionModel.select(0);
     		}
+    		
     	}
    
         //System.out.println("click on Exit button");
     }
     
-    private boolean isInputValidForPreviewElaborazione() {
+    private void fillPreviewElaborazione() {
+		// TODO Auto-generated method stub
+		    	
+    	ObservableList<Tabella> listaTabelleSelezionate = tabelledbTable.getSelectionModel().getSelectedItems();
+    	ObservableList<Voce> listaVociSelezionate = vociTable.getSelectionModel().getSelectedItems();
+    	ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
+    	
+    	ArrayList<String> listDelete = new ArrayList<String>();
+    	String textArea = "";
+    	
+    	for (int i = 0; i < listaTabelleSelezionate.size(); i++) {
+    		String deleteString = "";
+    		deleteString = "DELETE FROM "; 
+    		Tabella tab = listaTabelleSelezionate.get(i);
+    		DeleteStatement ds = new DeleteStatement();
+    		ds.setCodice(tab.getCodice());
+    		deleteString += tab.getCodice() + " WHERE CDVOCEXX  IN('";
+    		for (int x = 0; x < listaVociSelezionate.size(); x++) {
+    			Voce voce = listaVociSelezionate.get(x);
+    			if (x > 0) {
+    				deleteString += " , '";
+    			}
+    			deleteString += voce.getCodice() + "'";
+    			if (x == listaVociSelezionate.size() - 1) {
+    				deleteString += ");";
+    				listDelete.add(deleteString);
+    				System.out.println(deleteString);
+    				
+    			}
+    		}
+    		ds.setDeleteStatement(deleteString);
+    		main.addDeleteStatement(ds);
+    	}  
+    	deleteStatementTable.setItems(main.getDeleteStatement());
+	}
+
+	private boolean isInputValidForPreviewElaborazione() {
         String errorMessage = "";
 
         int selectedIndexTabelle = tabelledbTable.getSelectionModel().getSelectedIndex();

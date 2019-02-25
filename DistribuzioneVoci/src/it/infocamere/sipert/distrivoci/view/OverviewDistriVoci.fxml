@@ -9,16 +9,18 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.Reflection?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.infocamere.sipert.distrivoci.view.OverviewDistriVociController">
+<AnchorPane styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.infocamere.sipert.distrivoci.view.OverviewDistriVociController">
    <children>
-      <TabPane fx:id="tabPane" prefHeight="750.0" prefWidth="950.0" styleClass="background" stylesheets="@DarkTheme.css" tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="tabPane" prefHeight="740.0" prefWidth="950.0" styleClass="background" stylesheets="@DarkTheme.css" tabClosingPolicy="UNAVAILABLE">
         <tabs>
-          <Tab text="Parametri">
+          <Tab text="          PARAMETRI          ">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="686.0" prefWidth="950.0">
                      <children>
@@ -127,17 +129,35 @@
                   </AnchorPane>
             </content>
           </Tab>
-          <Tab text="Preview Elaborazione">
+          <Tab text="          PREVIEW ELABORAZIONE          ">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <VBox prefHeight="500.0" prefWidth="100.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                           <children>
+                              <Label styleClass="label-header" text="Delete" />
+                              <TableView fx:id="deleteStatementTable" prefHeight="300.0" prefWidth="500.0">
+                                <columns>
+                                  <TableColumn fx:id="codiceTabDeleteColumn" prefWidth="150.0" text="Tabella" />
+                                  <TableColumn fx:id="statementDeleteColumn" prefWidth="770.0" text="Statements SQL" />
+                                </columns>
+                              </TableView>
+                              <Label layoutX="10.0" layoutY="10.0" styleClass="label-header" text="Insert Statements" />
+                              <TextArea fx:id="textAreaPreviewInsert" disable="true" opacity="0.85" prefHeight="300.0" prefWidth="200.0" />
+                           </children>
+                        </VBox>
+                     </children></AnchorPane>
             </content>
           </Tab>
-            <Tab text="Elaborazione">
+            <Tab text="          ELABORAZIONE          ">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                </content>
             </Tab>
         </tabs>
+         <effect>
+            <Reflection />
+         </effect>
       </TabPane>
    </children>
 </AnchorPane>
