@@ -166,6 +166,12 @@ public class Main extends Application {
 		try {
 			listSchemi = model.getSchemi(fileSchemiXLS);
 			setSchemiDataBaseFilePath(fileSchemiXLS);
+			if (listSchemi.size() > 0) schemi.clear();
+			for (int i = 0; i < listSchemi.size(); i++) {
+				Schema schema = new Schema();
+				schema.setCodice(listSchemi.get(i).getSchemaUserName());
+				schemi.add(schema);
+			}
 
 		} catch (ErroreFileSchemiNonTrovato e) {
 
