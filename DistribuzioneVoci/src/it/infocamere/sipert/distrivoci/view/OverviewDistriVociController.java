@@ -9,14 +9,21 @@ import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SingleSelectionModel;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 public class OverviewDistriVociController {
+	
+	@FXML
+	private TabPane tabPane;
 	
     @FXML
     private TableView<Tabella> tabelledbTable;
@@ -77,12 +84,11 @@ public class OverviewDistriVociController {
     	vociTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     	schemiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     	
-    	
-
-		
         // Listener per la selezione delle modifiche e della visualizzazione del dettaglio della query quando viene cambiata
 //    	tabelledbTable.getSelectionModel().selectedItemProperty().addListener(
 //                (observable, oldValue, newValue) -> showQueryDetails(newValue));
+    	
+		tabPane.getSelectionModel().selectedItemProperty().addListener((obs, ov, nv) -> handlePreviewElaborazione(nv));
     }
     
     public void setMain(Main main) {
@@ -256,4 +262,55 @@ public class OverviewDistriVociController {
         //System.out.println("click on Exit button");
        
     }
+    
+    @FXML
+    private void handlePreviewElaborazione(Tab nv) {
+    	
+    	if ("Preview Elaborazione".equalsIgnoreCase(nv.getText())) {
+    		if (!isInputValidForPreviewElaborazione()) {
+    			SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+    			selectionModel.select(0);
+    		}
+    	}
+   
+        //System.out.println("click on Exit button");
+    }
+    
+    private boolean isInputValidForPreviewElaborazione() {
+        String errorMessage = "";
+
+        int selectedIndexTabelle = tabelledbTable.getSelectionModel().getSelectedIndex();
+        int selectedIndexVoci = vociTable.getSelectionModel().getSelectedIndex();
+        int selectedIndexSchemi = schemiTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndexTabelle < 0) {
+        	errorMessage += "Seleziona almeno una Tabella dalla lista!\n";
+        }
+        if (selectedIndexVoci < 0) {
+        	errorMessage += "Seleziona almeno una Voce dalla lista!\n";
+        }
+        if (selectedIndexSchemi < 0) {
+        	errorMessage += "Seleziona almeno uno Schema dalla lista!\n";
+        }
+
+		if (errorMessage.length() == 0) {
+			return true;
+		} else {
+			showAlert(AlertType.ERROR, "campi non validi", "Per cortesia, correggi i campi non validi sul tab Parametri", errorMessage, main.getStagePrincipale());
+			return false;
+		}
+    }
+    
+	public void showAlert(AlertType type, String title, String headerText, String text, Stage stage) {
+		
+		Alert alert = new Alert(type);
+
+		alert.setTitle(title);
+		alert.setHeaderText(headerText);
+		alert.setContentText(text);
+
+		if (stage != null) alert.initOwner(stage);
+		
+		alert.showAndWait();
+	}
+    
 }

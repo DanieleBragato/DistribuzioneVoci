@@ -16,7 +16,7 @@
 
 <AnchorPane styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.infocamere.sipert.distrivoci.view.OverviewDistriVociController">
    <children>
-      <TabPane prefHeight="750.0" prefWidth="950.0" styleClass="background" stylesheets="@DarkTheme.css" tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="tabPane" prefHeight="750.0" prefWidth="950.0" styleClass="background" stylesheets="@DarkTheme.css" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Parametri">
             <content>
@@ -127,7 +127,7 @@
                   </AnchorPane>
             </content>
           </Tab>
-          <Tab text="Preview">
+          <Tab text="Preview Elaborazione">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
             </content>
