@@ -1,12 +1,16 @@
 package it.infocamere.sipert.distrivoci.view;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 
 import it.infocamere.sipert.distrivoci.Main;
+import it.infocamere.sipert.distrivoci.db.DBConnect;
+import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.model.DeleteStatement;
 import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
+import it.infocamere.sipert.distrivoci.util.GenerateInsertStatements;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -298,7 +302,7 @@ public class OverviewDistriVociController {
     @FXML
     private void handlePreviewElaborazione(Tab nv) {
     	
-    	if ("Preview Elaborazione".equalsIgnoreCase(nv.getText())) {
+    	if ("          PREVIEW ELABORAZIONE          ".equalsIgnoreCase(nv.getText())) {
     		if (isInputValidForPreviewElaborazione()) {
     			fillPreviewElaborazione();
     		} else {
@@ -312,39 +316,62 @@ public class OverviewDistriVociController {
     }
     
     private void fillPreviewElaborazione() {
-		// TODO Auto-generated method stub
 		    	
     	ObservableList<Tabella> listaTabelleSelezionate = tabelledbTable.getSelectionModel().getSelectedItems();
     	ObservableList<Voce> listaVociSelezionate = vociTable.getSelectionModel().getSelectedItems();
-    	ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
     	
     	ArrayList<String> listDelete = new ArrayList<String>();
-    	String textArea = "";
     	
     	for (int i = 0; i < listaTabelleSelezionate.size(); i++) {
     		String deleteString = "";
+    		String whereCondition = "";
     		deleteString = "DELETE FROM "; 
     		Tabella tab = listaTabelleSelezionate.get(i);
-    		DeleteStatement ds = new DeleteStatement();
-    		ds.setCodice(tab.getCodice());
-    		deleteString += tab.getCodice() + " WHERE CDVOCEXX  IN('";
+    		DeleteStatement deleteStatement = new DeleteStatement();
+    		deleteStatement.setCodice(tab.getCodice());
+    		whereCondition = " WHERE CDVOCEXX  IN('";
+    		deleteString += tab.getCodice();
     		for (int x = 0; x < listaVociSelezionate.size(); x++) {
     			Voce voce = listaVociSelezionate.get(x);
     			if (x > 0) {
-    				deleteString += " , '";
+    				whereCondition += " , '";
     			}
-    			deleteString += voce.getCodice() + "'";
+    			whereCondition += voce.getCodice() + "'";
     			if (x == listaVociSelezionate.size() - 1) {
-    				deleteString += ");";
-    				listDelete.add(deleteString);
-    				System.out.println(deleteString);
+    				whereCondition += ");";
+    				listDelete.add(deleteString + whereCondition);
+    				System.out.println(deleteString + whereCondition);
     				
     			}
     		}
-    		ds.setDeleteStatement(deleteString);
-    		main.addDeleteStatement(ds);
+    		deleteStatement.setDeleteStatement(deleteString + whereCondition);
+    		generateInsertStatement(tab.getCodice(), whereCondition);
+    		main.addDeleteStatement(deleteStatement);
     	}  
     	deleteStatementTable.setItems(main.getDeleteStatement());
+	}
+
+	private void generateInsertStatement(String tabella, String whereCondition) {
+		
+		String selectStatement = "SELECT * FROM " + tabella + whereCondition;
+		System.out.println("selectStatement = " + selectStatement);
+		
+		try {
+			ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
+			for (Schema s : listaSchemiSelezionati) {
+				
+				for (SchemaDTO schemaDTO : main.getListSchemi()) {
+					if (schemaDTO.getSchemaUserName().equalsIgnoreCase(s.getCodice())) {
+						Connection conn = DBConnect.getConnection(schemaDTO);
+						GenerateInsertStatements.generateInsertStatements(conn, tabella);
+					}
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	private boolean isInputValidForPreviewElaborazione() {

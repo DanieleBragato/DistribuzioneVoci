@@ -72,7 +72,7 @@ public class GenerateInsertStatements {
         }
     }
 
-    private static void generateInsertStatements(Connection conn, String tableName) 
+    public static void generateInsertStatements(Connection conn, String tableName) 
                         throws Exception {
         log("Generating Insert statements for: " + tableName);
         Statement stmt = conn.createStatement();

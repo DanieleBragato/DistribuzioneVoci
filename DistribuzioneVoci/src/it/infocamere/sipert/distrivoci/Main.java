@@ -1,9 +1,14 @@
 package it.infocamere.sipert.distrivoci;
 	
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
@@ -62,8 +67,11 @@ public class Main extends Application {
      */
     private List<SchemaDTO> listSchemi = new ArrayList<SchemaDTO>();
     
+    private Map <String, String> mapProvince = new HashMap<String, String>();
+    
     
 	public Main() {
+		
         // Aggiungo alcuni dati di esempio
     	tabelleDB.add(new Tabella("tabella1", "la prima tabella"));
     	tabelleDB.add(new Tabella("tabella2", "la seconda tabella"));
@@ -88,8 +96,39 @@ public class Main extends Application {
     	schemi.add(new Schema("schema15", "quindicesimo schemi"));
     	schemi.add(new Schema("schema16", "sedicesimo schemi"));
     	
+    	loadProvince();
+    	
     }
     
+	private void loadProvince() {
+
+        try {
+			File file = new File("resources/elencoProvince.txt"); 
+			BufferedReader br = new BufferedReader(new FileReader(file)); 			
+			String st; 
+			while ((st = br.readLine()) != null) {
+				String codiceProvincia = st.split(" ")[1];
+				String provincia = ""; 
+				if (codiceProvincia.length() > 2) {
+					codiceProvincia = st.split(" ")[2];
+					provincia = st.split(" ")[0] + " " + st.split(" ")[1];
+				} else {
+					codiceProvincia = st.split(" ")[1];
+					provincia = st.split(" ")[0];
+				}
+				//mapProvince.put(st.split(" ")[1], st.split(" ")[0]);
+				mapProvince.put(codiceProvincia, provincia);
+			}
+			br.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("eccezione in fase di lettura file delle province (non trovato) - eccezione = " + e.toString());
+		} catch (IOException e) {
+			System.out.println("eccezione in fase di lettura file delle province - eccezione = " + e.toString());
+		} 
+        
+		System.out.println("trovate " + mapProvince.size() + " province");
+	}
+
 	@Override
 	public void start(Stage stagePrincipale) {
 		
@@ -169,7 +208,10 @@ public class Main extends Application {
 			if (listSchemi.size() > 0) schemi.clear();
 			for (int i = 0; i < listSchemi.size(); i++) {
 				Schema schema = new Schema();
+				String codSchema = listSchemi.get(i).getSchemaUserName();
+				String targaProvincia = codSchema.substring(3, 5);
 				schema.setCodice(listSchemi.get(i).getSchemaUserName());
+				schema.setDescrizione(trovaProvincia(targaProvincia));
 				schemi.add(schema);
 			}
 
@@ -194,7 +236,15 @@ public class Main extends Application {
 		}
 	}
 	
-    public void setSchemiDataBaseFilePath(File file) {
+    private String trovaProvincia(String substring) {
+    	String provincia = mapProvince.get(substring);
+    	if (provincia == null || provincia.length() <= 0) {
+    		provincia = "PROVINCIA NON TROVATA";
+    	}
+    	return provincia;
+	}
+
+	public void setSchemiDataBaseFilePath(File file) {
         Preferences prefs = Preferences.userNodeForPackage(Main.class);
         if (file != null) {
             prefs.put("filePathSchemiDB", file.getPath());
