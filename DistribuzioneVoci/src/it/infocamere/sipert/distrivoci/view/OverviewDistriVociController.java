@@ -322,6 +322,8 @@ public class OverviewDistriVociController {
     	
     	ArrayList<String> listDelete = new ArrayList<String>();
     	
+    	main.clearDeleteStatement();
+    	
     	for (int i = 0; i < listaTabelleSelezionate.size(); i++) {
     		String deleteString = "";
     		String whereCondition = "";
@@ -381,19 +383,19 @@ public class OverviewDistriVociController {
         int selectedIndexVoci = vociTable.getSelectionModel().getSelectedIndex();
         int selectedIndexSchemi = schemiTable.getSelectionModel().getSelectedIndex();
         if (selectedIndexTabelle < 0) {
-        	errorMessage += "Seleziona almeno una Tabella dalla lista!\n";
+        	errorMessage += "Seleziona almeno una Tabella\n";
         }
         if (selectedIndexVoci < 0) {
-        	errorMessage += "Seleziona almeno una Voce dalla lista!\n";
+        	errorMessage += "Seleziona almeno una Voce\n";
         }
         if (selectedIndexSchemi < 0) {
-        	errorMessage += "Seleziona almeno uno Schema dalla lista!\n";
+        	errorMessage += "Seleziona almeno uno Schema\n";
         }
 
 		if (errorMessage.length() == 0) {
 			return true;
 		} else {
-			showAlert(AlertType.ERROR, "campi non validi", "Per cortesia, correggi i campi non validi sul tab Parametri", errorMessage, main.getStagePrincipale());
+			showAlert(AlertType.ERROR, "campi non validi", "Per cortesia, correggi i campi non validi sul tab PARAMETRI", errorMessage, main.getStagePrincipale());
 			return false;
 		}
     }

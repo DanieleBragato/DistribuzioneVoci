@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.exception.ErroreColonneFileXlsSchemiKo;
 import it.infocamere.sipert.distrivoci.exception.ErroreFileSchemiNonTrovato;
@@ -18,7 +22,9 @@ import it.infocamere.sipert.distrivoci.model.DeleteStatement;
 import it.infocamere.sipert.distrivoci.model.Model;
 import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.Tabella;
+import it.infocamere.sipert.distrivoci.model.TabelleListWrapper;
 import it.infocamere.sipert.distrivoci.model.Voce;
+import it.infocamere.sipert.distrivoci.model.VociListWrapper;
 import it.infocamere.sipert.distrivoci.view.OverviewDistriVociController;
 import it.infocamere.sipert.distrivoci.view.RootLayoutController;
 import it.infocamere.sipert.distrivoci.view.TabellaEditDialogController;
@@ -181,6 +187,18 @@ public class Main extends Application {
 			e.printStackTrace();
 		}
 		
+		// tentativo di caricamento dell'ultimo file delle tabelle aperto 
+		File fileTabelle = getTabelleFilePath();
+		if (fileTabelle != null) {
+			loadTabelleDataFromFile(fileTabelle);
+		}
+		
+		// tentativo di caricamento dell'ultimo file delle voci aperto 
+		File fileVoci = getVociFilePath();
+		if (fileVoci != null) {
+			loadVociDataFromFile(fileVoci);
+		}
+		
 		// tentativo di caricamento dell'ultimo file aperto degli schemi dei data base oracle  
 		File fileSchemiDB = getSchemiFilePath();
 		if (fileSchemiDB != null) {
@@ -197,6 +215,62 @@ public class Main extends Application {
 			return null;
 		}
 	}
+	
+    public void loadTabelleDataFromFile(File file) {
+    	
+        try {
+            JAXBContext context = JAXBContext
+                    .newInstance(TabelleListWrapper.class);
+            Unmarshaller um = context.createUnmarshaller();
+
+            // lettura XML dal file e unmarshalling.
+            TabelleListWrapper wrapper = (TabelleListWrapper) um.unmarshal(file);
+
+            tabelleDB.clear();
+            tabelleDB.addAll(wrapper.getTabelle());
+
+            // Save del file path sul registro.
+            setTabelleFilePath(file);
+
+        } catch (Exception e) { // catches ANY exception
+        	
+        	Alert alert = new Alert(AlertType.ERROR);
+        	alert.setTitle("Error");
+        	alert.setHeaderText("Elenco Tabelle vuoto");
+        	alert.setContentText("Impossibile caricare le tabelle dal file:\n" + file.getPath());
+        	
+        	alert.showAndWait();
+        	tabelleDB.clear();
+        }
+    }
+    
+    public void loadVociDataFromFile(File file) {
+    	
+        try {
+            JAXBContext context = JAXBContext
+                    .newInstance(VociListWrapper.class);
+            Unmarshaller um = context.createUnmarshaller();
+
+            // lettura XML dal file e unmarshalling.
+            VociListWrapper wrapper = (VociListWrapper) um.unmarshal(file);
+
+            voci.clear();
+            voci.addAll(wrapper.getVoci());
+
+            // Save del file path sul registro.
+            setVociFilePath(file);
+
+        } catch (Exception e) { // catches ANY exception
+        	
+        	Alert alert = new Alert(AlertType.ERROR);
+        	alert.setTitle("Error");
+        	alert.setHeaderText("Elenco Voci vuoto");
+        	alert.setContentText("Impossibile caricare le voci dal file:\n" + file.getPath());
+        	
+        	alert.showAndWait();
+        	voci.clear();
+        }
+    }
 	
 	public void loadSchemiDataBaseFromFile(File fileSchemiXLS) {
 
@@ -252,7 +326,104 @@ public class Main extends Application {
             prefs.remove("filePathSchemiDB");
         }
     }
+
+    // gestione salvataggio elenco tabelle
 	
+	public File getTabelleFilePath() {
+		Preferences prefs = Preferences.userNodeForPackage(Main.class);
+		String filePath = prefs.get("filePathTabelle", null);
+		if (filePath != null) {
+			return new File(filePath);
+		} else {
+			return null;
+		}
+	}
+	
+    public void saveTabelleDataToFile(File file) {
+        try {
+            JAXBContext context = JAXBContext
+                    .newInstance(TabelleListWrapper.class);
+            Marshaller m = context.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+            // Wrapping dei dati delle tabelle
+            TabelleListWrapper wrapper = new TabelleListWrapper();
+            wrapper.setTabelle(tabelleDB);
+
+            // Marshalling e salvataggio XML su file
+            m.marshal(wrapper, file);
+
+            // Salvataggio del file path sul registro
+            setTabelleFilePath(file);
+            
+        } catch (Exception e) { // catches ANY exception
+        	Alert alert = new Alert(AlertType.ERROR);
+        	alert.setTitle("Error");
+        	alert.setHeaderText("Impossibile salvare i dati");
+        	alert.setContentText("Impossibile salvare i dati sul file:\n" + file.getPath());
+        	
+        	alert.showAndWait();
+        }
+    }
+    
+    public void setTabelleFilePath(File file) {
+        Preferences prefs = Preferences.userNodeForPackage(Main.class);
+        if (file != null) {
+            prefs.put("filePathTabelle", file.getPath());
+        } else {
+            prefs.remove("filePath");
+        }
+    }
+	
+    // gestione salvataggio elenco voci
+    
+	public File getVociFilePath() {
+		Preferences prefs = Preferences.userNodeForPackage(Main.class);
+		String filePath = prefs.get("filePathVoci", null);
+		if (filePath != null) {
+			return new File(filePath);
+		} else {
+			return null;
+		}
+	}
+	
+    public void saveVociDataToFile(File file) {
+        try {
+            JAXBContext context = JAXBContext
+                    .newInstance(VociListWrapper.class);
+            Marshaller m = context.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+            // Wrapping dei dati delle voci
+            VociListWrapper wrapper = new VociListWrapper();
+            wrapper.setVoci(voci);
+
+            // Marshalling e salvataggio XML su file
+            m.marshal(wrapper, file);
+
+            // Salvataggio del file path sul registro
+            setVociFilePath(file);
+            
+        } catch (Exception e) { // catches ANY exception
+        	Alert alert = new Alert(AlertType.ERROR);
+        	alert.setTitle("Error");
+        	alert.setHeaderText("Impossibile salvare i dati");
+        	alert.setContentText("Impossibile salvare i dati sul file:\n" + file.getPath());
+        	
+        	alert.showAndWait();
+        }
+    }
+    
+    public void setVociFilePath(File file) {
+        Preferences prefs = Preferences.userNodeForPackage(Main.class);
+        if (file != null) {
+            prefs.put("filePathVoci", file.getPath());
+        } else {
+            prefs.remove("filePathVoci");
+        }
+    }
+    
+    
     public void showOverview() {
         try {
             // Load overview.
@@ -355,6 +526,15 @@ public class Main extends Application {
     	
     	if (deleteStatement != null) {
     		this.deleteStatement.add(deleteStatement);
+    		return true;
+    	}
+    	return false;
+    }
+    
+    public boolean clearDeleteStatement () {
+    	
+    	if (this.deleteStatement != null) {
+    		this.deleteStatement.clear();
     		return true;
     	}
     	return false;
