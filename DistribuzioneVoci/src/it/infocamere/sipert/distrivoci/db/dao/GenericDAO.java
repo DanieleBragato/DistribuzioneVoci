@@ -32,9 +32,16 @@ public class GenericDAO {
 		}
 	}
 	
-	public GenericResultsDTO executeQuery(SchemaDTO schemaDTO, QueryDB queryDB) {
+	public GenericResultsDTO executeQuery(SchemaDTO schemaDTO, QueryDB queryDB, boolean createListOfLinkedHashMap,
+			boolean createListOfInsert) {
 		
 		GenericResultsDTO results = new GenericResultsDTO();
+		
+		if ((createListOfLinkedHashMap && createListOfInsert) || (!createListOfLinkedHashMap && !createListOfInsert)) {
+			System.out.println("parametri non coerenti");
+			return results;
+		}
+		
 		results.setSchema(schemaDTO.getSchemaUserName());
 		
 		SchemaDTO schemaDB = schemaDTO;
@@ -48,10 +55,12 @@ public class GenericDAO {
 			preparedStatement = conn.prepareStatement(queryDB.getQuery());
 
 			rs = preparedStatement.executeQuery();
-
-			List<LinkedHashMap<String, Object>> listLinkedHashMap = convertResultSetToListOfLinkedHashMap(rs);
 			
-			results.setListLinkedHashMap(listLinkedHashMap);
+			if (createListOfLinkedHashMap) {
+				List<LinkedHashMap<String, Object>> listLinkedHashMap = convertResultSetToListOfLinkedHashMap(rs);
+				results.setListLinkedHashMap(listLinkedHashMap);
+			}
+			
 			
 		} catch (SQLSyntaxErrorException e) {
 			throw new RuntimeException(e.toString(), e);

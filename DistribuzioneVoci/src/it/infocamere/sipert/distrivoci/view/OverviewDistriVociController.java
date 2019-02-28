@@ -1,19 +1,20 @@
 package it.infocamere.sipert.distrivoci.view;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 
 import it.infocamere.sipert.distrivoci.Main;
-import it.infocamere.sipert.distrivoci.db.DBConnect;
+import it.infocamere.sipert.distrivoci.db.QueryDB;
+import it.infocamere.sipert.distrivoci.db.dto.GenericResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.model.DeleteStatement;
+import it.infocamere.sipert.distrivoci.model.Model;
 import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
-import it.infocamere.sipert.distrivoci.util.GenerateInsertStatements;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -81,6 +82,18 @@ public class OverviewDistriVociController {
     
     // Referimento al main 
     private Main main;
+    
+	private Model model ;
+
+	private boolean estrazioneDatiTerminataCorrettamente;
+
+	private boolean erroreSuScritturaFileRisultati;
+
+	private boolean nessunDatoEstratto;
+
+	private Task copyWorker;
+
+	protected GenericResultsDTO risultatiDTO;
     
     public OverviewDistriVociController() {
     	
@@ -340,7 +353,7 @@ public class OverviewDistriVociController {
     			}
     			whereCondition += voce.getCodice() + "'";
     			if (x == listaVociSelezionate.size() - 1) {
-    				whereCondition += ");";
+    				whereCondition += ")";
     				listDelete.add(deleteString + whereCondition);
     				System.out.println(deleteString + whereCondition);
     				
@@ -358,23 +371,85 @@ public class OverviewDistriVociController {
 		String selectStatement = "SELECT * FROM " + tabella + whereCondition;
 		System.out.println("selectStatement = " + selectStatement);
 		
-		try {
-			ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
-			for (Schema s : listaSchemiSelezionati) {
+    	QueryDB queryDB = new QueryDB();
+    	queryDB.setQuery(selectStatement);
+    	
+		estrazioneDatiTerminataCorrettamente = false;
+		erroreSuScritturaFileRisultati = false;
+		nessunDatoEstratto = false;
+		
+		ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
+		
+		if (listaSchemiSelezionati != null && listaSchemiSelezionati.size() > 0) {
+			// uso il primo schema selezionato
+			Schema s = listaSchemiSelezionati.get(0);
+			SchemaDTO schemaDTO = searchSchemaDTO(s.getCodice());
+			
+			if (schemaDTO != null) {
 				
-				for (SchemaDTO schemaDTO : main.getListSchemi()) {
-					if (schemaDTO.getSchemaUserName().equalsIgnoreCase(s.getCodice())) {
-						Connection conn = DBConnect.getConnection(schemaDTO);
-						GenerateInsertStatements.generateInsertStatements(conn, tabella);
-					}
-				}
+				risultatiDTO = model.runQuery (schemaDTO, queryDB, false, true);
+				
+//				copyWorker = createWorker(schemaDTO, queryDB);
+//
+//				Thread backgroundThread = new Thread(copyWorker, "queryDataBase-thread");
+//				backgroundThread.setDaemon(true);
+//				backgroundThread.start();
+//				
+//				copyWorker.setOnFailed(e -> {
+//					Throwable exception = ((Task) e.getSource()).getException();
+//					if (exception != null) {
+//						copyWorker.cancel(true);
+//						showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), null);
+//					}
+//				});
+			} else {
+				showAlert(AlertType.ERROR, "Error", "", "Non trovati dati di connessione relativi allo schema " + s.getCodice(), null);
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		
 	}
+	
+	private SchemaDTO searchSchemaDTO(String codiceSchema) {
+		
+		for (SchemaDTO schemaDTO : main.getListSchemi()) {
+			if (schemaDTO.getSchemaUserName().equalsIgnoreCase(codiceSchema)) {
+				return schemaDTO;
+			}
+		}
+		return null;
+	}
+
+	public Task createWorker(SchemaDTO schema, QueryDB queryDB) {
+		
+        return new Task() {
+            @Override
+            protected Object call() throws Exception {
+				
+				if (this.isCancelled()) {
+					System.out.println("Canceling...");
+				} 
+				
+				risultatiDTO = model.runQuery (schema, queryDB, false, true); 
+
+				if (risultatiDTO.getListLinkedHashMap().size() > 0) {
+					estrazioneDatiTerminataCorrettamente = true;
+				} else {
+					erroreSuScritturaFileRisultati = true;
+				}
+				return true;
+			}
+            
+            @Override protected void succeeded() {
+            	System.out.println("sono dentro il metodo succeeded del Task");
+                super.succeeded();
+                updateMessage("Done!");
+                if (risultatiDTO != null) {
+                	System.out.println("nr. di righe estratte dalla query = " + risultatiDTO.getListLinkedHashMap().size());
+                }
+            }
+         };
+
+    }
 
 	private boolean isInputValidForPreviewElaborazione() {
         String errorMessage = "";
@@ -399,6 +474,10 @@ public class OverviewDistriVociController {
 			return false;
 		}
     }
+	
+	public void setModel(Model model) {
+		this.model = model;
+	}
     
 	public void showAlert(AlertType type, String title, String headerText, String text, Stage stage) {
 		

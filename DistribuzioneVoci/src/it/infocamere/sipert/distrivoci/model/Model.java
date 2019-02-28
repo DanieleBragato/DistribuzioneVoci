@@ -36,12 +36,13 @@ public class Model {
 		
 	}
 	
-	public GenericResultsDTO runQuery(SchemaDTO schema, QueryDB queryDB) {
+	public GenericResultsDTO runQuery(SchemaDTO schema, QueryDB queryDB, boolean createListOfLinkedHashMap,
+			boolean createListOfInsert) {
 		
 		GenericResultsDTO risultati = null;
 		
 		GenericDAO genericDAO = new GenericDAO();
-		risultati = genericDAO.executeQuery(schema, queryDB);
+		risultati = genericDAO.executeQuery(schema, queryDB, createListOfLinkedHashMap, createListOfInsert);
 		
 		return risultati;
 	}

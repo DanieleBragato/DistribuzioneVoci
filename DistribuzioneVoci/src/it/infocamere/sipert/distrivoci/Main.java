@@ -436,6 +436,9 @@ public class Main extends Application {
 
             // Give the controller access to the main app.
             OverviewDistriVociController controller = loader.getController();
+			// set the model
+			Model model = new Model() ;
+			controller.setModel(model);
             controller.setMain(this);
             controller.setFilter();
 

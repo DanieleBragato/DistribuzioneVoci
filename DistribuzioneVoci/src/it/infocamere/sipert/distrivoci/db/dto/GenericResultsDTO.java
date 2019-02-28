@@ -9,6 +9,8 @@ public class GenericResultsDTO {
 	private String schema = null;
 	private List<LinkedHashMap<String, Object>> listLinkedHashMap = new ArrayList<LinkedHashMap<String,Object>>();
 	
+	private List<String> listString = new ArrayList<String>();
+	
 
 	public List<LinkedHashMap<String, Object>> getListLinkedHashMap() {
 		return listLinkedHashMap;
@@ -36,9 +38,18 @@ public class GenericResultsDTO {
 		this.schema = schema;
 	}
 
+	public List<String> getListString() {
+		return listString;
+	}
+
+	public void setListString(List<String> listString) {
+		this.listString = listString;
+	}
+	
 	@Override
 	public String toString() {
-		return "GenericResultsDTO [schema=" + schema + ", listLinkedHashMap=" + listLinkedHashMap + "]";
+		return "GenericResultsDTO [schema=" + schema + ", listLinkedHashMap=" + listLinkedHashMap + ", listString="
+				+ listString + "]";
 	}
 
 	@Override
