@@ -83,7 +83,7 @@ public class GenericDAO {
 			}
 			
 		} catch (SQLSyntaxErrorException e) {
-			throw new RuntimeException(e.toString(), e);
+			throw new RuntimeException(e.toString() + "Schema = " + schemaDTO.getSchemaUserName() + " - SQL = " + queryDB.getQuery(), e);
 		} catch (SQLException e) {
 			throw new RuntimeException("Errore nell'esecuzione della query: " + e.toString() , e);
 		} 

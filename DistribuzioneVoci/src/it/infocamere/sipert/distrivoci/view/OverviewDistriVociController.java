@@ -324,7 +324,13 @@ public class OverviewDistriVociController {
     	
     	if ("          PREVIEW ELABORAZIONE          ".equalsIgnoreCase(nv.getText())) {
     		if (isInputValidForPreviewElaborazione()) {
-    			fillPreviewElaborazione();
+    			try {
+					fillPreviewElaborazione();
+				} catch (Exception e) {
+					showAlert(AlertType.ERROR, "Error", "", e.toString(), null);
+	    			SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+	    			selectionModel.select(0);
+				}
     		} else {
     			SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
     			selectionModel.select(0);
@@ -369,7 +375,6 @@ public class OverviewDistriVociController {
     			}
     		}
     		deleteStatement.setDeleteStatement(deleteString + whereCondition);
-    		//generateInsertStatement(tab.getCodice(), whereCondition, deleteStatement);
     		main.addDeleteStatement(generateInsertStatement(tab.getCodice(), whereCondition, deleteStatement));
     	}  
     	deleteStatementTable.setItems(main.getDeleteStatement());
@@ -478,13 +483,33 @@ public class OverviewDistriVociController {
         }
 
 		if (errorMessage.length() == 0) {
-			return true;
+			return isSchemiSelezionatiOK();  
+			//return true;
 		} else {
 			showAlert(AlertType.ERROR, "campi non validi", "Per cortesia, correggi i campi non validi sul tab PARAMETRI", errorMessage, main.getStagePrincipale());
 			return false;
 		}
     }
 	
+	private boolean isSchemiSelezionatiOK() {
+		
+		ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
+
+		for (Schema s : listaSchemiSelezionati) {
+			SchemaDTO schemaDTO = searchSchemaDTO(s.getCodice());
+			if (schemaDTO != null) {
+				if (!model.testConnessioneDB(schemaDTO)) {
+					showAlert(AlertType.ERROR, "Error", "", "Non riuscita connessione allo schema " + s.getCodice(), null);
+					return false;
+				}
+			} else {
+				showAlert(AlertType.ERROR, "Error", "", "Non trovati dati di connessione relativi allo schema " + s.getCodice(), null);
+				return false;
+			}	
+		}
+		return true;
+	}
+
 	public void setModel(Model model) {
 		this.model = model;
 	}
