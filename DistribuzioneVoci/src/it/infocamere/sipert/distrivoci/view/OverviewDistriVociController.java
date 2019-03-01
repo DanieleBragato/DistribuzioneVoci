@@ -85,13 +85,13 @@ public class OverviewDistriVociController {
     
 	private Model model ;
 
-	private boolean estrazioneDatiTerminataCorrettamente;
-
-	private boolean erroreSuScritturaFileRisultati;
-
-	private boolean nessunDatoEstratto;
-
-	private Task copyWorker;
+//	private boolean estrazioneDatiTerminataCorrettamente;
+//
+//	private boolean erroreSuScritturaFileRisultati;
+//
+//	private boolean nessunDatoEstratto;
+//
+//	private Task copyWorker;
 
 	protected GenericResultsDTO risultatiDTO;
     
@@ -132,9 +132,16 @@ public class OverviewDistriVociController {
 		tabPane.getSelectionModel().selectedItemProperty().addListener((obs, ov, nv) -> handlePreviewElaborazione(nv));
     }
     
-    private Object showInsertsDetails(DeleteStatement newValue) {
-		// TODO Auto-generated method stub
-		return null;
+    private void showInsertsDetails(DeleteStatement newValue) {
+    	
+    	if (newValue != null && newValue.getInsertsList() != null && newValue.getInsertsList().size() > 0) {
+    		String textArea = "";
+    		for (String insertStatement : newValue.getInsertsList()) {
+    			textArea = textArea + insertStatement + "\n";
+    		}
+    		textAreaPreviewInsert.setText(textArea);
+    	}
+		
 	}
 
 	public void setMain(Main main) {
@@ -330,6 +337,8 @@ public class OverviewDistriVociController {
     
     private void fillPreviewElaborazione() {
 		    	
+    	textAreaPreviewInsert.setText("");
+    	
     	ObservableList<Tabella> listaTabelleSelezionate = tabelledbTable.getSelectionModel().getSelectedItems();
     	ObservableList<Voce> listaVociSelezionate = vociTable.getSelectionModel().getSelectedItems();
     	
@@ -360,23 +369,21 @@ public class OverviewDistriVociController {
     			}
     		}
     		deleteStatement.setDeleteStatement(deleteString + whereCondition);
-    		generateInsertStatement(tab.getCodice(), whereCondition);
-    		main.addDeleteStatement(deleteStatement);
+    		//generateInsertStatement(tab.getCodice(), whereCondition, deleteStatement);
+    		main.addDeleteStatement(generateInsertStatement(tab.getCodice(), whereCondition, deleteStatement));
     	}  
     	deleteStatementTable.setItems(main.getDeleteStatement());
 	}
 
-	private void generateInsertStatement(String tabella, String whereCondition) {
+	private DeleteStatement generateInsertStatement(String tableName, String whereCondition, DeleteStatement deleteStatement) {
 		
-		String selectStatement = "SELECT * FROM " + tabella + whereCondition;
+		String selectStatement = "SELECT * FROM " + tableName + whereCondition;
 		System.out.println("selectStatement = " + selectStatement);
+		
+		DeleteStatement deleteStatementOutput = deleteStatement;
 		
     	QueryDB queryDB = new QueryDB();
     	queryDB.setQuery(selectStatement);
-    	
-		estrazioneDatiTerminataCorrettamente = false;
-		erroreSuScritturaFileRisultati = false;
-		nessunDatoEstratto = false;
 		
 		ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
 		
@@ -386,10 +393,10 @@ public class OverviewDistriVociController {
 			SchemaDTO schemaDTO = searchSchemaDTO(s.getCodice());
 			
 			if (schemaDTO != null) {
+				risultatiDTO = model.runQueryForGenerateInserts (schemaDTO, queryDB, tableName);
+				deleteStatementOutput.setInsertsList((ArrayList<String>) risultatiDTO.getListString());
 				
-				risultatiDTO = model.runQuery (schemaDTO, queryDB, false, true);
-				
-//				copyWorker = createWorker(schemaDTO, queryDB);
+//				copyWorker = createWorker(schemaDTO, queryDB, tableName);
 //
 //				Thread backgroundThread = new Thread(copyWorker, "queryDataBase-thread");
 //				backgroundThread.setDaemon(true);
@@ -406,7 +413,7 @@ public class OverviewDistriVociController {
 				showAlert(AlertType.ERROR, "Error", "", "Non trovati dati di connessione relativi allo schema " + s.getCodice(), null);
 			}
 		}
-		
+		return deleteStatementOutput;
 	}
 	
 	private SchemaDTO searchSchemaDTO(String codiceSchema) {
@@ -419,7 +426,7 @@ public class OverviewDistriVociController {
 		return null;
 	}
 
-	public Task createWorker(SchemaDTO schema, QueryDB queryDB) {
+	public Task createWorker(SchemaDTO schema, QueryDB queryDB, String tableName) {
 		
         return new Task() {
             @Override
@@ -429,13 +436,16 @@ public class OverviewDistriVociController {
 					System.out.println("Canceling...");
 				} 
 				
-				risultatiDTO = model.runQuery (schema, queryDB, false, true); 
+				boolean createListOfLinkedHashMap = false; 
+				boolean createListOfInsert = true;
+				
+				risultatiDTO = model.runQueryForGenerateInserts (schema, queryDB, tableName); 
 
-				if (risultatiDTO.getListLinkedHashMap().size() > 0) {
-					estrazioneDatiTerminataCorrettamente = true;
-				} else {
-					erroreSuScritturaFileRisultati = true;
-				}
+//				if (risultatiDTO.getListLinkedHashMap().size() > 0) {
+//					estrazioneDatiTerminataCorrettamente = true;
+//				} else {
+//					erroreSuScritturaFileRisultati = true;
+//				}
 				return true;
 			}
             

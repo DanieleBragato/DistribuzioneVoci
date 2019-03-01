@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -136,7 +137,7 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <VBox prefHeight="500.0" prefWidth="100.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                        <VBox prefHeight="596.0" prefWidth="930.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                            <children>
                               <Label styleClass="label-header" text="Delete" />
                               <TableView fx:id="deleteStatementTable" prefHeight="300.0" prefWidth="500.0">
@@ -146,7 +147,15 @@
                                 </columns>
                               </TableView>
                               <Label layoutX="10.0" layoutY="10.0" styleClass="label-header" text="Insert Statements" />
-                              <TextArea fx:id="textAreaPreviewInsert" disable="true" opacity="0.85" prefHeight="300.0" prefWidth="200.0" />
+                              <ScrollPane prefHeight="177.0" prefWidth="930.0">
+                                <content>
+                                  <AnchorPane>
+                                       <children>
+                                          <TextArea fx:id="textAreaPreviewInsert" prefHeight="129.0" prefWidth="910.0" />
+                                       </children>
+                                    </AnchorPane>
+                                </content>
+                              </ScrollPane>
                            </children>
                         </VBox>
                      </children></AnchorPane>

@@ -42,8 +42,19 @@ public class Model {
 		GenericResultsDTO risultati = null;
 		
 		GenericDAO genericDAO = new GenericDAO();
-		risultati = genericDAO.executeQuery(schema, queryDB, createListOfLinkedHashMap, createListOfInsert);
+		risultati = genericDAO.executeQuery(schema, queryDB);
 		
 		return risultati;
 	}
+	
+	public GenericResultsDTO runQueryForGenerateInserts(SchemaDTO schema, QueryDB queryDB, String tableName) {
+		
+		GenericResultsDTO risultati = null;
+		
+		GenericDAO genericDAO = new GenericDAO();
+		risultati = genericDAO.executeQueryForGenerateInserts(schema, queryDB, tableName);
+		
+		return risultati;
+	}
+	
 }
