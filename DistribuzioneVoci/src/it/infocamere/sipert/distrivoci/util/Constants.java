@@ -22,7 +22,15 @@ public class Constants {
 	public static final String SVILUPPO = "SVILUPPO";
 	
 	public static final String SCHEMA = "Schema";
+	public static final String SETEUR7ES = "SETEUR7ES";
+	public static final String NOME_FOLDER_SETEUR7ES = "Connessione_SETEUR7ES";
+	
+	public static final String PREFIX_WHERE_CONDITION = " WHERE CDVOCEXX  IN('";
+	public static final String PREFIX_SELECT = "SELECT * FROM ";
+	
 	public static final int COLONNA_ZERO = 0;
 	public static final int RIGA_ZERO = 0;
+	
+	public static final int ZERO = 0;
 	
 }

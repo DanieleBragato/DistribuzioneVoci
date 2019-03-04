@@ -156,6 +156,17 @@
                                     </AnchorPane>
                                 </content>
                               </ScrollPane>
+                              <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                                <buttons>
+                                  <Button mnemonicParsing="false" onAction="#elaborazione" text="elabora" />
+                                </buttons>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets right="40.0" />
+                                 </padding>
+                              </ButtonBar>
                            </children>
                         </VBox>
                      </children></AnchorPane>

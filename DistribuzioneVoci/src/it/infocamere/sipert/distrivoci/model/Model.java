@@ -28,6 +28,16 @@ public class Model {
 
 	}
 	
+	public SchemaDTO getSchema(File fileSchemiXLS, String nomeFolder, String codiceSchema) throws ErroreFileSchemiNonTrovato, ErroreColonneFileXlsSchemiKo {
+		
+		SchemaDTO schema = new SchemaDTO();
+		SchemiManager schemiManager = new SchemiManager();
+		schema = schemiManager.getSchema(fileSchemiXLS, nomeFolder, codiceSchema);
+		
+		return schema;
+		
+	}
+	
 	public boolean testConnessioneDB(SchemaDTO schemaDB) {
 		
 		GenericDAO genericDAO = new GenericDAO();

@@ -10,16 +10,29 @@ public class DeleteStatement {
     private final StringProperty codiceTabella;
     private final StringProperty deleteStatement;
     
-    private ArrayList<String> insertsList;
+    // where condition
+    private String whereCondition;
+    
+    // codice identificativo dello schema di partenza/origine (da sviluppo)
+    private String codiceSchemaOrigine;
+    
+    // elenco delle Insert SQL generate tramite lo schema di partenza/origine (da sviluppo), il codice tabella e la where condition dello statement di Delete 
+    private ArrayList<String> insertsListFromSchemaOrigine;
+    
+    // informazioni relative alla distribuzione in produzione: elenco per schema di distribuzione
+    
+    private ArrayList<Distribuzione> listaDistribuzione;
+    
 
 	public DeleteStatement() {
-		this(null, null, null);
+		this(null, null, null, null);
 	}
 
-	public DeleteStatement(String codice, String deleteStatement, ArrayList<String> insertsList) {
+	public DeleteStatement(String codice, String deleteStatement, String codiceSchemaOrigine,  ArrayList<String> insertsList) {
 		this.codiceTabella = new SimpleStringProperty(codice);
         this.deleteStatement = new SimpleStringProperty(deleteStatement);
-        this.insertsList = insertsList;
+        this.codiceSchemaOrigine = codiceSchemaOrigine;
+        this.insertsListFromSchemaOrigine = insertsList;
 	}
 
 	public String getCodice() {
@@ -46,12 +59,37 @@ public class DeleteStatement {
         return deleteStatement;
     }
 
-	public ArrayList<String> getInsertsList() {
-		return insertsList;
+	public ArrayList<String> getInsertsListFromSchemaOrigine() {
+		return insertsListFromSchemaOrigine;
 	}
 
-	public void setInsertsList(ArrayList<String> insertsList) {
-		this.insertsList = insertsList;
+	public void setInsertsListFromSchemaOrigine(ArrayList<String> insertsList) {
+		this.insertsListFromSchemaOrigine = insertsList;
+	}
+
+	public String getCodiceSchemaOrigine() {
+		return codiceSchemaOrigine;
+	}
+
+	public void setCodiceSchemaOrigine(String codiceSchemaOrigine) {
+		this.codiceSchemaOrigine = codiceSchemaOrigine;
+	}
+
+	public ArrayList<Distribuzione> getListaDistribuzione() {
+		return listaDistribuzione;
+	}
+
+	public void setListaDistribuzione(ArrayList<Distribuzione> listaDistribuzione) {
+		this.listaDistribuzione = listaDistribuzione;
+	}
+
+	public String getWhereCondition() {
+		return whereCondition;
+	}
+
+	public void setWhereCondition(String whereCondition) {
+		this.whereCondition = whereCondition;
 	}	
+	
     
 }

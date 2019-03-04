@@ -1,16 +1,20 @@
 package it.infocamere.sipert.distrivoci.view;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import it.infocamere.sipert.distrivoci.Main;
 import it.infocamere.sipert.distrivoci.db.QueryDB;
 import it.infocamere.sipert.distrivoci.db.dto.GenericResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.model.DeleteStatement;
+import it.infocamere.sipert.distrivoci.model.Distribuzione;
 import it.infocamere.sipert.distrivoci.model.Model;
 import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
+import it.infocamere.sipert.distrivoci.util.Constants;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -83,8 +87,8 @@ public class OverviewDistriVociController {
     // Referimento al main 
     private Main main;
     
-	private Model model ;
-
+	private Model model;
+	
 //	private boolean estrazioneDatiTerminataCorrettamente;
 //
 //	private boolean erroreSuScritturaFileRisultati;
@@ -129,14 +133,14 @@ public class OverviewDistriVociController {
     	deleteStatementTable.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showInsertsDetails(newValue));
     	
-		tabPane.getSelectionModel().selectedItemProperty().addListener((obs, ov, nv) -> handlePreviewElaborazione(nv));
+		tabPane.getSelectionModel().selectedItemProperty().addListener((obs, ov, nv) -> handleTabPane(nv));
     }
     
     private void showInsertsDetails(DeleteStatement newValue) {
     	
-    	if (newValue != null && newValue.getInsertsList() != null && newValue.getInsertsList().size() > 0) {
+    	if (newValue != null && newValue.getInsertsListFromSchemaOrigine() != null && newValue.getInsertsListFromSchemaOrigine().size() > 0) {
     		String textArea = "";
-    		for (String insertStatement : newValue.getInsertsList()) {
+    		for (String insertStatement : newValue.getInsertsListFromSchemaOrigine()) {
     			textArea = textArea + insertStatement + "\n";
     		}
     		textAreaPreviewInsert.setText(textArea);
@@ -318,25 +322,32 @@ public class OverviewDistriVociController {
         //System.out.println("click on Exit button");
        
     }
+
     
-    @FXML
+    private void handleTabPane(Tab nv) {
+    	if ("          PREVIEW ELABORAZIONE          ".equalsIgnoreCase(nv.getText())) {
+    		handlePreviewElaborazione(nv);
+    	}
+//    	if ("          ELABORAZIONE          ".equalsIgnoreCase(nv.getText())) {
+//    		handleElaborazione(nv);
+//    	}
+    }
+    
     private void handlePreviewElaborazione(Tab nv) {
     	
-    	if ("          PREVIEW ELABORAZIONE          ".equalsIgnoreCase(nv.getText())) {
-    		if (isInputValidForPreviewElaborazione()) {
-    			try {
-					fillPreviewElaborazione();
-				} catch (Exception e) {
-					showAlert(AlertType.ERROR, "Error", "", e.toString(), null);
-	    			SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
-	    			selectionModel.select(0);
-				}
-    		} else {
-    			SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
-    			selectionModel.select(0);
-    		}
+		if (isInputValidForPreviewElaborazione()) {
+			try {
+				fillPreviewElaborazione();
+			} catch (Exception e) {
+				showAlert(AlertType.ERROR, "Error", "", e.toString(), null);
+				SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+				selectionModel.select(0);
+			}
+		} else {
+			SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+			selectionModel.select(0);
+		}
     		
-    	}
    
         //System.out.println("click on Exit button");
     }
@@ -344,6 +355,8 @@ public class OverviewDistriVociController {
     private void fillPreviewElaborazione() {
 		    	
     	textAreaPreviewInsert.setText("");
+    	
+    	boolean fromSchemaOrigine = true;
     	
     	ObservableList<Tabella> listaTabelleSelezionate = tabelledbTable.getSelectionModel().getSelectedItems();
     	ObservableList<Voce> listaVociSelezionate = vociTable.getSelectionModel().getSelectedItems();
@@ -359,7 +372,7 @@ public class OverviewDistriVociController {
     		Tabella tab = listaTabelleSelezionate.get(i);
     		DeleteStatement deleteStatement = new DeleteStatement();
     		deleteStatement.setCodice(tab.getCodice());
-    		whereCondition = " WHERE CDVOCEXX  IN('";
+    		whereCondition = Constants.PREFIX_WHERE_CONDITION;
     		deleteString += tab.getCodice();
     		for (int x = 0; x < listaVociSelezionate.size(); x++) {
     			Voce voce = listaVociSelezionate.get(x);
@@ -374,32 +387,33 @@ public class OverviewDistriVociController {
     				
     			}
     		}
+    		deleteStatement.setWhereCondition(whereCondition);
     		deleteStatement.setDeleteStatement(deleteString + whereCondition);
-    		main.addDeleteStatement(generateInsertStatement(tab.getCodice(), whereCondition, deleteStatement));
+    		main.addDeleteStatement(generateInsertStatement(deleteStatement, fromSchemaOrigine));
     	}  
     	deleteStatementTable.setItems(main.getDeleteStatement());
 	}
 
-	private DeleteStatement generateInsertStatement(String tableName, String whereCondition, DeleteStatement deleteStatement) {
+    
+	private DeleteStatement generateInsertStatement(DeleteStatement deleteStatement, boolean fromSchemaOrigine) {
 		
-		String selectStatement = "SELECT * FROM " + tableName + whereCondition;
+		String tableName = deleteStatement.getCodice();
+		String whereCondition = deleteStatement.getWhereCondition();
+		
+		String selectStatement = Constants.PREFIX_SELECT + tableName + whereCondition;
 		System.out.println("selectStatement = " + selectStatement);
 		
 		DeleteStatement deleteStatementOutput = deleteStatement;
 		
     	QueryDB queryDB = new QueryDB();
     	queryDB.setQuery(selectStatement);
-		
-		ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
-		
-		if (listaSchemiSelezionati != null && listaSchemiSelezionati.size() > 0) {
-			// uso il primo schema selezionato
-			Schema s = listaSchemiSelezionati.get(0);
-			SchemaDTO schemaDTO = searchSchemaDTO(s.getCodice());
-			
-			if (schemaDTO != null) {
-				risultatiDTO = model.runQueryForGenerateInserts (schemaDTO, queryDB, tableName);
-				deleteStatementOutput.setInsertsList((ArrayList<String>) risultatiDTO.getListString());
+    	
+    	if (fromSchemaOrigine) {
+
+			if (main.getSchemaDtoOrigine() != null) {
+				risultatiDTO = model.runQueryForGenerateInserts (main.getSchemaDtoOrigine(), queryDB, tableName);
+				deleteStatementOutput.setInsertsListFromSchemaOrigine((ArrayList<String>) risultatiDTO.getListString());
+				deleteStatementOutput.setCodiceSchemaOrigine(main.getSchemaDtoOrigine().getSchemaUserName());
 				
 //				copyWorker = createWorker(schemaDTO, queryDB, tableName);
 //
@@ -414,10 +428,39 @@ public class OverviewDistriVociController {
 //						showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), null);
 //					}
 //				});
+				
 			} else {
-				showAlert(AlertType.ERROR, "Error", "", "Non trovati dati di connessione relativi allo schema " + s.getCodice(), null);
+				showAlert(AlertType.ERROR, "Error", "", "Non trovati dati di connessione relativi allo schema " + Constants.SETEUR7ES, null);
 			}
-		}
+    	} else {
+    		
+    		ObservableList<Schema> listaSchemiSuiQualiDistribuire = schemiTable.getSelectionModel().getSelectedItems();
+    		ArrayList<Distribuzione> listaDistribuzione = new ArrayList<Distribuzione>(listaSchemiSuiQualiDistribuire.size());
+    		
+    		for (Schema schema : listaSchemiSuiQualiDistribuire) {
+    			
+        		Distribuzione distribuzione = new Distribuzione();
+        		distribuzione.setCodiceSchema(schema.getCodice());
+        		distribuzione.setContatoreInsertGeneratePerBackup(Constants.ZERO);
+				distribuzione.setContatoreRigheCancellate(Constants.ZERO);
+				distribuzione.setContatoreRigheDistribuite(Constants.ZERO);
+    			
+    			SchemaDTO schemaDTO = searchSchemaDTO(schema.getCodice());
+    			
+    			if (schemaDTO != null) {
+    				risultatiDTO = model.runQueryForGenerateInserts (schemaDTO, queryDB, tableName);
+    				distribuzione.setContatoreRigheCancellate(Constants.ZERO);
+    				distribuzione.setContatoreRigheDistribuite(Constants.ZERO);
+    				distribuzione.setContatoreInsertGeneratePerBackup(risultatiDTO.getListString().size());
+    				distribuzione.setListaInsertGeneratePerBackup(risultatiDTO.getListString());
+    			} else {
+    				showAlert(AlertType.ERROR, "Error", "", "Non trovati dati di connessione relativi allo schema " + schema.getCodice(), null);
+    			}
+    			listaDistribuzione.add(distribuzione);
+    		}
+    		deleteStatementOutput.setListaDistribuzione(listaDistribuzione);
+    	}
+		
 		return deleteStatementOutput;
 	}
 	
@@ -509,6 +552,55 @@ public class OverviewDistriVociController {
 		}
 		return true;
 	}
+	
+    private void handleElaborazione(Tab nv) {
+    	
+		if (isInputValidForElaborazione()) {
+			try {
+				elaborazione();
+			} catch (Exception e) {
+				showAlert(AlertType.ERROR, "Error", "", e.toString(), null);
+    			SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+    			selectionModel.select(0);
+			}
+		} else {
+			SingleSelectionModel<Tab> selectionModel = tabPane.getSelectionModel();
+			selectionModel.select(0);
+		}
+   
+        //System.out.println("click on Exit button");
+    }
+	
+	private boolean isInputValidForElaborazione() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+    
+    /**
+     * chiamata quando l'utente fa click sul bottone Cancella
+     */
+    @FXML
+    private void elaborazione() {
+		// TODO  >> per ogni deleteStatement di Main aggiorno la relativa lista delle distribuzioni:
+		boolean fromSchemaOrigine = false;
+		ObservableList<DeleteStatement> newlistaDelete =  FXCollections.observableArrayList();
+		for (DeleteStatement deleteStatement : main.getDeleteStatement()) {
+			//	a) per ogni elemento della lista delle distribuzioni genero l'elenco delle insert di backup ed aggiorno il relativo contatore
+			//deleteStatement;
+			//main.addDeleteStatement(
+			newlistaDelete.add(generateInsertStatement(deleteStatement, fromSchemaOrigine));
+			System.out.println("SQL Statement " + deleteStatement.getDeleteStatement() + " Elaborato!" );
+			
+		}
+		main.getDeleteStatement().clear();
+		main.setDeleteStatement(newlistaDelete);
+		
+		deleteStatementTable.setItems(main.getDeleteStatement());
+		//              	b) a fronte dell'esecuzione della Delete aggiorno il relativo contatore del nr. di righe cancellate
+		//					c) a fronte dell'inserimento dei nuovi valori aggiorno il contatore del nr. di righe inserite
+		
+		
+	}
 
 	public void setModel(Model model) {
 		this.model = model;
@@ -526,5 +618,7 @@ public class OverviewDistriVociController {
 		
 		alert.showAndWait();
 	}
+
+
     
 }

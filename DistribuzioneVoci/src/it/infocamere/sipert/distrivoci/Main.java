@@ -25,6 +25,7 @@ import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.TabelleListWrapper;
 import it.infocamere.sipert.distrivoci.model.Voce;
 import it.infocamere.sipert.distrivoci.model.VociListWrapper;
+import it.infocamere.sipert.distrivoci.util.Constants;
 import it.infocamere.sipert.distrivoci.view.OverviewDistriVociController;
 import it.infocamere.sipert.distrivoci.view.RootLayoutController;
 import it.infocamere.sipert.distrivoci.view.TabellaEditDialogController;
@@ -72,6 +73,11 @@ public class Main extends Application {
      *  gli schemi dei data base oracle da trattare
      */
     private List<SchemaDTO> listSchemi = new ArrayList<SchemaDTO>();
+    
+    /**
+     *   schema di partenza (sviluppo) dal quale recuperare i dati da distribuire sugli schemi di arrivo (produzione)
+     */
+    private SchemaDTO schemaDtoOrigine;
     
     private Map <String, String> mapProvince = new HashMap<String, String>();
     
@@ -278,6 +284,7 @@ public class Main extends Application {
 
 		try {
 			listSchemi = model.getSchemi(fileSchemiXLS);
+			schemaDtoOrigine = model.getSchema(fileSchemiXLS, Constants.NOME_FOLDER_SETEUR7ES, Constants.SETEUR7ES);
 			setSchemiDataBaseFilePath(fileSchemiXLS);
 			if (listSchemi.size() > 0) schemi.clear();
 			for (int i = 0; i < listSchemi.size(); i++) {
@@ -644,4 +651,13 @@ public class Main extends Application {
             return false;
         }
     } 
+    
+	public SchemaDTO getSchemaDtoOrigine() {
+		return schemaDtoOrigine;
+	}
+
+	public void setSchemaDtoOrigine(SchemaDTO schemaDtoOrigine) {
+		this.schemaDtoOrigine = schemaDtoOrigine;
+	}
+    
 }

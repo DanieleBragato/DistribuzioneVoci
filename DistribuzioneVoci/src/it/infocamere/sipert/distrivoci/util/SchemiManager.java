@@ -21,6 +21,76 @@ public class SchemiManager {
 	
 	private static final Logger LOGGER = Logger.getLogger(SchemiManager.class.getName());
 
+	public SchemaDTO getSchema(File fileSchemiXLS, String nomeFolder, String codiceSchema) throws ErroreFileSchemiNonTrovato, ErroreColonneFileXlsSchemiKo {
+		
+		SchemaDTO schema = new SchemaDTO();
+		
+		if (!fileSchemiXLS.exists()) {
+			throw new ErroreFileSchemiNonTrovato();
+		}
+		
+		Workbook workbook; 
+		
+		try {
+			boolean trovatoSchema = false;
+			workbook = Workbook.getWorkbook(fileSchemiXLS);
+			Sheet sheet = workbook.getSheet(1);
+			if (nomeFolder.equalsIgnoreCase(sheet.getName())) {
+				
+				for (int iRiga = 0; iRiga < sheet.getRows() && !trovatoSchema; iRiga++) {
+					
+					if (iRiga == 0) colonneFileXlsSchemiOk = checkTestataColonne(sheet.getRow(iRiga));
+					
+					if (!colonneFileXlsSchemiOk) {
+						throw new ErroreColonneFileXlsSchemiKo();
+					}
+					
+					if (colonneFileXlsSchemiOk && iRiga > 0) {
+						//SchemaDTO schemaDTO = new SchemaDTO();
+						
+						for (int iColonna = 0; iColonna < sheet.getColumns(); iColonna++) {
+
+							Cell cell = sheet.getCell(iColonna, iRiga);
+							CellType cellType = cell.getType();
+							
+							if (cellType == CellType.LABEL) {
+								if (iColonna == Constants.NUM_COLL_SCHEMA) {
+									if (cell.getContents().equalsIgnoreCase(codiceSchema)) {
+										schema.setSchemaUserName(cell.getContents());
+										trovatoSchema = true;
+									} else {
+										break;
+									}
+								}
+								if (iColonna == Constants.NUM_COLL_PASSWORD) {
+									schema.setPassword(cell.getContents());
+								}
+								if (iColonna == Constants.NUM_COLL_DBNAME) {
+									schema.setDbName(cell.getContents());
+								}
+								if (iColonna == Constants.NUM_COLL_PORT) {
+									schema.setPort(cell.getContents());
+								}
+								if (iColonna == Constants.NUM_COLL_SERVER) {
+									schema.setHostServerURL(cell.getContents());
+								}
+							}
+						}						
+					}
+				}
+			}
+		
+		} catch (BiffException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Errore nella lettura del file xls delle connessioni", e);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Errore nella lettura del file xls delle connessioni", e);
+		}
+		
+		return schema;
+	}
+	
 	public List<SchemaDTO> getListSchemi(File fileSchemiXLS) throws ErroreFileSchemiNonTrovato, ErroreColonneFileXlsSchemiKo {
 		
 		List<SchemaDTO> schemi  = new ArrayList<>() ;
