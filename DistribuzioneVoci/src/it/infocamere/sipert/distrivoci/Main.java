@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import it.infocamere.sipert.distrivoci.model.TabelleListWrapper;
 import it.infocamere.sipert.distrivoci.model.Voce;
 import it.infocamere.sipert.distrivoci.model.VociListWrapper;
 import it.infocamere.sipert.distrivoci.util.Constants;
+import it.infocamere.sipert.distrivoci.util.DistributionStep;
 import it.infocamere.sipert.distrivoci.view.OverviewDistriVociController;
 import it.infocamere.sipert.distrivoci.view.RootLayoutController;
 import it.infocamere.sipert.distrivoci.view.TabellaEditDialogController;
@@ -37,17 +39,37 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import jfxtras.styles.jmetro8.JMetro;
 
 
 public class Main extends Application {
 	
+    private static final JMetro.Style STYLE = JMetro.Style.DARK;
+	
 	private Stage stagePrincipale;
     private BorderPane rootLayout;
+    
+    private List<DistributionStep> distributionStep = Arrays.asList(
+            new DistributionStep("Tabelle", "Parametri"),
+            new DistributionStep("Voci", "Parametri"),
+            new DistributionStep("Schemi sui quali distribuire", "Parametri"),
+            new DistributionStep("Anteprima", "Anteprima Elaborazione "));
+    private TreeItem<String> rootNode;
 	
     /**
      * i dati nel formato di observable list di Tabella.
@@ -83,6 +105,8 @@ public class Main extends Application {
     
     
 	public Main() {
+		
+		this.rootNode = new TreeItem<>("Distribuzione Voci");
 		
         // Aggiungo alcuni dati di esempio
     	tabelleDB.add(new Tabella("tabella1", "la prima tabella"));
@@ -147,7 +171,7 @@ public class Main extends Application {
         this.stagePrincipale = stagePrincipale;
         
         this.stagePrincipale.initStyle(StageStyle.UNDECORATED);
-        this.stagePrincipale.setTitle("Distri Voci");
+        this.stagePrincipale.setTitle("Distribuzione Voci");
         
         // Set the application icon.
         //this.stagePrincipale.getIcons().add(new Image("file:resources/images/globalquery_32.png"));
@@ -181,6 +205,10 @@ public class Main extends Application {
 
 			// esposizione della Scene contenente il root layout.
 			Scene scene = new Scene(rootLayout);
+			
+			scene.setFill(Color.LIGHTGRAY);
+			//new JMetro(STYLE).applyTheme(scene);
+			
 			stagePrincipale.setScene(scene);
 
 			// do al controllore l'accesso alla main app.
@@ -435,9 +463,44 @@ public class Main extends Application {
         try {
             // Load overview.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(Main.class.getResource("view/OverviewDistriVoci.fxml"));
+            loader.setLocation(Main.class.getResource("view/OverviewDistriVoci2.fxml"));
             AnchorPane overview = (AnchorPane) loader.load();
 
+            rootNode.setExpanded(true);
+            for (DistributionStep step : distributionStep) {
+                TreeItem<String> stepLeaf = new TreeItem<>(step.getName());
+                boolean found = false;
+                for (TreeItem<String> stepNode : rootNode.getChildren()) {
+                	
+                    if (stepNode.getValue().contentEquals(step.getStep())){
+                        stepNode.getChildren().add(stepLeaf);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    TreeItem<String> stepNode = new TreeItem<>(
+                            step.getStep()
+                    );
+                    rootNode.getChildren().add(stepNode);
+                    stepNode.getChildren().add(stepLeaf);
+                }
+            }
+            
+            TreeView<String> treeView = new TreeView<>(rootNode);
+            
+            treeView.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
+                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+            
+            setTreeCellFactory(treeView);
+            
+            AnchorPane anchorPaneSX = (AnchorPane) overview.lookup("#anchorPaneSX");
+            
+            anchorPaneSX.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
+                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+            
+            anchorPaneSX.getChildren().add(treeView);
+            
             // Set distri voci overview into the center of root layout.
             rootLayout.setCenter(overview);
 
@@ -454,6 +517,64 @@ public class Main extends Application {
         }
     }
 	
+    private void setTreeCellFactory(TreeView<String> tree) {
+        tree.setCellFactory(param -> new TreeCell<String>() {
+            @Override
+            public void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                //setDisclosureNode(null);
+
+                if (empty) {
+                    setText("");
+                    setGraphic(null);
+                } else {
+                    setText(item);
+                }
+            }
+
+        });
+
+        tree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+            	if ("Tabelle".equalsIgnoreCase(newValue.getValue())) {
+            		VboxVisibile("#vboxTabelle");
+            		VboxNonVisibile("#vboxVoci");
+            		VboxNonVisibile("#vboxSchemi");
+            		VboxNonVisibile("#vboxPreView");
+            	}
+            	if ("Voci".equalsIgnoreCase(newValue.getValue())) {
+            		VboxNonVisibile("#vboxTabelle");
+            		VboxNonVisibile("#vboxSchemi");
+            		VboxNonVisibile("#vboxPreView");
+            		VboxVisibile("#vboxVoci");
+            	}
+            	if ("Schemi sui quali distribuire".equalsIgnoreCase(newValue.getValue())) {
+            		VboxNonVisibile("#vboxTabelle");
+            		VboxNonVisibile("#vboxVoci");
+            		VboxNonVisibile("#vboxPreView");
+            		VboxVisibile("#vboxSchemi");
+            	}
+            	if ("Anteprima".equalsIgnoreCase(newValue.getValue())) {
+            		VboxNonVisibile("#vboxTabelle");
+            		VboxNonVisibile("#vboxVoci");
+            		VboxNonVisibile("#vboxSchemi");
+            		VboxVisibile("#vboxPreView");
+            	}
+            	
+                System.out.println(newValue.getValue());
+            }
+        });
+    }
+    
+    private void VboxVisibile (String nomeBox) {
+		VBox vboxTabelle = (VBox) rootLayout.lookup(nomeBox);
+		vboxTabelle.setVisible(true);
+    }
+    private void VboxNonVisibile (String nomeBox) {
+		VBox vboxTabelle = (VBox) rootLayout.lookup(nomeBox);
+		vboxTabelle.setVisible(false);
+    }
+    
 	public List<SchemaDTO> getListSchemi() {
 		return listSchemi;
 	}

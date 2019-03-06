@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane opacity="0.73" prefHeight="250.0" prefWidth="650.0" styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.infocamere.sipert.distrivoci.view.VoceEditDialogController">
+<AnchorPane opacity="0.73" prefHeight="250.0" prefWidth="650.0" styleClass="background" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.infocamere.sipert.distrivoci.view.VoceEditDialogController">
    <children>
       <VBox opacity="0.91" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
          <children>
