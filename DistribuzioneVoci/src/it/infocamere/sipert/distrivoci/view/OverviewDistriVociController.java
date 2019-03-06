@@ -3,7 +3,6 @@ package it.infocamere.sipert.distrivoci.view;
 import java.util.ArrayList;
 
 import it.infocamere.sipert.distrivoci.Main;
-import it.infocamere.sipert.distrivoci.MainWithTreeView;
 import it.infocamere.sipert.distrivoci.db.QueryDB;
 import it.infocamere.sipert.distrivoci.db.dto.GenericResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
@@ -23,6 +22,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SingleSelectionModel;
@@ -32,6 +32,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeView;
 import javafx.stage.Stage;
 
 public class OverviewDistriVociController {
@@ -87,9 +89,6 @@ public class OverviewDistriVociController {
     // Referimento al main 
     private Main main;
     
-    // Referimento al main2 
-    private MainWithTreeView main2;
-    
 	private Model model;
 	
 //	private boolean estrazioneDatiTerminataCorrettamente;
@@ -112,30 +111,29 @@ public class OverviewDistriVociController {
     @FXML
     private void initialize() {
         // Initializza la lista delle tabelle con 2 colonne - codice e descrizione 
-//    	codiceTabColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
-//    	descrizioneTabColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
-//        
-//        // Initializza la lista delle voci con 2 colonne - codice e descrizione 
-//    	codiceVoceColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
-//    	descrizioneVoceColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
-//    	
-//        // Initializza la lista degli schemi con 2 colonne - codice e descrizione 
-//    	codiceSchemaColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
-//    	descrizioneSchemaColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
-//    	
-//        // Initializza la lista degli statement di delete (2 colonne - codice tabella e relativo statement) 
-//    	codiceTabDeleteColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
-//    	statementDeleteColumn.setCellValueFactory(cellData -> cellData.getValue().deleteStatementProperty());
-//    	
-//    	//
-//    	tabelledbTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//    	vociTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//    	schemiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//    	
-//        // Listener per la selezione del dettaglio dello sattement di delete e dei relativi statement di insert
-//    	deleteStatementTable.getSelectionModel().selectedItemProperty().addListener(
-//                (observable, oldValue, newValue) -> showInsertsDetails(newValue));
-//    	
+    	codiceTabColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
+    	descrizioneTabColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
+        
+        // Initializza la lista delle voci con 2 colonne - codice e descrizione 
+    	codiceVoceColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
+    	descrizioneVoceColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
+    	
+        // Initializza la lista degli schemi con 2 colonne - codice e descrizione 
+    	codiceSchemaColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
+    	descrizioneSchemaColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
+    	
+        // Initializza la lista degli statement di delete (2 colonne - codice tabella e relativo statement) 
+    	codiceTabDeleteColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
+    	statementDeleteColumn.setCellValueFactory(cellData -> cellData.getValue().deleteStatementProperty());
+    	
+    	tabelledbTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    	vociTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    	schemiTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    	
+        // Listener per la selezione del dettaglio dello sattement di delete e dei relativi statement di insert
+    	deleteStatementTable.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> showInsertsDetails(newValue));
+    	
 //		tabPane.getSelectionModel().selectedItemProperty().addListener((obs, ov, nv) -> handleTabPane(nv));
     }
     
@@ -168,58 +166,41 @@ public class OverviewDistriVociController {
         
     }
     
-	public void setMain2(MainWithTreeView main2) {
-        this.main2 = main2;
-
-//        // aggiunta di una observable list alla table
-//        tabelledbTable.setItems(main.getTabelleDB());
-//        
-//        // aggiunta di una observable list alla table
-//        vociTable.setItems(main.getVociData());
-//        
-//        // aggiunta di una observable list alla table
-//        schemiTable.setItems(main.getSchemi());
-//
-//        // aggiunta di una observable list alla table delle sql delete statement
-//        deleteStatementTable.setItems(main.getDeleteStatement());
-        
-    }
-    
 	
     public void setFilter() {
     
 		// 1. Wrap the ObservableList in a FilteredList (initially display all data).
-//		FilteredList<Schema> filteredData = new FilteredList<>(main.getSchemi(), p -> true);
-//    	
-//		// 2. Set the filter Predicate whenever the filter changes.
-//		filterField.textProperty().addListener((observable, oldValue, newValue) -> {
-//			filteredData.setPredicate(schema -> {
-//				// If filter text is empty, display all persons.
-//				if (newValue == null || newValue.isEmpty()) {
-//					return true;
-//				}
-//				
-//				// Compare first name and last name of every person with filter text.
-//				String lowerCaseFilter = newValue.toLowerCase();
-//				
-//				if (schema.getCodice().toLowerCase().indexOf(lowerCaseFilter) != -1) {
-//					return true; // Filter matches first name.
-//				} else if (schema.getDescrizione().toLowerCase().indexOf(lowerCaseFilter) != -1) {
-//					return true; // Filter matches last name.
-//				}
-//				return false; // Does not match.
-//			});
-//		});
-//		
-//		// 3. Wrap the FilteredList in a SortedList. 
-//		SortedList<Schema> sortedData = new SortedList<>(filteredData);
-//		
-//		// 4. Bind the SortedList comparator to the TableView comparator.
-//		// 	  Otherwise, sorting the TableView would have no effect.
-//		sortedData.comparatorProperty().bind(schemiTable.comparatorProperty());
-//		
-//		// 5. Add sorted (and filtered) data to the table.
-//		schemiTable.setItems(sortedData);
+		FilteredList<Schema> filteredData = new FilteredList<>(main.getSchemi(), p -> true);
+    	
+		// 2. Set the filter Predicate whenever the filter changes.
+		filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+			filteredData.setPredicate(schema -> {
+				// If filter text is empty, display all persons.
+				if (newValue == null || newValue.isEmpty()) {
+					return true;
+				}
+				
+				// Compare first name and last name of every person with filter text.
+				String lowerCaseFilter = newValue.toLowerCase();
+				
+				if (schema.getCodice().toLowerCase().indexOf(lowerCaseFilter) != -1) {
+					return true; // Filter matches first name.
+				} else if (schema.getDescrizione().toLowerCase().indexOf(lowerCaseFilter) != -1) {
+					return true; // Filter matches last name.
+				}
+				return false; // Does not match.
+			});
+		});
+		
+		// 3. Wrap the FilteredList in a SortedList. 
+		SortedList<Schema> sortedData = new SortedList<>(filteredData);
+		
+		// 4. Bind the SortedList comparator to the TableView comparator.
+		// 	  Otherwise, sorting the TableView would have no effect.
+		sortedData.comparatorProperty().bind(schemiTable.comparatorProperty());
+		
+		// 5. Add sorted (and filtered) data to the table.
+		schemiTable.setItems(sortedData);
     	
     }
     
@@ -344,6 +325,63 @@ public class OverviewDistriVociController {
        
     }
 
+    public void setTreeCellFactory(TreeView<String> tree) {
+        tree.setCellFactory(param -> new TreeCell<String>() {
+            @Override
+            public void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                //setDisclosureNode(null);
+
+                if (empty) {
+                    setText("");
+                    setGraphic(null);
+                } else {
+                    setText(item);
+                }
+            }
+
+        });
+
+        tree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+            	if ("Tabelle".equalsIgnoreCase(newValue.getValue())) {
+            		VboxVisibile("#vboxTabelle");
+            		VboxNonVisibile("#vboxVoci");
+            		VboxNonVisibile("#vboxSchemi");
+            		VboxNonVisibile("#vboxPreView");
+            	}
+            	if ("Voci".equalsIgnoreCase(newValue.getValue())) {
+            		VboxNonVisibile("#vboxTabelle");
+            		VboxNonVisibile("#vboxSchemi");
+            		VboxNonVisibile("#vboxPreView");
+            		VboxVisibile("#vboxVoci");
+            	}
+            	if ("Schemi sui quali distribuire".equalsIgnoreCase(newValue.getValue())) {
+            		VboxNonVisibile("#vboxTabelle");
+            		VboxNonVisibile("#vboxVoci");
+            		VboxNonVisibile("#vboxPreView");
+            		VboxVisibile("#vboxSchemi");
+            	}
+            	if ("Anteprima".equalsIgnoreCase(newValue.getValue())) {
+            		VboxNonVisibile("#vboxTabelle");
+            		VboxNonVisibile("#vboxVoci");
+            		VboxNonVisibile("#vboxSchemi");
+            		VboxVisibile("#vboxPreView");
+            	}
+            	
+                System.out.println(newValue.getValue());
+            }
+        });
+    }
+    
+    private void VboxVisibile (String nomeBox) {
+		VBox vboxTabelle = (VBox) main.getRootLayout().lookup(nomeBox);
+		vboxTabelle.setVisible(true);
+    }
+    private void VboxNonVisibile (String nomeBox) {
+		VBox vboxTabelle = (VBox) main.getRootLayout().lookup(nomeBox);
+		vboxTabelle.setVisible(false);
+    }
     
     private void handleTabPane(Tab nv) {
     	if ("          PREVIEW ELABORAZIONE          ".equalsIgnoreCase(nv.getText())) {

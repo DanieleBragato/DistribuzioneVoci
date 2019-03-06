@@ -29,49 +29,49 @@ public class RootLayoutController {
     @FXML
     private void handleExit() {
     	
-//    	if (main.getTabelleFilePath() == null) {
-//    		if (main.getTabelleDB().size() > 0) {
-//            	// alert per indicare dove salvare la lista delle tabelle
-//        		Alert alert = new Alert(AlertType.CONFIRMATION);
-//        		alert.setTitle("Indicare il File xml della lista tabelle");
-//        		alert.setHeaderText("Indicare il File xml sul quale salvare l'elenco delle tabelle");
-//        		alert.setContentText("Scegli la tua opzione");
-//
-//        		ButtonType buttonSelectFile = new ButtonType("Select File Tabelle..");
-//        		ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-//
-//        		alert.getButtonTypes().setAll(buttonSelectFile, buttonTypeCancel);
-//
-//        		Optional<ButtonType> result = alert.showAndWait();
-//        		if (result.get() == buttonSelectFile){
-//        			handleSaveTabelle();
-//        		}
-//            } 
-//    	} else {
-//    		handleSaveTabelle();
-//		}
-//    	
-//    	if (main.getVociFilePath() == null) {
-//    		if (main.getVociData().size() > 0) {
-//            	// alert per indicare dove salvare la lista delle voci
-//        		Alert alert = new Alert(AlertType.CONFIRMATION);
-//        		alert.setTitle("Indicare il File xml della lista voci");
-//        		alert.setHeaderText("Indicare il File xml sul quale salvare l'elenco delle voci");
-//        		alert.setContentText("Scegli la tua opzione");
-//
-//        		ButtonType buttonSelectFile = new ButtonType("Select File Voci..");
-//        		ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-//
-//        		alert.getButtonTypes().setAll(buttonSelectFile, buttonTypeCancel);
-//
-//        		Optional<ButtonType> result = alert.showAndWait();
-//        		if (result.get() == buttonSelectFile){
-//        			handleSaveVoci();
-//        		}
-//            } 
-//    	} else {
-//    		handleSaveVoci();
-//		}
+    	if (main.getTabelleFilePath() == null) {
+    		if (main.getTabelleDB().size() > 0) {
+            	// alert per indicare dove salvare la lista delle tabelle
+        		Alert alert = new Alert(AlertType.CONFIRMATION);
+        		alert.setTitle("Indicare il File xml della lista tabelle");
+        		alert.setHeaderText("Indicare il File xml sul quale salvare l'elenco delle tabelle");
+        		alert.setContentText("Scegli la tua opzione");
+
+        		ButtonType buttonSelectFile = new ButtonType("Select File Tabelle..");
+        		ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+        		alert.getButtonTypes().setAll(buttonSelectFile, buttonTypeCancel);
+
+        		Optional<ButtonType> result = alert.showAndWait();
+        		if (result.get() == buttonSelectFile){
+        			handleSaveTabelle();
+        		}
+            } 
+    	} else {
+    		handleSaveTabelle();
+		}
+    	
+    	if (main.getVociFilePath() == null) {
+    		if (main.getVociData().size() > 0) {
+            	// alert per indicare dove salvare la lista delle voci
+        		Alert alert = new Alert(AlertType.CONFIRMATION);
+        		alert.setTitle("Indicare il File xml della lista voci");
+        		alert.setHeaderText("Indicare il File xml sul quale salvare l'elenco delle voci");
+        		alert.setContentText("Scegli la tua opzione");
+
+        		ButtonType buttonSelectFile = new ButtonType("Select File Voci..");
+        		ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+        		alert.getButtonTypes().setAll(buttonSelectFile, buttonTypeCancel);
+
+        		Optional<ButtonType> result = alert.showAndWait();
+        		if (result.get() == buttonSelectFile){
+        			handleSaveVoci();
+        		}
+            } 
+    	} else {
+    		handleSaveVoci();
+		}
     	
 		System.exit(0);
     }

@@ -139,7 +139,7 @@ public class MainWithTreeView extends Application {
 			// set the model
 			Model model = new Model() ;
 			controller.setModel(model);
-            controller.setMain2(this);
+            //controller.setMain2(this);
             controller.setFilter();
 
         } catch (IOException e) {

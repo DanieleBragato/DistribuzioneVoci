@@ -492,7 +492,8 @@ public class Main extends Application {
             treeView.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
                     BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
             
-            setTreeCellFactory(treeView);
+//            OverviewDistriVociController OverviewDistriVociController = new OverviewDistriVociController();
+//            OverviewDistriVociController.setTreeCellFactory(treeView);
             
             AnchorPane anchorPaneSX = (AnchorPane) overview.lookup("#anchorPaneSX");
             
@@ -511,70 +512,75 @@ public class Main extends Application {
 			controller.setModel(model);
             controller.setMain(this);
             controller.setFilter();
+            controller.setTreeCellFactory(treeView);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 	
-    private void setTreeCellFactory(TreeView<String> tree) {
-        tree.setCellFactory(param -> new TreeCell<String>() {
-            @Override
-            public void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                //setDisclosureNode(null);
-
-                if (empty) {
-                    setText("");
-                    setGraphic(null);
-                } else {
-                    setText(item);
-                }
-            }
-
-        });
-
-        tree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-            	if ("Tabelle".equalsIgnoreCase(newValue.getValue())) {
-            		VboxVisibile("#vboxTabelle");
-            		VboxNonVisibile("#vboxVoci");
-            		VboxNonVisibile("#vboxSchemi");
-            		VboxNonVisibile("#vboxPreView");
-            	}
-            	if ("Voci".equalsIgnoreCase(newValue.getValue())) {
-            		VboxNonVisibile("#vboxTabelle");
-            		VboxNonVisibile("#vboxSchemi");
-            		VboxNonVisibile("#vboxPreView");
-            		VboxVisibile("#vboxVoci");
-            	}
-            	if ("Schemi sui quali distribuire".equalsIgnoreCase(newValue.getValue())) {
-            		VboxNonVisibile("#vboxTabelle");
-            		VboxNonVisibile("#vboxVoci");
-            		VboxNonVisibile("#vboxPreView");
-            		VboxVisibile("#vboxSchemi");
-            	}
-            	if ("Anteprima".equalsIgnoreCase(newValue.getValue())) {
-            		VboxNonVisibile("#vboxTabelle");
-            		VboxNonVisibile("#vboxVoci");
-            		VboxNonVisibile("#vboxSchemi");
-            		VboxVisibile("#vboxPreView");
-            	}
-            	
-                System.out.println(newValue.getValue());
-            }
-        });
-    }
+//    private void setTreeCellFactory(TreeView<String> tree) {
+//        tree.setCellFactory(param -> new TreeCell<String>() {
+//            @Override
+//            public void updateItem(String item, boolean empty) {
+//                super.updateItem(item, empty);
+//                //setDisclosureNode(null);
+//
+//                if (empty) {
+//                    setText("");
+//                    setGraphic(null);
+//                } else {
+//                    setText(item);
+//                }
+//            }
+//
+//        });
+//
+//        tree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//            	if ("Tabelle".equalsIgnoreCase(newValue.getValue())) {
+//            		VboxVisibile("#vboxTabelle");
+//            		VboxNonVisibile("#vboxVoci");
+//            		VboxNonVisibile("#vboxSchemi");
+//            		VboxNonVisibile("#vboxPreView");
+//            	}
+//            	if ("Voci".equalsIgnoreCase(newValue.getValue())) {
+//            		VboxNonVisibile("#vboxTabelle");
+//            		VboxNonVisibile("#vboxSchemi");
+//            		VboxNonVisibile("#vboxPreView");
+//            		VboxVisibile("#vboxVoci");
+//            	}
+//            	if ("Schemi sui quali distribuire".equalsIgnoreCase(newValue.getValue())) {
+//            		VboxNonVisibile("#vboxTabelle");
+//            		VboxNonVisibile("#vboxVoci");
+//            		VboxNonVisibile("#vboxPreView");
+//            		VboxVisibile("#vboxSchemi");
+//            	}
+//            	if ("Anteprima".equalsIgnoreCase(newValue.getValue())) {
+//            		VboxNonVisibile("#vboxTabelle");
+//            		VboxNonVisibile("#vboxVoci");
+//            		VboxNonVisibile("#vboxSchemi");
+//            		VboxVisibile("#vboxPreView");
+//            	}
+//            	
+//                System.out.println(newValue.getValue());
+//            }
+//        });
+//    }
+//    
+//    private void VboxVisibile (String nomeBox) {
+//		VBox vboxTabelle = (VBox) rootLayout.lookup(nomeBox);
+//		vboxTabelle.setVisible(true);
+//    }
+//    private void VboxNonVisibile (String nomeBox) {
+//		VBox vboxTabelle = (VBox) rootLayout.lookup(nomeBox);
+//		vboxTabelle.setVisible(false);
+//    }
     
-    private void VboxVisibile (String nomeBox) {
-		VBox vboxTabelle = (VBox) rootLayout.lookup(nomeBox);
-		vboxTabelle.setVisible(true);
-    }
-    private void VboxNonVisibile (String nomeBox) {
-		VBox vboxTabelle = (VBox) rootLayout.lookup(nomeBox);
-		vboxTabelle.setVisible(false);
-    }
-    
+	public BorderPane getRootLayout() {
+		return rootLayout;
+	}
+
 	public List<SchemaDTO> getListSchemi() {
 		return listSchemi;
 	}

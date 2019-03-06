@@ -85,7 +85,7 @@
                               </Label>
                               <TextField fx:id="filterField" prefHeight="37.0" prefWidth="150.0">
                                  <HBox.margin>
-                                    <Insets bottom="5.0" left="5.0" top="5.0" />
+                                    <Insets bottom="5.0" left="5.0" right="30.0" top="5.0" />
                                  </HBox.margin>
                               </TextField>
                            </children>
@@ -125,7 +125,7 @@
                               <TableColumn fx:id="descrizioneVoceColumn" prefWidth="400.0" text="Descrizione" />
                            </columns>
                            <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                              <Insets bottom="10.0" left="10.0" right="60.0" top="10.0" />
                            </VBox.margin>
                         </TableView>
                         <ButtonBar prefHeight="33.0" prefWidth="407.0">
@@ -135,7 +135,7 @@
                               <Button layoutX="348.0" layoutY="10.0" mnemonicParsing="false" onAction="#handleDeleteVoce" text="Delete" />
                            </buttons>
                            <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="30.0" />
+                              <Insets bottom="10.0" left="10.0" right="70.0" top="30.0" />
                            </VBox.margin>
                         </ButtonBar>
                      </children>
@@ -152,7 +152,7 @@
                               <TableColumn fx:id="descrizioneTabColumn" prefWidth="400.0" text="Descrizione" />
                            </columns>
                            <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                              <Insets bottom="10.0" left="10.0" right="60.0" top="10.0" />
                            </VBox.margin>
                         </TableView>
                         <ButtonBar prefHeight="33.0" prefWidth="407.0">
@@ -162,7 +162,7 @@
                               <Button layoutX="348.0" layoutY="10.0" mnemonicParsing="false" onAction="#handleDeleteTabDB" text="Delete" />
                            </buttons>
                            <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="30.0" />
+                              <Insets bottom="10.0" left="10.0" right="70.0" top="30.0" />
                            </VBox.margin>
                         </ButtonBar>
                      </children>
