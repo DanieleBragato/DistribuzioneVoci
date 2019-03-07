@@ -11,6 +11,8 @@ public class GenericResultsDTO {
 	
 	private List<String> listString = new ArrayList<String>();
 	
+	private int rowsUpdated = 0;
+	
 
 	public List<LinkedHashMap<String, Object>> getListLinkedHashMap() {
 		return listLinkedHashMap;
@@ -49,7 +51,7 @@ public class GenericResultsDTO {
 	@Override
 	public String toString() {
 		return "GenericResultsDTO [schema=" + schema + ", listLinkedHashMap=" + listLinkedHashMap + ", listString="
-				+ listString + "]";
+				+ listString + ", rowsUpdated=" + rowsUpdated + "]";
 	}
 
 	@Override
@@ -75,6 +77,14 @@ public class GenericResultsDTO {
 		} else if (!schema.equals(other.schema))
 			return false;
 		return true;
+	}
+
+	public int getRowsUpdated() {
+		return rowsUpdated;
+	}
+
+	public void setRowsUpdated(int rowsUpdated) {
+		this.rowsUpdated = rowsUpdated;
 	}
 
 }

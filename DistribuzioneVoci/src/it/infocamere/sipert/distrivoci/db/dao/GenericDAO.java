@@ -25,6 +25,7 @@ public class GenericDAO {
     private static String tableName = "";
     private static boolean createListOfLinkedHashMap = true;
     private static boolean createListOfInsert = false;
+    private static boolean executeUpdate = true;
 	
 	public boolean testConnessioneOK (SchemaDTO schemDTO) {
 		
@@ -51,14 +52,30 @@ public class GenericDAO {
 		
 	}
 	
+	public GenericResultsDTO executeUpdate(SchemaDTO schemaDTO, QueryDB queryDB) {
+		
+		executeUpdate = true;
+		
+		GenericResultsDTO results;
+		return results = executeQuery(schemaDTO, queryDB);
+		
+	}
+	
 	public GenericResultsDTO executeQuery(SchemaDTO schemaDTO, QueryDB queryDB) {
 		
 		GenericResultsDTO results = new GenericResultsDTO();
 		
-		if ((createListOfLinkedHashMap && createListOfInsert) || (!createListOfLinkedHashMap && !createListOfInsert)) {
-			System.out.println("parametri non coerenti");
-			return results;
+		if (executeUpdate) {
+			createListOfLinkedHashMap = false;
+			createListOfInsert = false;
+		} else {
+			if ((createListOfLinkedHashMap && createListOfInsert) || (!createListOfLinkedHashMap && !createListOfInsert)) {
+				System.out.println("parametri non coerenti");
+				return results;
+			}
 		}
+		
+
 		
 		results.setSchema(schemaDTO.getSchemaUserName());
 		
@@ -70,18 +87,22 @@ public class GenericDAO {
 		
 		try {
 			conn = DBConnect.getConnection(schemaDB);
+			
 			preparedStatement = conn.prepareStatement(queryDB.getQuery());
+			
+			if (executeUpdate) {
+				results.setRowsUpdated(preparedStatement.executeUpdate());
+			} else {
+				rs = preparedStatement.executeQuery();
+				if (createListOfLinkedHashMap) {
+					List<LinkedHashMap<String, Object>> listLinkedHashMap = convertResultSetToListOfLinkedHashMap(rs);
+					results.setListLinkedHashMap(listLinkedHashMap);
+				}
+				if (createListOfInsert) {
+					results.setListString(convertResultSetToListOfString(rs));
+				}
+			}
 
-			rs = preparedStatement.executeQuery();
-			
-			if (createListOfLinkedHashMap) {
-				List<LinkedHashMap<String, Object>> listLinkedHashMap = convertResultSetToListOfLinkedHashMap(rs);
-				results.setListLinkedHashMap(listLinkedHashMap);
-			}
-			if (createListOfInsert) {
-				results.setListString(convertResultSetToListOfString(rs));
-			}
-			
 		} catch (SQLSyntaxErrorException e) {
 			throw new RuntimeException(e.toString() + "Schema = " + schemaDTO.getSchemaUserName() + " - SQL = " + queryDB.getQuery(), e);
 		} catch (SQLException e) {

@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
@@ -12,6 +11,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.infocamere.sipert.distrivoci.view.OverviewDistriVociController">
    <children>
@@ -28,10 +28,21 @@
                <children>
                   <VBox fx:id="vboxPreView" prefHeight="596.0" prefWidth="650.0" visible="false" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="20.0">
                      <children>
+                        <Label text="Statement sql per la Distribuzione delle Voci sugli Schemi di destinazione">
+                           <VBox.margin>
+                              <Insets bottom="20.0" left="40.0" right="20.0" top="20.0" />
+                           </VBox.margin>
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
                         <Label text="Delete">
                            <VBox.margin>
                               <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
-                           </VBox.margin></Label>
+                           </VBox.margin>
+                           <font>
+                              <Font name="System Italic" size="16.0" />
+                           </font></Label>
                         <TableView fx:id="deleteStatementTable" prefHeight="300.0" prefWidth="930.0">
                            <columns>
                               <TableColumn fx:id="codiceTabDeleteColumn" prefWidth="150.0" text="Tabella" />
@@ -41,28 +52,27 @@
                               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                            </VBox.margin>
                         </TableView>
-                        <Label layoutX="10.0" layoutY="10.0" text="Insert Statement">
+                        <Label fx:id="labelAnteprimaInsert" layoutX="10.0" layoutY="10.0" text="Insert - origine valori Schema di partenza ">
                            <VBox.margin>
                               <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
-                           </VBox.margin></Label>
-                        <ScrollPane prefHeight="199.0" prefWidth="930.0">
-                           <content>
-                              <AnchorPane prefHeight="179.0" prefWidth="910.0">
-                                 <children>
-                                    <TextArea fx:id="textAreaPreviewInsert" layoutY="5.0" opacity="0.88" prefHeight="183.0" prefWidth="670.0" />
-                                 </children>
-                              </AnchorPane>
-                           </content>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                            </VBox.margin>
-                        </ScrollPane>
+                           <font>
+                              <Font name="System Italic" size="16.0" />
+                           </font></Label>
+                        <AnchorPane prefWidth="650.0">
+                           <children>
+                              <TextArea fx:id="textAreaPreviewInsert" layoutY="5.0" opacity="0.88" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+                           </children>
+                        </AnchorPane>
                         <ButtonBar prefHeight="40.0" prefWidth="200.0">
                            <buttons>
-                              <Button mnemonicParsing="false" onAction="#elaborazione" text="elabora" />
+                              <Button mnemonicParsing="false" onAction="#elaborazione" text="Distribuzione Voci">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font></Button>
                            </buttons>
                            <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                              <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />
                            </VBox.margin>
                            <padding>
                               <Insets right="40.0" />
@@ -165,6 +175,28 @@
                               <Insets bottom="10.0" left="10.0" right="70.0" top="30.0" />
                            </VBox.margin>
                         </ButtonBar>
+                     </children>
+                  </VBox>
+                  <VBox fx:id="vboxSchemiPartenza" layoutX="60.0" layoutY="110.0" prefHeight="340.0" prefWidth="600.0" visible="false">
+                     <children>
+                        <HBox prefHeight="50.0" prefWidth="200.0">
+                           <children>
+                              <Label prefHeight="48.0" prefWidth="310.0" text="Schemi di Partenza" textAlignment="CENTER">
+                                 <HBox.margin>
+                                    <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <TableView fx:id="schemiPartenzaTable" prefHeight="400.0" prefWidth="500.0">
+                           <columns>
+                              <TableColumn fx:id="codiceSchemaPartenzaColumn" prefWidth="150.0" text="Codice" />
+                              <TableColumn fx:id="descrizioneSchemaPartenzaColumn" prefWidth="440.0" text="Descrizione" />
+                           </columns>
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </VBox.margin>
+                        </TableView>
                      </children>
                   </VBox>
                </children></AnchorPane>

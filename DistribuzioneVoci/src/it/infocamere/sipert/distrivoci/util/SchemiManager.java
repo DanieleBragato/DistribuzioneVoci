@@ -91,7 +91,12 @@ public class SchemiManager {
 		return schema;
 	}
 	
-	public List<SchemaDTO> getListSchemi(File fileSchemiXLS) throws ErroreFileSchemiNonTrovato, ErroreColonneFileXlsSchemiKo {
+	public List<SchemaDTO> getListSchemi(File fileSchemiXLS, boolean schemiPartenza, boolean schemiArrivo) throws ErroreFileSchemiNonTrovato, ErroreColonneFileXlsSchemiKo {
+		
+		int qualeFoglio = 0;
+		
+		if (schemiArrivo) qualeFoglio = 0; 
+		if (schemiPartenza) qualeFoglio = 1;
 		
 		List<SchemaDTO> schemi  = new ArrayList<>() ;
 		
@@ -104,7 +109,7 @@ public class SchemiManager {
 		try {
 			
 			workbook = Workbook.getWorkbook(fileSchemiXLS);
-			Sheet sheet = workbook.getSheet(0);
+			Sheet sheet = workbook.getSheet(qualeFoglio);
 			
 			for (int iRiga = 0; iRiga < sheet.getRows(); iRiga++) {
 				

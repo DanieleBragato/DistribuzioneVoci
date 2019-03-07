@@ -27,6 +27,7 @@ public class Constants {
 	
 	public static final String PREFIX_WHERE_CONDITION = " WHERE CDVOCEXX  IN('";
 	public static final String PREFIX_SELECT = "SELECT * FROM ";
+	public static final String PREFIX_DELETE = "DELETE FROM ";
 	
 	public static final int COLONNA_ZERO = 0;
 	public static final int RIGA_ZERO = 0;

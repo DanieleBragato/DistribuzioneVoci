@@ -26,7 +26,6 @@ import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.TabelleListWrapper;
 import it.infocamere.sipert.distrivoci.model.Voce;
 import it.infocamere.sipert.distrivoci.model.VociListWrapper;
-import it.infocamere.sipert.distrivoci.util.Constants;
 import it.infocamere.sipert.distrivoci.util.DistributionStep;
 import it.infocamere.sipert.distrivoci.view.OverviewDistriVociController;
 import it.infocamere.sipert.distrivoci.view.RootLayoutController;
@@ -39,7 +38,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.AnchorPane;
@@ -49,7 +47,6 @@ import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -65,10 +62,13 @@ public class Main extends Application {
     private BorderPane rootLayout;
     
     private List<DistributionStep> distributionStep = Arrays.asList(
+            new DistributionStep("Schemi di Partenza", "Parametri"),
             new DistributionStep("Tabelle", "Parametri"),
             new DistributionStep("Voci", "Parametri"),
             new DistributionStep("Schemi sui quali distribuire", "Parametri"),
-            new DistributionStep("Anteprima", "Anteprima Elaborazione "));
+            new DistributionStep("Anteprima e Distribuzione", "Anteprima e Distribuzione Voci"),
+    		new DistributionStep("Distribuzioni", "Storico "),
+    		new DistributionStep("Ripristino", "Storico "));
     private TreeItem<String> rootNode;
 	
     /**
@@ -82,7 +82,12 @@ public class Main extends Application {
     private ObservableList<Voce> voci = FXCollections.observableArrayList();
     
     /**
-     * i dati nel formato di observable list di Schema.
+     * i dati nel formato di observable list di Schema >> PARTENZA
+     */
+    private ObservableList<Schema> schemiPartenza = FXCollections.observableArrayList();
+    
+    /**
+     * i dati nel formato di observable list di Schema >> ARRIVO
      */
     private ObservableList<Schema> schemi = FXCollections.observableArrayList();
 	
@@ -95,6 +100,11 @@ public class Main extends Application {
      *  gli schemi dei data base oracle da trattare
      */
     private List<SchemaDTO> listSchemi = new ArrayList<SchemaDTO>();
+    
+	/**
+     *  gli schemi dei data base oracle di partenza
+     */
+    private List<SchemaDTO> listSchemiPartenza = new ArrayList<SchemaDTO>();
     
     /**
      *   schema di partenza (sviluppo) dal quale recuperare i dati da distribuire sugli schemi di arrivo (produzione)
@@ -312,16 +322,41 @@ public class Main extends Application {
 
 		try {
 			listSchemi = model.getSchemi(fileSchemiXLS);
-			schemaDtoOrigine = model.getSchema(fileSchemiXLS, Constants.NOME_FOLDER_SETEUR7ES, Constants.SETEUR7ES);
+			//schemaDtoOrigine = model.getSchema(fileSchemiXLS, Constants.NOME_FOLDER_SETEUR7ES, Constants.SETEUR7ES);
 			setSchemiDataBaseFilePath(fileSchemiXLS);
 			if (listSchemi.size() > 0) schemi.clear();
 			for (int i = 0; i < listSchemi.size(); i++) {
 				Schema schema = new Schema();
 				String codSchema = listSchemi.get(i).getSchemaUserName();
-				String targaProvincia = codSchema.substring(3, 5);
+				// test INIZIO
+				if (!"HR".equalsIgnoreCase(codSchema)) {
+					String targaProvincia = codSchema.substring(3, 5);
+					schema.setDescrizione(trovaProvincia(targaProvincia));
+				} else {
+					schema.setDescrizione("ORACLE 11 XE LOCALE");
+				}
+				// test FINE
 				schema.setCodice(listSchemi.get(i).getSchemaUserName());
-				schema.setDescrizione(trovaProvincia(targaProvincia));
 				schemi.add(schema);
+			}
+			
+			listSchemiPartenza = model.getSchemiPartenza(fileSchemiXLS);
+			//schemaDtoOrigine = model.getSchema(fileSchemiXLS, Constants.NOME_FOLDER_SETEUR7ES, Constants.SETEUR7ES);
+			//setSchemiDataBaseFilePath(fileSchemiXLS);
+			if (listSchemiPartenza.size() > 0) schemiPartenza.clear();
+			for (int i = 0; i < listSchemiPartenza.size(); i++) {
+				Schema schema = new Schema();
+				String codSchema = listSchemiPartenza.get(i).getSchemaUserName();
+//				// test INIZIO
+//				if (!"HR".equalsIgnoreCase(codSchema)) {
+//					String targaProvincia = codSchema.substring(3, 5);
+//					schema.setDescrizione(trovaProvincia(targaProvincia));
+//				} else {
+//					schema.setDescrizione("ORACLE 11 XE LOCALE");
+//				}
+				// test FINE
+				schema.setCodice(listSchemiPartenza.get(i).getSchemaUserName());
+				schemiPartenza.add(schema);
 			}
 
 		} catch (ErroreFileSchemiNonTrovato e) {
@@ -492,9 +527,6 @@ public class Main extends Application {
             treeView.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
                     BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
             
-//            OverviewDistriVociController OverviewDistriVociController = new OverviewDistriVociController();
-//            OverviewDistriVociController.setTreeCellFactory(treeView);
-            
             AnchorPane anchorPaneSX = (AnchorPane) overview.lookup("#anchorPaneSX");
             
             anchorPaneSX.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
@@ -518,65 +550,7 @@ public class Main extends Application {
             e.printStackTrace();
         }
     }
-	
-//    private void setTreeCellFactory(TreeView<String> tree) {
-//        tree.setCellFactory(param -> new TreeCell<String>() {
-//            @Override
-//            public void updateItem(String item, boolean empty) {
-//                super.updateItem(item, empty);
-//                //setDisclosureNode(null);
-//
-//                if (empty) {
-//                    setText("");
-//                    setGraphic(null);
-//                } else {
-//                    setText(item);
-//                }
-//            }
-//
-//        });
-//
-//        tree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-//            if (newValue != null) {
-//            	if ("Tabelle".equalsIgnoreCase(newValue.getValue())) {
-//            		VboxVisibile("#vboxTabelle");
-//            		VboxNonVisibile("#vboxVoci");
-//            		VboxNonVisibile("#vboxSchemi");
-//            		VboxNonVisibile("#vboxPreView");
-//            	}
-//            	if ("Voci".equalsIgnoreCase(newValue.getValue())) {
-//            		VboxNonVisibile("#vboxTabelle");
-//            		VboxNonVisibile("#vboxSchemi");
-//            		VboxNonVisibile("#vboxPreView");
-//            		VboxVisibile("#vboxVoci");
-//            	}
-//            	if ("Schemi sui quali distribuire".equalsIgnoreCase(newValue.getValue())) {
-//            		VboxNonVisibile("#vboxTabelle");
-//            		VboxNonVisibile("#vboxVoci");
-//            		VboxNonVisibile("#vboxPreView");
-//            		VboxVisibile("#vboxSchemi");
-//            	}
-//            	if ("Anteprima".equalsIgnoreCase(newValue.getValue())) {
-//            		VboxNonVisibile("#vboxTabelle");
-//            		VboxNonVisibile("#vboxVoci");
-//            		VboxNonVisibile("#vboxSchemi");
-//            		VboxVisibile("#vboxPreView");
-//            	}
-//            	
-//                System.out.println(newValue.getValue());
-//            }
-//        });
-//    }
-//    
-//    private void VboxVisibile (String nomeBox) {
-//		VBox vboxTabelle = (VBox) rootLayout.lookup(nomeBox);
-//		vboxTabelle.setVisible(true);
-//    }
-//    private void VboxNonVisibile (String nomeBox) {
-//		VBox vboxTabelle = (VBox) rootLayout.lookup(nomeBox);
-//		vboxTabelle.setVisible(false);
-//    }
-    
+	    
 	public BorderPane getRootLayout() {
 		return rootLayout;
 	}
@@ -585,6 +559,10 @@ public class Main extends Application {
 		return listSchemi;
 	}
     
+	public List<SchemaDTO> getListSchemiPartenza() {
+		return listSchemiPartenza;
+	}
+	
     /**
      * Ritorna i dati nel formato di observable list of Tabella. 
      * @return
@@ -642,6 +620,27 @@ public class Main extends Application {
     	
     	if (schema != null) {
     		this.schemi.add(schema);
+    		return true;
+    	}
+    	return false;
+    }
+    
+    /**
+     * Ritorna i dati nel formato di observable list of Schema. 
+     * @return
+     */
+    public ObservableList<Schema> getSchemiPartenza() {
+        return schemiPartenza;
+    }
+    
+    public void setSchemiPartenza(ObservableList<Schema> schemiPartenza ) {
+		this.schemiPartenza = schemiPartenza;
+	}
+    
+    public boolean addSchemiPartenzaData (Schema schemaPartenza) {
+    	
+    	if (schemaPartenza != null) {
+    		this.schemiPartenza.add(schemaPartenza);
     		return true;
     	}
     	return false;

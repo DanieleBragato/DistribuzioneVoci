@@ -15,17 +15,31 @@ public class Model {
 
 	private List<SchemaDTO> schemi;
 	
+	boolean schemiPartenza = false;
+	boolean schemiArrivo = false;
+	
 	public List<SchemaDTO> getSchemi(File fileSchemiXLS) throws ErroreFileSchemiNonTrovato, ErroreColonneFileXlsSchemiKo {
 		
-		if (this.schemi == null) {
+		schemiArrivo = false;
+		
+		if (!schemiPartenza) schemiArrivo = true;
+		
+		//if (this.schemi == null) {
 			SchemiManager schemiManager = new SchemiManager();
-			this.schemi = schemiManager.getListSchemi(fileSchemiXLS) ;
+			this.schemi = schemiManager.getListSchemi(fileSchemiXLS , schemiPartenza , schemiArrivo) ;
 
 			//System.out.println("Trovati " +  this.schemi.size() + " schemi");
-		}
+		//}
 
 		return this.schemi ;
 
+	}
+	
+	public List<SchemaDTO> getSchemiPartenza(File fileSchemiXLS) throws ErroreFileSchemiNonTrovato, ErroreColonneFileXlsSchemiKo {
+		
+		schemiPartenza = true;
+		
+		return getSchemi(fileSchemiXLS);
 	}
 	
 	public SchemaDTO getSchema(File fileSchemiXLS, String nomeFolder, String codiceSchema) throws ErroreFileSchemiNonTrovato, ErroreColonneFileXlsSchemiKo {
@@ -63,6 +77,16 @@ public class Model {
 		
 		GenericDAO genericDAO = new GenericDAO();
 		risultati = genericDAO.executeQueryForGenerateInserts(schema, queryDB, tableName);
+		
+		return risultati;
+	}
+
+	public GenericResultsDTO runUpdate(SchemaDTO schema, QueryDB queryDB) {
+		
+		GenericResultsDTO risultati = null;
+		
+		GenericDAO genericDAO = new GenericDAO();
+		risultati = genericDAO.executeUpdate(schema, queryDB);
 		
 		return risultati;
 	}
