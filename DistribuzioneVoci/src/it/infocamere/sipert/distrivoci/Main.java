@@ -22,6 +22,7 @@ import it.infocamere.sipert.distrivoci.exception.ErroreFileSchemiNonTrovato;
 import it.infocamere.sipert.distrivoci.model.DeleteStatement;
 import it.infocamere.sipert.distrivoci.model.Model;
 import it.infocamere.sipert.distrivoci.model.Schema;
+import it.infocamere.sipert.distrivoci.model.StoricoDistribuzione;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.TabelleListWrapper;
 import it.infocamere.sipert.distrivoci.model.Voce;
@@ -96,6 +97,11 @@ public class Main extends Application {
      */
     private ObservableList<DeleteStatement> deleteStatement = FXCollections.observableArrayList();
 	
+    /**
+     * i dati nel formato di observable list dello storico delle Distribuzioni
+     */
+    private ObservableList<StoricoDistribuzione> storicoDistribuzione = FXCollections.observableArrayList();
+    
 	/**
      *  gli schemi dei data base oracle da trattare
      */
@@ -676,6 +682,36 @@ public class Main extends Application {
     	return false;
     }
    
+    /**
+     * Ritorna i dati nel formato di observable list of StoricoDistribuzione. 
+     * @return
+     */
+    public ObservableList<StoricoDistribuzione> getStoricoDistribuzione() {
+        return storicoDistribuzione;
+    }
+    
+    public void setStoricoDistribuzione(ObservableList<StoricoDistribuzione> storicoDistribuzione ) {
+		this.storicoDistribuzione = storicoDistribuzione;
+	}
+    
+    public boolean addStoricoDistribuzione (StoricoDistribuzione storicoDistribuzione) {
+    	
+    	if (storicoDistribuzione != null) {
+    		this.storicoDistribuzione.add(storicoDistribuzione);
+    		return true;
+    	}
+    	return false;
+    }
+    
+    public boolean clearStoricoDistribuzione () {
+    	
+    	if (this.storicoDistribuzione != null) {
+    		this.storicoDistribuzione.clear();
+    		return true;
+    	}
+    	return false;
+    }
+    
 	/**
      * Apre un dialog per editare i dettagli di una specifica tabella. Se l'utente clicca OK
      * i cambiamenti vengono salvati e ritorna true

@@ -26,6 +26,14 @@ public class Constants {
 	public static final String NOME_FOLDER_SETEUR7ES = "Connessione_SETEUR7ES";
 	
 	public static final String PREFIX_WHERE_CONDITION = " WHERE CDVOCEXX  IN('";
+	
+	public static final String PREFIX_WHERE_CONDITION_WITH_CDTPFORM = " WHERE CDTPFORM = 'PEVOCI' AND CDVOCEXX  IN('";
+	
+	public static final String INSERT_LABEL_CONTENTS = "Insert - origine valori Schema di partenza ";
+	
+	public static final String ESPADE = "ESPADE";
+	public static final String ESPAFM = "ESPAFM";
+	
 	public static final String PREFIX_SELECT = "SELECT * FROM ";
 	public static final String PREFIX_DELETE = "DELETE FROM ";
 	

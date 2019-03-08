@@ -66,12 +66,14 @@ public class Model {
 		GenericResultsDTO risultati = null;
 		
 		GenericDAO genericDAO = new GenericDAO();
-		risultati = genericDAO.executeQuery(schema, queryDB);
+		risultati = genericDAO.execute(schema, queryDB);
 		
 		return risultati;
 	}
 	
 	public GenericResultsDTO runQueryForGenerateInserts(SchemaDTO schema, QueryDB queryDB, String tableName) {
+		
+		System.out.println("classe Model metodo runQueryForGenerateInserts");
 		
 		GenericResultsDTO risultati = null;
 		
@@ -82,6 +84,8 @@ public class Model {
 	}
 
 	public GenericResultsDTO runUpdate(SchemaDTO schema, QueryDB queryDB) {
+		
+		System.out.println("classe Model metodo runUpdate");
 		
 		GenericResultsDTO risultati = null;
 		

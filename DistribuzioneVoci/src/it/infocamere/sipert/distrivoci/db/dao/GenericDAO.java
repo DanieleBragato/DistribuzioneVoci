@@ -25,7 +25,7 @@ public class GenericDAO {
     private static String tableName = "";
     private static boolean createListOfLinkedHashMap = true;
     private static boolean createListOfInsert = false;
-    private static boolean executeUpdate = true;
+    private static boolean executeUpdate = false;
 	
 	public boolean testConnessioneOK (SchemaDTO schemDTO) {
 		
@@ -44,24 +44,30 @@ public class GenericDAO {
 	
 	public GenericResultsDTO executeQueryForGenerateInserts(SchemaDTO schemaDTO, QueryDB queryDB, String tableName) {
 		
+		System.out.println("classe GenericDAO metodo executeQueryForGenerateInserts");
+		
 		this.tableName = tableName;
 		createListOfLinkedHashMap = false;
 		createListOfInsert = true;
 		
-		return executeQuery(schemaDTO, queryDB);
+		return execute(schemaDTO, queryDB);
 		
 	}
 	
 	public GenericResultsDTO executeUpdate(SchemaDTO schemaDTO, QueryDB queryDB) {
 		
+		System.out.println("classe GenericDAO metodo executeUpdate");
+		
 		executeUpdate = true;
 		
 		GenericResultsDTO results;
-		return results = executeQuery(schemaDTO, queryDB);
+		return results = execute(schemaDTO, queryDB);
 		
 	}
 	
-	public GenericResultsDTO executeQuery(SchemaDTO schemaDTO, QueryDB queryDB) {
+	public GenericResultsDTO execute(SchemaDTO schemaDTO, QueryDB queryDB) {
+		
+		System.out.println("classe GenericDAO metodo execute");
 		
 		GenericResultsDTO results = new GenericResultsDTO();
 		
@@ -74,9 +80,7 @@ public class GenericDAO {
 				return results;
 			}
 		}
-		
-
-		
+				
 		results.setSchema(schemaDTO.getSchemaUserName());
 		
 		SchemaDTO schemaDB = schemaDTO;
@@ -88,12 +92,20 @@ public class GenericDAO {
 		try {
 			conn = DBConnect.getConnection(schemaDB);
 			
+			System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post DBConnect.getConnection...");
+			
+			System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - SQL = " + queryDB.getQuery());
+			
 			preparedStatement = conn.prepareStatement(queryDB.getQuery());
 			
 			if (executeUpdate) {
+				System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - ante preparedStatement.executeUpdate...");
 				results.setRowsUpdated(preparedStatement.executeUpdate());
+				System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post preparedStatement.executeUpdate...");
 			} else {
+				System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - ante preparedStatement.executeQuery...");
 				rs = preparedStatement.executeQuery();
+				System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post preparedStatement.executeQuery...");
 				if (createListOfLinkedHashMap) {
 					List<LinkedHashMap<String, Object>> listLinkedHashMap = convertResultSetToListOfLinkedHashMap(rs);
 					results.setListLinkedHashMap(listLinkedHashMap);
@@ -113,18 +125,21 @@ public class GenericDAO {
 			if (rs != null) {
 				try {
 					rs.close();
+					System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post rs.close()");
 				} catch (SQLException e) {
 				}
 			}
 			if (preparedStatement != null) {
 				try {
 					preparedStatement.close();
+					System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post preparedStatement.close()");
 				} catch (SQLException e) {
 				}
 			}
 			if (conn != null) {
 				try {
 					conn.close();
+					System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post conn.close()");
 				} catch (SQLException e) {
 				}
 			}
