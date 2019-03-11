@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class StoricoDistribuzione {
@@ -12,24 +13,23 @@ public class StoricoDistribuzione {
 	
 	private StringProperty note;
 	
+	private StringProperty schemaPartenza;
+	
     // informazioni relative alla distribuzione in produzione: elenco delle DeleteStatement
     
     private ArrayList<DeleteStatement> listaDeleteStatement;
 
     public StoricoDistribuzione() {
-    	this(null, null, null);
+    	this(null, null, null, null);
     }
     
 
-	public StoricoDistribuzione(StringProperty dataOraDistribuzione, StringProperty note,
-			ArrayList<DeleteStatement> listaDeleteStatement) {
-		
-		this.dataOraDistribuzione = dataOraDistribuzione;
-		this.note = note;
-		this.listaDeleteStatement = listaDeleteStatement;
+	public StoricoDistribuzione(String dataOraDistribuzione, String note, String schemaPartenza, ArrayList<DeleteStatement> listaDeleteStatement) {
+		this.dataOraDistribuzione = new SimpleStringProperty(dataOraDistribuzione);
+        this.note = new SimpleStringProperty(note);
+        this.schemaPartenza = new SimpleStringProperty(schemaPartenza);
+        this.listaDeleteStatement = listaDeleteStatement;
 	}
-
-
 
 	public ArrayList<DeleteStatement> getListaDeleteStatement() {
 		return listaDeleteStatement;
@@ -64,4 +64,16 @@ public class StoricoDistribuzione {
         return note;
     }
 	
+	public String getSchemaPartenza() {
+		return schemaPartenza.get();
+	}
+
+	public void setSchemaPartenza(String schemaPartenza) {
+		this.schemaPartenza.set(schemaPartenza);
+	}
+
+    public StringProperty schemaPartenzaProperty() {
+        return schemaPartenza;
+    }
+    
 }

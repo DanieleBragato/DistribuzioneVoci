@@ -129,18 +129,26 @@
                         </ButtonBar>
                      </children>
                   </VBox>
-                  <VBox fx:id="vboxStorico" prefHeight="200.0" prefWidth="100.0" visible="false">
+                  <VBox fx:id="vboxStorico" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="100.0">
                      <children>
-                        <Label prefHeight="48.0" prefWidth="310.0" text="Storico Distribuzioni" textAlignment="CENTER">
+                        <Label text="Storico Distribuzioni" textAlignment="CENTER">
                            <font>
                               <Font name="System Bold" size="16.0" />
                            </font>
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+                           </VBox.margin>
                         </Label>
-                        <TableView fx:id="storicoDistribuzioneTable" prefHeight="400.0" prefWidth="500.0">
+                        <TableView fx:id="storicoDistribuzioneTable" prefHeight="400.0" prefWidth="550.0">
                            <columns>
-                              <TableColumn fx:id="dataTabStoricoDistribuzioneColumn" prefWidth="150.0" text="Data" />
-                              <TableColumn fx:id="noteTabStoricoDistribuzioneColumn" prefWidth="440.0" text="Note" />
+                              <TableColumn fx:id="dataTabStoricoDistribuzioneColumn" prefWidth="180.0" text="Data" />
+                              <TableColumn fx:id="schemaPartenzaTabStoricoDistribuzioneColumn" prefWidth="100.0" text="Schema Origine" />
+                              <TableColumn fx:id="noteTabStoricoDistribuzioneColumn" prefWidth="290.0" text="Note" />
+                              <TableColumn fx:id="dummyTabStoricoDistribuzioneColumn" />
                            </columns>
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </VBox.margin>
                         </TableView>
                      </children>
                   </VBox>

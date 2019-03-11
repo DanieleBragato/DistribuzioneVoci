@@ -23,11 +23,13 @@ import it.infocamere.sipert.distrivoci.model.DeleteStatement;
 import it.infocamere.sipert.distrivoci.model.Model;
 import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.StoricoDistribuzione;
+import it.infocamere.sipert.distrivoci.model.StoricoDistribuzioniListWrapper;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.TabelleListWrapper;
 import it.infocamere.sipert.distrivoci.model.Voce;
 import it.infocamere.sipert.distrivoci.model.VociListWrapper;
 import it.infocamere.sipert.distrivoci.util.DistributionStep;
+import it.infocamere.sipert.distrivoci.view.DettaglioStoricoDistribuzioneDialogController;
 import it.infocamere.sipert.distrivoci.view.OverviewDistriVociController;
 import it.infocamere.sipert.distrivoci.view.RootLayoutController;
 import it.infocamere.sipert.distrivoci.view.TabellaEditDialogController;
@@ -248,6 +250,12 @@ public class Main extends Application {
 		if (fileVoci != null) {
 			loadVociDataFromFile(fileVoci);
 		}
+
+		// tentativo di caricamento dell'ultimo file dello storico delle distribuzioni 
+		File fileStoricoDistribuzioni = getStoricoDistribuzioniFilePath();
+		if (fileStoricoDistribuzioni != null) {
+			loadStoricoDistribuzioniDataFromFile(fileStoricoDistribuzioni);
+		}
 		
 		// tentativo di caricamento dell'ultimo file aperto degli schemi dei data base oracle  
 		File fileSchemiDB = getSchemiFilePath();
@@ -322,6 +330,36 @@ public class Main extends Application {
         }
     }
 	
+    public void loadStoricoDistribuzioniDataFromFile(File file) {
+    	
+        try {
+            JAXBContext context = JAXBContext
+                    .newInstance(StoricoDistribuzioniListWrapper.class);
+            Unmarshaller um = context.createUnmarshaller();
+
+            // lettura XML dal file e unmarshalling.
+            StoricoDistribuzioniListWrapper wrapper = (StoricoDistribuzioniListWrapper) um.unmarshal(file);
+
+            storicoDistribuzione.clear();
+            storicoDistribuzione.addAll(wrapper.getDistribuzioni());
+
+            // Save del file path sul registro.
+            //setVociFilePath(file);
+            setStoricoDistribuzioniFilePath(file);
+
+        } catch (Exception e) { // catches ANY exception
+        	
+        	Alert alert = new Alert(AlertType.ERROR);
+        	alert.setTitle("Error");
+        	alert.setHeaderText("Elenco Distribuzioni vuoto");
+        	alert.setContentText("Impossibile caricare lo storico delle distribuzioni dal file:\n" + file.getPath());
+        	
+        	alert.showAndWait();
+        	storicoDistribuzione.clear();
+        }
+    }
+    
+    
 	public void loadSchemiDataBaseFromFile(File fileSchemiXLS) {
 
 		Model model = new Model();
@@ -499,6 +537,53 @@ public class Main extends Application {
         }
     }
     
+    // gestione salvataggio elenco Storico Distribuzioni
+    
+	public File getStoricoDistribuzioniFilePath() {
+		Preferences prefs = Preferences.userNodeForPackage(Main.class);
+		String filePath = prefs.get("filePathStoricoDistribuzioni", null);
+		if (filePath != null) {
+			return new File(filePath);
+		} else {
+			return null;
+		}
+	}
+	
+    public void saveStoricoDistribuzioniDataToFile(File file) {
+        try {
+            JAXBContext context = JAXBContext
+                    .newInstance(StoricoDistribuzioniListWrapper.class);
+            Marshaller m = context.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+            // Wrapping dei dati delle Storico Distribuzioni
+            StoricoDistribuzioniListWrapper wrapper = new StoricoDistribuzioniListWrapper();
+            wrapper.setDistribuzioni(storicoDistribuzione);
+
+            // Marshalling e salvataggio XML su file
+            m.marshal(wrapper, file);
+
+            // Salvataggio del file path sul registro
+            setStoricoDistribuzioniFilePath(file);
+            
+        } catch (Exception e) { // catches ANY exception
+        	Alert alert = new Alert(AlertType.ERROR);
+        	alert.setTitle("Error");
+        	alert.setHeaderText("Impossibile salvare i dati");
+        	alert.setContentText("Impossibile salvare i dati sul file:\n" + file.getPath());
+        	
+        	alert.showAndWait();
+        }
+    }
+    
+    public void setStoricoDistribuzioniFilePath(File file) {
+        Preferences prefs = Preferences.userNodeForPackage(Main.class);
+        if (file != null) {
+            prefs.put("filePathStoricoDistribuzioni", file.getPath());
+        } else {
+            prefs.remove("filePathStoricoDistribuzioni");
+        }
+    }
     
     public void showOverview() {
         try {
@@ -756,6 +841,56 @@ public class Main extends Application {
             dialogStage.showAndWait();
 
             return controller.isOkClicked();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+	/**
+     * Apre un dialog per visualizzare i dettagli di una specifica distribuzione.
+     * 
+     * @param StoricoDistribuzione
+     * @return true , se l'utente clicca su OK, altrimenti false
+     */
+    public boolean showDettaglioDistribuzioneDialog(StoricoDistribuzione storicoDistribuzione) {
+        try {
+            // carico dell' fxml file e creazione del nuovo stage per il popup dialog.
+        	
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(Main.class.getResource("view/DettaglioStoricoDistribuzioneDialog.fxml"));
+            AnchorPane page = (AnchorPane) loader.load();
+
+            // Crea lo Stage di dialogo
+            Stage dialogStage = new Stage();
+            
+            dialogStage.initStyle(StageStyle.UNDECORATED);
+            
+            //.setValue(Boolean.FALSE);
+            
+            //dialogStage.getIcons().add(new Image("file:resources/images/globalquery_32.png"));
+            
+            dialogStage.setTitle("Dettaglio Distribuzione");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(stagePrincipale);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            // Imposta la query nel controller
+            DettaglioStoricoDistribuzioneDialogController controller = loader.getController();
+            controller.setMain(this);
+            controller.setDialogStage(dialogStage);
+            controller.setStoricoDistribuzione(storicoDistribuzione);
+            
+			// set the model
+//			Model model = new Model() ;
+//			controller.setModel(model);
+
+            // Show the dialog and wait until the user closes it
+            dialogStage.showAndWait();
+
+            return controller.isexitClicked();
             
         } catch (IOException e) {
             e.printStackTrace();

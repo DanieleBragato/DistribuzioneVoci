@@ -3,6 +3,7 @@ package it.infocamere.sipert.distrivoci.view;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import it.infocamere.sipert.distrivoci.Main;
 import it.infocamere.sipert.distrivoci.db.QueryDB;
@@ -31,15 +32,19 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 public class OverviewDistriVociController {
 
@@ -69,6 +74,12 @@ public class OverviewDistriVociController {
 
 	@FXML
 	private TableColumn<StoricoDistribuzione, String> noteTabStoricoDistribuzioneColumn;
+	
+	@FXML
+	private TableColumn<StoricoDistribuzione, String> schemaPartenzaTabStoricoDistribuzioneColumn;
+	
+	@FXML
+	private TableColumn dummyTabStoricoDistribuzioneColumn;
 	
 	@FXML
 	private TableView<DeleteStatement> deleteStatementTable;
@@ -131,7 +142,9 @@ public class OverviewDistriVociController {
 
 	private Task copyWorkerForGenInserts;
 	
-	private Task copyWorkerForUpdateDB;
+	private Task copyWorkerForExecuteDistribution;
+	
+	private String nota;
 	
 	private ObservableList<DeleteStatement> newlistaDelete = FXCollections.observableArrayList();
 	
@@ -174,6 +187,42 @@ public class OverviewDistriVociController {
 		// Initializza la lista dello storico delle distribuzioni (2 colonne - data e note della distribuzione
 		dataTabStoricoDistribuzioneColumn.setCellValueFactory(cellData -> cellData.getValue().dataOraDistribuzioneProperty());
 		noteTabStoricoDistribuzioneColumn.setCellValueFactory(cellData -> cellData.getValue().noteProperty());
+		schemaPartenzaTabStoricoDistribuzioneColumn.setCellValueFactory(cellData -> cellData.getValue().schemaPartenzaProperty());
+		
+		dummyTabStoricoDistribuzioneColumn.setCellValueFactory(new PropertyValueFactory<>("DUMMY"));
+		
+		Callback<TableColumn<StoricoDistribuzione, String>, TableCell<StoricoDistribuzione, String>> cellFactory = //
+				new Callback<TableColumn<StoricoDistribuzione, String>, TableCell<StoricoDistribuzione, String>>() {
+					@Override
+					public TableCell call(final TableColumn<StoricoDistribuzione, String> param) {
+						
+						final TableCell<StoricoDistribuzione, String> cell = new TableCell<StoricoDistribuzione, String>() {
+
+							final Button btn = new Button("Dettaglio");
+
+							@Override
+							public void updateItem(String item, boolean empty) {
+								super.updateItem(item, empty);
+								if (empty) {
+									setGraphic(null);
+									setText(null);
+								} else {
+									btn.setOnAction(event -> {
+										StoricoDistribuzione storicoDistribuzione = getTableView().getItems()
+												.get(getIndex());
+										System.out.println(storicoDistribuzione.getDataOraDistribuzione() + "   "
+												+ storicoDistribuzione.getNote());
+										handleApriDettaglioDistribuzione(storicoDistribuzione);
+									});
+									setGraphic(btn);
+									setText(null);
+								}
+							}
+						};
+						return cell;
+					}
+				};
+		dummyTabStoricoDistribuzioneColumn.setCellFactory(cellFactory);
 		
 		tabelledbTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		vociTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -238,6 +287,9 @@ public class OverviewDistriVociController {
 		// aggiunta di una observable list alla table delle sql delete statement
 		deleteStatementTable.setItems(main.getDeleteStatement());
 
+		// aggiunta di una observable list alla table dello storico delle distribuzioni
+		storicoDistribuzioneTable.setItems(main.getStoricoDistribuzione());
+		
 	}
 
 	public void setFilter() {
@@ -399,6 +451,16 @@ public class OverviewDistriVociController {
 
 	}
 
+	/**
+	 * chiamata quando l'utente fa click sul bottone Apri Dettaglio (Storico > Distribuzioni)
+	 */
+	@FXML
+	private void handleApriDettaglioDistribuzione(StoricoDistribuzione storicoDistribuzione) {
+
+		main.showDettaglioDistribuzioneDialog(storicoDistribuzione);
+
+	}
+	
 	public void setTreeCellFactory(TreeView<String> tree) {
 		tree.setCellFactory(param -> new TreeCell<String>() {
 			@Override
@@ -450,7 +512,7 @@ public class OverviewDistriVociController {
 					VboxNonVisibile("#vboxSchemi");
 					VboxVisibile("#vboxPreView");
 			    	bar.setVisible(true);
-					handleAnteprimaDuistribuzione();
+					handleAnteprimaDistribuzione();
 				}
 				if ("Schemi di Partenza".equalsIgnoreCase(newValue.getValue())) {
 					VboxNonVisibile("#vboxTabelle");
@@ -459,14 +521,6 @@ public class OverviewDistriVociController {
 					VboxNonVisibile("#vboxPreView");
 					VboxNonVisibile("#vboxSchemi");
 					VboxVisibile("#vboxSchemiPartenza");
-				}
-				if ("Distribuzioni".equalsIgnoreCase(newValue.getValue())) {
-					VboxNonVisibile("#vboxTabelle");
-					VboxNonVisibile("#vboxStorico");
-					VboxNonVisibile("#vboxVoci");
-					VboxNonVisibile("#vboxPreView");
-					VboxNonVisibile("#vboxSchemi");
-					VboxNonVisibile("#vboxSchemiPartenza");
 				}
 				if ("Ripristino".equalsIgnoreCase(newValue.getValue())) {
 					VboxNonVisibile("#vboxTabelle");
@@ -500,9 +554,9 @@ public class OverviewDistriVociController {
 		vboxTabelle.setVisible(false);
 	}
 
-	private void handleAnteprimaDuistribuzione() {
+	private void handleAnteprimaDistribuzione() {
 
-		if (isInputValidForAnteprimaDuistribuzione()) {
+		if (isInputValidForAnteprimaDistribuzione()) {
 			try {
 				previewDistribuzione();
 			} catch (Exception e) {
@@ -516,7 +570,7 @@ public class OverviewDistriVociController {
 		// System.out.println("click on Exit button");
 	}
 
-	private void fillAnteprimaDuistribuzione() {
+	private void fillAnteprimaDistribuzione() {
 
 		ObservableList<Tabella> listaTabelleSelezionate = tabelledbTable.getSelectionModel().getSelectedItems();
 		ObservableList<Voce> listaVociSelezionate = vociTable.getSelectionModel().getSelectedItems();
@@ -597,6 +651,8 @@ public class OverviewDistriVociController {
 		System.out.println("selectStatement = " + selectStatement);
 
 		DeleteStatement deleteStatementOutput = deleteStatement;
+		
+		deleteStatementOutput.setCodiceSchemaOrigine(main.getSchemaDtoOrigine().getSchemaUserName());
 
 		QueryDB queryDB = new QueryDB();
 		queryDB.setQuery(selectStatement);
@@ -694,7 +750,7 @@ public class OverviewDistriVociController {
 		bntDistribuzioneVoci.setDisable(true);
 	}
 	
-	private boolean isInputValidForAnteprimaDuistribuzione() {
+	private boolean isInputValidForAnteprimaDistribuzione() {
 		String errorMessage = "";
 
 		int selectedIndexTabelle = tabelledbTable.getSelectionModel().getSelectedIndex();
@@ -801,46 +857,67 @@ public class OverviewDistriVociController {
 		
 		System.out.println("OverviewDistriVociController metodo distribuzione");
 		
+		if (!checkNoteAndConfirm()) {
+			return;
+		}
+		
 		disabledView(true);
 		bar.setVisible(true);
 		
 		bar.setProgress(0);
 		
-		copyWorkerForUpdateDB = createWorkerForExecuteUpdateDB();
+		copyWorkerForExecuteDistribution = createWorkerForExecuteDistribution();
 		
         labelInfoEsecuzione.textProperty().unbind();
-        labelInfoEsecuzione.textProperty().bind(copyWorkerForUpdateDB.messageProperty());
+        labelInfoEsecuzione.textProperty().bind(copyWorkerForExecuteDistribution.messageProperty());
 
         bar.progressProperty().unbind();
-        bar.progressProperty().bind(copyWorkerForUpdateDB.progressProperty());
+        bar.progressProperty().bind(copyWorkerForExecuteDistribution.progressProperty());
 
-        copyWorkerForUpdateDB.messageProperty().addListener(new ChangeListener<String>() {
+        copyWorkerForExecuteDistribution.messageProperty().addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 System.out.println("newValue " + newValue);
             }
         });
         
-		Thread backgroundThreadUpdateDB = new Thread(copyWorkerForUpdateDB, "updateDataBase-thread");
+		Thread backgroundThreadUpdateDB = new Thread(copyWorkerForExecuteDistribution, "updateDataBase-thread");
 		backgroundThreadUpdateDB.setDaemon(true);
 		backgroundThreadUpdateDB.start();
 		
-		copyWorkerForUpdateDB.setOnFailed(e -> {
+		copyWorkerForExecuteDistribution.setOnFailed(e -> {
 			Throwable exception = ((Task) e.getSource()).getException();
 			if (exception != null) {
-				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteUpdateDB - setOnFailed - no eccezione");
-				copyWorkerForUpdateDB.cancel(true);
+				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - no eccezione");
+				copyWorkerForExecuteDistribution.cancel(true);
 				bar.progressProperty().unbind();
 				bar.setProgress(0);
 				disabledView(false);
 				bar.setVisible(false);
 				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), null);
 			} else {
-				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteUpdateDB - setOnFailed - eccezione = " + exception.toString());
+				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - eccezione = " + exception.toString());
 			}
 		});
 		
 	}
 
+	private boolean checkNoteAndConfirm() {
+		
+		TextInputDialog dialog = new TextInputDialog();
+		dialog.setTitle("Conferma Distribuzione");
+		dialog.setHeaderText("Per cortesia, imposta una nota informativa relativa alla distribuzione");
+		dialog.setContentText("Nota informativa:");
+		// Traditional way to get the response value.
+		Optional<String> result = dialog.showAndWait();
+		if (result.isPresent()){
+			this.nota = result.get();
+			return true;
+		} else {
+			this.nota = "";
+			return false;
+		}
+	}
+	
     private void disabledView(boolean b) {
     	
     	anchorPaneDX.setDisable(b);
@@ -862,7 +939,7 @@ public class OverviewDistriVociController {
 					System.out.println("Canceling...");
 				}
 				
-				fillAnteprimaDuistribuzione();
+				fillAnteprimaDistribuzione();
 				
 				return true;
 			}
@@ -882,9 +959,9 @@ public class OverviewDistriVociController {
 	}
 
 	
-	public Task createWorkerForExecuteUpdateDB() {
+	public Task createWorkerForExecuteDistribution() {
 
-		System.out.println("OverviewDistriVociController metodo createWorkerForExecuteUpdateDB");
+		System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution");
 		
 		return new Task() {
 			@Override
@@ -893,15 +970,23 @@ public class OverviewDistriVociController {
 				if (this.isCancelled()) {
 					System.out.println("Canceling...");
 				}
-				
-				for (DeleteStatement deleteStatement : main.getDeleteStatement()) {
-					newlistaDelete.add(manageDeleteStatement(deleteStatement));
+				ObservableList<DeleteStatement> newlistaDeleteXtest = FXCollections.observableArrayList();
+				for (int i = 0; i < main.getDeleteStatement().size(); i++) {
+					DeleteStatement deleteStatement  = main.getDeleteStatement().get(i);
+					newlistaDeleteXtest.add(manageDeleteStatement(deleteStatement));
 					System.out.println("SQL Statement " + deleteStatement.getDeleteStatement() + " Elaborato!");
-
 				}
-				
+//				for (DeleteStatement deleteStatement : main.getDeleteStatement()) {
+//					newlistaDelete.add(manageDeleteStatement(deleteStatement));
+//					System.out.println("SQL Statement " + deleteStatement.getDeleteStatement() + " Elaborato!");
+//
+//				}
+				newlistaDelete.clear();
 				main.getDeleteStatement().clear();
-				main.setDeleteStatement(newlistaDelete);
+				for (DeleteStatement ds: newlistaDeleteXtest) {
+					newlistaDelete.add(ds);
+					main.addDeleteStatement(ds);
+				}
 				deleteStatementTable.setItems(main.getDeleteStatement());
 				
 				return true;
@@ -909,15 +994,20 @@ public class OverviewDistriVociController {
 
 			@Override
 			protected void succeeded() {
-				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteUpdateDB - succeeded");
+				
+				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
 				bar.progressProperty().unbind();
 				bar.setProgress(0);
+				main.getDeleteStatement().clear();
+				main.setDeleteStatement(newlistaDelete);
+				deleteStatementTable.setItems(main.getDeleteStatement());
 				disabledView(false);
 				bar.setVisible(false);
-				showAlertEstrazioneOK();
 				aggiornaStoricoDistribuzione();
+				clearDistributionInfo();
+				showAlertEstrazioneOK();
 			}
 		};
 	}
@@ -930,15 +1020,32 @@ public class OverviewDistriVociController {
 		
 		StoricoDistribuzione storicoDistribuzione = new StoricoDistribuzione();
 		ArrayList<DeleteStatement> listaDeleteStatement = new ArrayList<DeleteStatement>();
+		String schemaPartenza = "";
 		for (DeleteStatement deletestatement : newlistaDelete) {
 			listaDeleteStatement.add(deletestatement);
-			
+			schemaPartenza = deletestatement.getCodiceSchemaOrigine();
 		}
 		storicoDistribuzione.setListaDeleteStatement(listaDeleteStatement);
-		storicoDistribuzione.setNote("inserire gestione");
+		storicoDistribuzione.setNote(this.nota);
+		storicoDistribuzione.setSchemaPartenza(main.getSchemaDtoOrigine().getSchemaUserName());
 		storicoDistribuzione.setDataOraDistribuzione(new Date().toString());
 		
 		main.addStoricoDistribuzione(storicoDistribuzione);
+		storicoDistribuzioneTable.setItems(main.getStoricoDistribuzione());
+	}
+	
+	private void clearDistributionInfo() {
+		
+		// pulizia delle selezioni sui parametri (schemi di partenza e arrivo, tabelle, voci)
+		schemiPartenzaTable.getSelectionModel().clearSelection();
+		tabelledbTable.getSelectionModel().clearSelection();
+		vociTable.getSelectionModel().clearSelection();
+		schemiTable.getSelectionModel().clearSelection();
+		
+		// pulizia della lista degli statement di delete
+		main.getDeleteStatement().clear();
+		deleteStatementTable.setItems(main.getDeleteStatement());
+		textAreaPreviewInsert.setText("");
 	}
 	
 	public void showAlert(AlertType type, String title, String headerText, String text, Stage stage) {

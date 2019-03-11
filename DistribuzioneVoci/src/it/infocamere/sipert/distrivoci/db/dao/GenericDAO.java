@@ -47,6 +47,7 @@ public class GenericDAO {
 		System.out.println("classe GenericDAO metodo executeQueryForGenerateInserts");
 		
 		this.tableName = tableName;
+		executeUpdate = false;
 		createListOfLinkedHashMap = false;
 		createListOfInsert = true;
 		

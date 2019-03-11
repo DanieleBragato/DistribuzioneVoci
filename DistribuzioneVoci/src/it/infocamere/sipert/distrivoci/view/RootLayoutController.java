@@ -73,6 +73,28 @@ public class RootLayoutController {
     		handleSaveVoci();
 		}
     	
+    	if (main.getStoricoDistribuzioniFilePath() == null) {
+    		if (main.getStoricoDistribuzione().size() > 0) {
+            	// alert per indicare dove salvare la lista delle voci
+        		Alert alert = new Alert(AlertType.CONFIRMATION);
+        		alert.setTitle("Indicare il File xml dello storico delle distribuzioni");
+        		alert.setHeaderText("Indicare il File xml sul quale salvare l'elenco delle distribuzioni");
+        		alert.setContentText("Scegli la tua opzione");
+
+        		ButtonType buttonSelectFile = new ButtonType("Select File Distribuzioni..");
+        		ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+        		alert.getButtonTypes().setAll(buttonSelectFile, buttonTypeCancel);
+
+        		Optional<ButtonType> result = alert.showAndWait();
+        		if (result.get() == buttonSelectFile){
+        			handleSaveDistribuzioni();
+        		}
+            } 
+    	} else {
+    		handleSaveDistribuzioni();
+		}
+    	
 		System.exit(0);
     }
 
@@ -126,7 +148,7 @@ public class RootLayoutController {
             handleSaveAsVoci();
         }
     }
-    
+  
     /**
      * Apre un FileChooser per permettere all'utente di selezionare un file da salvare
      */
@@ -148,6 +170,44 @@ public class RootLayoutController {
                 file = new File(file.getPath() + ".xml");
             }
             main.saveVociDataToFile(file);
+        }
+    }
+    
+    
+    /**
+     * salva sul file correntemente aperto, se non c'è nessun file aperto viene esposto il dialogo Save As
+     */
+    @FXML
+    private void handleSaveDistribuzioni() {
+        File distribuzioniFile = main.getStoricoDistribuzioniFilePath();
+        if (distribuzioniFile != null) {
+            main.saveStoricoDistribuzioniDataToFile(distribuzioniFile);
+        } else {
+        	handleSaveAsDistribuzioni();
+        }
+    }
+    
+    /**
+     * Apre un FileChooser per permettere all'utente di selezionare un file da salvare
+     */
+    @FXML
+    private void handleSaveAsDistribuzioni() {
+        FileChooser fileChooser = new FileChooser();
+
+        // impostazione del filtro per l'estensione
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                "XML files (*.xml)", "*.xml");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        // espone il dialogo per il salvataggio del file
+        File file = fileChooser.showSaveDialog(main.getStagePrincipale());
+
+        if (file != null) {
+            // verifica la corretta estensione del file
+            if (!file.getPath().endsWith(".xml")) {
+                file = new File(file.getPath() + ".xml");
+            }
+            main.saveStoricoDistribuzioniDataToFile(file);
         }
     }
     
