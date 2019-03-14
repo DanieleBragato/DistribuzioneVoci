@@ -44,22 +44,14 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import jfxtras.styles.jmetro8.JMetro;
 
 
 public class Main extends Application {
-	
-    private static final JMetro.Style STYLE = JMetro.Style.DARK;
 	
 	private Stage stagePrincipale;
     private BorderPane rootLayout;
@@ -71,7 +63,7 @@ public class Main extends Application {
             new DistributionStep("Schemi sui quali distribuire", "Parametri"),
             new DistributionStep("Anteprima e Distribuzione", "Anteprima e Distribuzione Voci"),
     		new DistributionStep("Distribuzioni", "Storico "),
-    		new DistributionStep("Ripristino", "Storico "));
+    		new DistributionStep("Anteprima e Ripristino", "Storico "));
     private TreeItem<String> rootNode;
 	
     /**
@@ -95,10 +87,20 @@ public class Main extends Application {
     private ObservableList<Schema> schemi = FXCollections.observableArrayList();
 	
     /**
+     * i dati nel formato di observable list di Schema >> per RIPRISTINO
+     */
+    private ObservableList<Schema> schemiRipristino = FXCollections.observableArrayList();
+    
+    /**
      * i dati nel formato di observable list di DeleteStatement.
      */
     private ObservableList<DeleteStatement> deleteStatement = FXCollections.observableArrayList();
 	
+    /**
+     * i dati nel formato di observable list di DeleteStatement.
+     */
+    private ObservableList<DeleteStatement> deleteStatementForRipristino = FXCollections.observableArrayList();
+    
     /**
      * i dati nel formato di observable list dello storico delle Distribuzioni
      */
@@ -613,17 +615,29 @@ public class Main extends Application {
                 }
             }
             
-            TreeView<String> treeView = new TreeView<>(rootNode);
             
-            treeView.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
-                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+            
+            TreeView<String> treeView = new TreeView<>(rootNode);
+
+            treeView.prefWidth(370);
+            treeView.minWidth(370);
+            treeView.prefHeight(740);
+            treeView.minHeight(740);
+
+//            treeView.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
+//                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
             
             AnchorPane anchorPaneSX = (AnchorPane) overview.lookup("#anchorPaneSX");
             
-            anchorPaneSX.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
-                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+//            anchorPaneSX.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
+//                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
             
             anchorPaneSX.getChildren().add(treeView);
+            
+            anchorPaneSX.setTopAnchor(treeView, 0.0);
+            anchorPaneSX.setBottomAnchor(treeView, 0.0);
+            anchorPaneSX.setRightAnchor(treeView, 0.0);
+            anchorPaneSX.setLeftAnchor(treeView, 0.0);
             
             // Set distri voci overview into the center of root layout.
             rootLayout.setCenter(overview);
@@ -738,6 +752,28 @@ public class Main extends Application {
     }
     
     /**
+     * Ritorna i dati nel formato di observable list of Schema per Ripristino 
+     * @return
+     */
+    public ObservableList<Schema> getSchemiRipristino() {
+        return schemiRipristino;
+    }
+    
+    public void setSchemiRipristino(ObservableList<Schema> schemiRipristino ) {
+		this.schemiRipristino = schemiRipristino;
+	}
+    
+    public boolean addSchemiRipristinoData (Schema schemaRipristino) {
+    	
+    	if (schemaRipristino != null) {
+    		this.schemiRipristino.add(schemaRipristino);
+    		return true;
+    	}
+    	return false;
+    }
+    
+    
+    /**
      * Ritorna i dati nel formato di observable list of DeleteStatement. 
      * @return
      */
@@ -797,6 +833,37 @@ public class Main extends Application {
     	return false;
     }
     
+    /**
+     * Ritorna i dati nel formato di observable list of DeleteStatement per il RIPRISTINO 
+     * @return
+     */
+    public ObservableList<DeleteStatement> getDeleteStatementForRipristino() {
+        return deleteStatementForRipristino;
+    }
+    
+    public void setDeleteStatementForRipristino(ObservableList<DeleteStatement> deleteStatemenForRipristinot ) {
+		this.deleteStatementForRipristino = deleteStatementForRipristino;
+	}
+    
+    public boolean addDeleteStatementForRipristino (DeleteStatement deleteStatementForRipristino) {
+    	
+    	if (deleteStatementForRipristino != null) {
+    		this.deleteStatementForRipristino.add(deleteStatementForRipristino);
+    		return true;
+    	}
+    	return false;
+    }
+    
+    public boolean clearDeleteStatementForRipristino () {
+    	
+    	if (this.deleteStatementForRipristino != null) {
+    		this.deleteStatementForRipristino.clear();
+    		return true;
+    	}
+    	return false;
+    }
+   
+    
 	/**
      * Apre un dialog per editare i dettagli di una specifica tabella. Se l'utente clicca OK
      * i cambiamenti vengono salvati e ritorna true
@@ -825,6 +892,10 @@ public class Main extends Application {
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(stagePrincipale);
             Scene scene = new Scene(page);
+            
+//            scene.setFill(Color.LIGHTGRAY);
+//            new JMetro(STYLE).applyTheme(scene);
+            
             dialogStage.setScene(scene);
 
             // Imposta la query nel controller
@@ -875,6 +946,10 @@ public class Main extends Application {
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(stagePrincipale);
             Scene scene = new Scene(page);
+            
+//            scene.setFill(Color.LIGHTGRAY);
+//            new JMetro(STYLE).applyTheme(scene);
+            
             dialogStage.setScene(scene);
 
             // Imposta la query nel controller
@@ -926,6 +1001,10 @@ public class Main extends Application {
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(stagePrincipale);
             Scene scene = new Scene(page);
+            
+//            scene.setFill(Color.LIGHTGRAY);
+//            new JMetro(STYLE).applyTheme(scene);
+            
             dialogStage.setScene(scene);
 
             // Imposta la query nel controller

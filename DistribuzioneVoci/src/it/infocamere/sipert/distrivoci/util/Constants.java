@@ -37,6 +37,14 @@ public class Constants {
 	public static final String PREFIX_SELECT = "SELECT * FROM ";
 	public static final String PREFIX_DELETE = "DELETE FROM ";
 	
+	public static final String TABELLE = "Tabelle";
+	public static final String VOCI = "Voci";
+	public static final String SCHEMI_SUI_QUALI_DISTRIBUIRE = "Schemi sui quali distribuire";
+	public static final String ANTEPRIMA_E_DISTRIBUZIONE = "Anteprima e Distribuzione";
+	public static final String SCHEMI_DI_PARTENZA = "Schemi di Partenza";
+	public static final String ANTEPRIMA_E_RIPRISTINO = "Anteprima e Ripristino";
+	public static final String  DISTRIBUZIONI = "Distribuzioni";
+	
 	public static final int COLONNA_ZERO = 0;
 	public static final int RIGA_ZERO = 0;
 	

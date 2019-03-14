@@ -11,26 +11,58 @@ public class StoricoDistribuzione {
 	
 	private StringProperty dataOraDistribuzione;
 	
+	private StringProperty dataOraRipristino;
+	
 	private StringProperty note;
 	
 	private StringProperty schemaPartenza;
+	
+	// informazioni relative alla distribuzione in produzione: elenco delle Voci distribuite
+    
+    private ArrayList<String> elencoVoci;
+    
+	// informazioni relative alla distribuzione in produzione: elenco degli schemi
+	// sui quali è stata effettuata la distribuzione
+    
+    private ArrayList<Schema> elencoSchemi;
 	
     // informazioni relative alla distribuzione in produzione: elenco delle DeleteStatement
     
     private ArrayList<DeleteStatement> listaDeleteStatement;
 
     public StoricoDistribuzione() {
-    	this(null, null, null, null);
+    	this(null, null, null, null, null, null, null);
     }
     
-
-	public StoricoDistribuzione(String dataOraDistribuzione, String note, String schemaPartenza, ArrayList<DeleteStatement> listaDeleteStatement) {
+	public StoricoDistribuzione(String dataOraDistribuzione, String dataOraRipristino, String note, String schemaPartenza,
+			ArrayList<String> elencoVoci,   ArrayList<Schema> elencoSchemi, ArrayList<DeleteStatement> listaDeleteStatement) {
+		
 		this.dataOraDistribuzione = new SimpleStringProperty(dataOraDistribuzione);
+		this.dataOraRipristino = new SimpleStringProperty(dataOraRipristino);
         this.note = new SimpleStringProperty(note);
         this.schemaPartenza = new SimpleStringProperty(schemaPartenza);
+        this.elencoVoci = elencoVoci;
+        this.elencoSchemi = elencoSchemi;
         this.listaDeleteStatement = listaDeleteStatement;
 	}
 
+	
+	public ArrayList<String> getElencoVoci() {
+		return elencoVoci;
+	}
+
+	public void setElencoVoci(ArrayList<String> elencoVoci) {
+		this.elencoVoci = elencoVoci;
+	}
+	
+	public ArrayList<Schema> getElencoSchemi() {
+		return elencoSchemi;
+	}
+
+	public void setElencoSchemi(ArrayList<Schema> elencoSchemi) {
+		this.elencoSchemi = elencoSchemi;
+	}
+	
 	public ArrayList<DeleteStatement> getListaDeleteStatement() {
 		return listaDeleteStatement;
 	}
@@ -52,6 +84,18 @@ public class StoricoDistribuzione {
         return dataOraDistribuzione;
     }
 
+	public String getDataOraRipristino() {
+		return dataOraRipristino.get();
+	}
+
+	public void setDataOraRipristino(String dataOraRipristino) {
+		this.dataOraRipristino.set(dataOraRipristino);
+	}
+
+    public StringProperty dataOraRipristinoProperty() {
+        return dataOraRipristino;
+    }
+    
 	public String getNote() {
 		return note.get();
 	}

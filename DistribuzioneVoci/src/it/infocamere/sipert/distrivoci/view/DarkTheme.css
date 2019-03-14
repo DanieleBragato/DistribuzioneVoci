@@ -16,6 +16,27 @@
     -fx-opacity: 1;
 }
 
+.label-bright18 {
+    -fx-font-size: 18pt;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-text-fill: white;
+    -fx-opacity: 1;
+}
+
+.label-bright15 {
+    -fx-font-size: 15pt;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-text-fill: white;
+    -fx-opacity: 1;
+}
+
+.label-bright13 {
+    -fx-font-size: 13pt;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-text-fill: white;
+    -fx-opacity: 1;
+}
+
 .label-header {
     -fx-font-size: 25pt;
     -fx-font-family: "Segoe UI Light";
@@ -45,7 +66,7 @@
 }
 
 .table-view .column-header, .table-view .filler {
-    -fx-size: 25;
+    -fx-size: 20;
     -fx-border-width: 0 0 1 0;
     -fx-background-color: transparent;
     -fx-border-color: 
@@ -154,3 +175,128 @@
 .button:default:hover {
     -fx-background-color: derive(-fx-focus-color,30%);
 }
+
+/*******************************************************************************
+ *                                                                             *
+ * Tree View                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.tree-view {
+    -fx-background-color: #111;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}
+
+.tree-view .tree-cell {
+    -fx-font-size: 1.166667em; /* 14 */
+    -fx-padding: 1em;
+    -fx-background-color: #111;
+    -fx-text-fill: white;
+}
+
+/********** Label **********/
+.tree-view .tree-cell .label{
+    -fx-font-family: "Segoe UI";
+
+    -fx-padding: 0 3px 0 0;
+}
+
+.tree-view .tree-cell {
+    -fx-text-fill: white;
+}
+
+/* Hover */
+.tree-view .tree-cell:filled:hover {
+    -fx-background-color: #333;
+
+    -fx-text-fill: white;
+}
+
+.tree-view .tree-cell:hover > .tree-disclosure-node > .arrow {
+    -fx-background-color: white;
+}
+
+/* Selected */
+.tree-view .tree-cell:filled:selected {
+    -fx-background-color: #0078d7;
+    -fx-table-cell-border-color: transparent;
+
+    -fx-text-fill: white;
+}
+
+/* Selected hover */
+.tree-view .tree-cell:filled:selected:hover,
+.tree-view .tree-cell:selected:hover {
+    -fx-background-color: derive(#0078d7, 20%);
+    -fx-text-fill: white;
+}
+
+.tree-view .tree-cell:selected:hover > .tree-disclosure-node > .arrow {
+    -fx-background-color: white;
+}
+
+
+/* Pressed */
+.tree-view .tree-cell:filled:pressed,
+.tree-view .tree-cell:filled:selected:pressed,
+.tree-view .tree-cell:selected:pressed,
+.tree-view .tree-cell:pressed{
+    -fx-background-color: derive(#333, 15%);
+}
+
+/*********** Expand/Collapse icon **********/
+.tree-cell > .tree-disclosure-node {
+    -fx-padding: 0.333333em 1em 0.333333em 1em;
+}
+
+.tree-cell > .tree-disclosure-node > .arrow {
+    -fx-background-color: white;
+    -fx-padding: 0.416667em 0.333333em 0.416667em 0.333333em;
+    -fx-shape: "M8.06,20.938L7,20l8-8L7,4l1.06-0.938L16.917,12L8.06,20.938z";
+}
+
+.tree-cell > .tree-disclosure-node > .arrow {
+    -fx-background-color: white;
+}
+
+.tree-cell:hover > .tree-disclosure-node > .arrow {
+    -fx-background-color: white;
+}
+
+.tree-cell:selected > .tree-disclosure-node > .arrow {
+    -fx-background-color: white;
+}
+
+.tree-cell:expanded > .tree-disclosure-node > .arrow {
+    -fx-scale-y: -1;
+    -fx-rotate: 90;
+}
+
+.tree-cell {
+    -fx-background-color: transparent;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Tree View Dark                                                              *
+ *                                                                             *
+ ******************************************************************************/
+/*	.tree-view {	*/
+/*    -fx-background-color: #111;	*/
+
+/*    hover_color: #333;  */
+/*    pressed_color: derive(#333, 15%);	  */
+/*    accent_color dovrebbe valere  #0078d7   */   
+
+/*    cell_selected_color: accent_color;	*/
+/*    cell_selected_hover_color: derive(accent_color, 20%);		*/
+
+/*    text_color: white;	*/
+/*    text_selected_color: white;	*/
+/*    text_hover_color: text_color;		*/
+
+/*    arrow_color: white;	*/
+/*    arrow__hover_color: text_hover_color;		*/
+/*    arrow_selected_hover_color: text_selected_color;	*/
+/*	}	*/
