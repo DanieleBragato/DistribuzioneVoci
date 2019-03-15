@@ -63,7 +63,7 @@ public class Main extends Application {
             new DistributionStep("Schemi sui quali distribuire", "Parametri"),
             new DistributionStep("Anteprima e Distribuzione", "Anteprima e Distribuzione Voci"),
     		new DistributionStep("Distribuzioni", "Storico "),
-    		new DistributionStep("Anteprima e Ripristino", "Storico "));
+    		new DistributionStep("Anteprima e Ripristino", "Ripristino "));
     private TreeItem<String> rootNode;
 	
     /**
@@ -591,7 +591,7 @@ public class Main extends Application {
         try {
             // Load overview.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(Main.class.getResource("view/OverviewDistriVoci2.fxml"));
+            loader.setLocation(Main.class.getResource("view/OverviewDistriVoci.fxml"));
             AnchorPane overview = (AnchorPane) loader.load();
 
             rootNode.setExpanded(true);
@@ -619,8 +619,8 @@ public class Main extends Application {
             
             TreeView<String> treeView = new TreeView<>(rootNode);
 
-            treeView.prefWidth(370);
-            treeView.minWidth(370);
+            treeView.prefWidth(280);
+            treeView.minWidth(280);
             treeView.prefHeight(740);
             treeView.minHeight(740);
 

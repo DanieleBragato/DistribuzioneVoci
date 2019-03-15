@@ -75,6 +75,9 @@ public class OverviewDistriVociController {
 	private TableColumn<StoricoDistribuzione, String> dataTabStoricoDistribuzioneColumn;
 
 	@FXML
+	private TableColumn<StoricoDistribuzione, String> ripristinoTabStoricoDistribuzioneColumn;
+	
+	@FXML
 	private TableColumn<StoricoDistribuzione, String> noteTabStoricoDistribuzioneColumn;
 	
 	@FXML
@@ -214,8 +217,8 @@ public class OverviewDistriVociController {
 	@FXML
 	private void initialize() {
 		
-		 assert labelRipristino != null : "fx:id=\"labelRipristino\" was not injected: check your FXML file 'OverviewDistriVoci2.fxml'.";
-		 assert labelRipristinoInsert != null : "fx:id=\"labelRipristinoInsert\" was not injected: check your FXML file 'OverviewDistriVoci2.fxml'.";
+		 assert labelRipristino != null : "fx:id=\"labelRipristino\" was not injected: check your FXML file 'OverviewDistriVoci.fxml'.";
+		 assert labelRipristinoInsert != null : "fx:id=\"labelRipristinoInsert\" was not injected: check your FXML file 'OverviewDistriVoci.fxml'.";
 		
 		// Initializza la lista delle tabelle con 2 colonne - codice e descrizione
 		codiceTabColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
@@ -252,6 +255,8 @@ public class OverviewDistriVociController {
 		// Initializza la lista dello storico delle distribuzioni (2 colonne - data e note della distribuzione
 		dataTabStoricoDistribuzioneColumn.setCellValueFactory(cellData -> cellData.getValue().dataOraDistribuzioneProperty());
 		dataTabStoricoDistribuzioneColumn.setSortType(TableColumn.SortType.DESCENDING);
+		
+		ripristinoTabStoricoDistribuzioneColumn.setCellValueFactory(cellData -> cellData.getValue().dataOraRipristinoProperty());
 		
 		noteTabStoricoDistribuzioneColumn.setCellValueFactory(cellData -> cellData.getValue().noteProperty());
 		schemaPartenzaTabStoricoDistribuzioneColumn.setCellValueFactory(cellData -> cellData.getValue().schemaPartenzaProperty());
@@ -308,10 +313,10 @@ public class OverviewDistriVociController {
 		
 		storicoDistribuzioneTable.sort();
 		
-		// Listener per la selezione del dettaglio dello storico distribuzioni 
-
-		storicoDistribuzioneTable.getSelectionModel().selectedItemProperty()
-				.addListener((observable, oldValue, newValue) -> showInfoDistribuzioneDetails(newValue));
+//		// Listener per la selezione del dettaglio dello storico distribuzioni 
+//
+//		storicoDistribuzioneTable.getSelectionModel().selectedItemProperty()
+//				.addListener((observable, oldValue, newValue) -> showInfoDistribuzioneDetails(newValue));
 		
 		// Listener per la selezione del dettaglio degli statement di delete Ripristino 
 		schemiRipristinoTable.getSelectionModel().selectedItemProperty()
@@ -345,9 +350,9 @@ public class OverviewDistriVociController {
 
 	}
 	
-	private void showInfoDistribuzioneDetails(StoricoDistribuzione newValue) {
-		
-	}
+//	private void showInfoDistribuzioneDetails(StoricoDistribuzione newValue) {
+//		
+//	}
 
 	private void showDeletesRipristinoDetails(Schema newValue) {
 		
@@ -408,17 +413,25 @@ public class OverviewDistriVociController {
 		// aggiunta di una observable list alla table dello storico delle distribuzioni
 		storicoDistribuzioneTable.setItems(main.getStoricoDistribuzione());
 		
+		impostaDistribuzioneRipristinabile();		
+	}
+
+	private void impostaDistribuzioneRipristinabile() {
+		
+		distribuzioneRipristinabile = null;
+		indiceDistribuzioneRipristinabile = 0;
+		
 		if (this.main.getStoricoDistribuzione().size() > 0) {
 			for (int i = 0 ; i < this.main.getStoricoDistribuzione().size() ; i++) {
 				if (this.main.getStoricoDistribuzione().get(i).getDataOraRipristino() == null) {
 					distribuzioneRipristinabile = this.main.getStoricoDistribuzione().get(i);
 					indiceDistribuzioneRipristinabile = i;
+					break;
 				}
 			}
 		}
-		
 	}
-
+	
 	public void setFilter() {
 
 		// 1. Wrap the ObservableList in a FilteredList (initially display all data).
@@ -608,11 +621,12 @@ public class OverviewDistriVociController {
 					hideAllOutsideOf("#vboxSchemiPartenza");
 				}
 				if (Constants.ANTEPRIMA_E_RIPRISTINO.equalsIgnoreCase(newValue.getValue())) {
-					hideAllOutsideOf("#vboxRipristino");
+					hideAllOutsideOf(null);
 					handleAnteprimaRipristino();
 				}
 				if (Constants.DISTRIBUZIONI.equalsIgnoreCase(newValue.getValue())) {
-					hideAllOutsideOf("#vboxStorico");
+					hideAllOutsideOf(null);
+					handleStoricoDistribuzioni();
 				}
 
 				System.out.println(newValue.getValue());
@@ -731,6 +745,16 @@ public class OverviewDistriVociController {
 		return deleteStatementOutput;
 	}
 	
+	private void handleStoricoDistribuzioni() {
+		
+		// TODO  verificare se è presente almeno una distribuzione sullo storico  
+		if (main.getStoricoDistribuzione() != null && main.getStoricoDistribuzione().size() > 0) {
+			VboxVisibile("#vboxStorico");
+		} else {
+			showAlert(AlertType.WARNING, "Errore", "Nessuna Distribuzione Presente", "Non ci sono Distribuzioni", null); 
+		}
+	}
+	
 	private void handleAnteprimaRipristino() {
 		
 		// TODO  verificare se è presente almeno una distribuzione sullo storico  
@@ -754,7 +778,7 @@ public class OverviewDistriVociController {
 		
 		main.getSchemiRipristino().clear();
 		
-		labelRipristino.setText("Ripristino dell'ultima distribuzione (del " + distribuzioneRipristinabile.getDataOraDistribuzione() + ")");
+		labelRipristino.setText("Ripristino Distribuzione del " + distribuzioneRipristinabile.getDataOraDistribuzione() );
 		
 		for (Schema schema: distribuzioneRipristinabile.getElencoSchemi()) {
 			main.addSchemiRipristinoData(schema);
@@ -762,7 +786,9 @@ public class OverviewDistriVociController {
 		
 		schemiRipristinoTable.setItems(main.getSchemiRipristino());
 		
-		showAlert(AlertType.INFORMATION, "Information", "Anteprima di Ripristino",
+		String contenuto = "Anteprima di Ripristino Distribuzione\ndel " + distribuzioneRipristinabile.getDataOraDistribuzione() + "\n" + "NOTE: " + distribuzioneRipristinabile.getNote();
+		
+		showAlert(AlertType.INFORMATION, "Information", contenuto,
 				"Selezionando l'elenco degli Schemi e poi la lista delle Delete verranno esposte le relative Insert predisposte per il ripristino",
 				null);
 		
@@ -1237,9 +1263,6 @@ public class OverviewDistriVociController {
 				updateMessage("Done!");
 				bar.progressProperty().unbind();
 				bar.setProgress(0);
-				//main.getDeleteStatement().clear();
-				//main.setDeleteStatement(newlistaDelete);
-				//deleteStatementTable.setItems(main.getDeleteStatement());
 				disabledView(false);
 				bar.setVisible(false);
 				showAlertDistribuzioneOK(aggiornaStoricoDistribuzione());
@@ -1285,6 +1308,8 @@ public class OverviewDistriVociController {
 		dataTabStoricoDistribuzioneColumn.setSortType(TableColumn.SortType.DESCENDING);
 		storicoDistribuzioneTable.getSortOrder().add(dataTabStoricoDistribuzioneColumn);
 		storicoDistribuzioneTable.sort();
+		
+		impostaDistribuzioneRipristinabile();
 		
 		return storicoDistribuzione;
 	}
@@ -1335,6 +1360,12 @@ public class OverviewDistriVociController {
 		barRipristino.setVisible(true);
 		
 		barRipristino.setProgress(0);
+		
+		main.getDeleteStatementForRipristino().clear();
+		
+		for (DeleteStatement deleteStatement : distribuzioneRipristinabile.getListaDeleteStatement()) {
+			main.addDeleteStatementForRipristino(deleteStatement);	
+		}
 		
 		copyWorkerForExecuteRipristino = createWorkerForExecuteRipristino();
 
@@ -1415,6 +1446,8 @@ public class OverviewDistriVociController {
 				barRipristino.setProgress(0);
 				disabledView(false);
 				barRipristino.setVisible(false);
+				textAreaRipristinoInsert.setText("");
+				main.getSchemiRipristino().clear();
 				aggiornaStoricoDistribuzioneRipristinata();
 				showAlertRipristinoOK();
 				clearRipristinoInfo();
@@ -1424,6 +1457,11 @@ public class OverviewDistriVociController {
 	
 	private void aggiornaStoricoDistribuzioneRipristinata() {
 		
+		LocalDateTime ldt = LocalDateTime.now();
+		DateTimeFormatter FOMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a");
+		this.main.getStoricoDistribuzione().get(indiceDistribuzioneRipristinabile).setDataOraRipristino(FOMATTER.format(ldt));
+		
+		impostaDistribuzioneRipristinabile();
 	}
 	
 	public void showAlert(AlertType type, String title, String headerText, String text, Stage stage) {
