@@ -16,6 +16,7 @@ import it.infocamere.sipert.distrivoci.db.DBConnect;
 import it.infocamere.sipert.distrivoci.db.QueryDB;
 import it.infocamere.sipert.distrivoci.db.dto.GenericResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
+import it.infocamere.sipert.distrivoci.util.Constants;
 
 public class GenericDAO {
 	
@@ -66,6 +67,74 @@ public class GenericDAO {
 		
 	}
 	
+	public GenericResultsDTO executeMultipleUpdateForDistribution(SchemaDTO schemaDTO, ArrayList<QueryDB> listaUpdate) {
+		
+		System.out.println("classe GenericDAO metodo executeMultipleUpdate");
+		
+		GenericResultsDTO results = new GenericResultsDTO();
+		
+		results.setSchema(schemaDTO.getSchemaUserName());
+		
+		SchemaDTO schemaDB = schemaDTO;
+
+		Connection conn = null;
+		PreparedStatement preparedStatement = null;
+		
+		try {
+			
+			conn = DBConnect.getConnection(schemaDB);
+			
+			System.out.println("classe GenericDAO metodo executeMultipleUpdate - post DBConnect.getConnection...");
+			
+			for (int i = 0; i < listaUpdate.size(); i++) {
+				QueryDB updateDB = listaUpdate.get(i);
+				System.out.println("classe GenericDAO metodo executeMultipleUpdate - SQL = " + updateDB.getQuery());
+				preparedStatement = conn.prepareStatement(updateDB.getQuery());
+				if (updateDB.getQuery().toUpperCase().contains(Constants.DELETE)) {
+					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsDeleted ANTE = " + results.getRowsDeleted());
+					results.setRowsDeleted(results.getRowsDeleted() + preparedStatement.executeUpdate());
+					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsDeleted POST = " + results.getRowsDeleted());
+				}
+				if (updateDB.getQuery().toUpperCase().contains(Constants.INSERT)) {
+					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsInserted ANTE = " + results.getRowsInserted());
+					results.setRowsInserted(results.getRowsInserted() + preparedStatement.executeUpdate());
+					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsInserted POST = " + results.getRowsInserted());
+				}
+				if (updateDB.getQuery().toUpperCase().contains(Constants.UPDATE)) {
+					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsUpdated ANTE = " + results.getRowsUpdated());
+					results.setRowsUpdated(results.getRowsUpdated() + preparedStatement.executeUpdate());
+					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsUpdated POST = " + results.getRowsUpdated());
+				}
+			}
+			
+			
+		} catch (SQLSyntaxErrorException e) {
+			throw new RuntimeException(e.toString() + "Schema = " + schemaDTO.getSchemaUserName() + " - SQL = " + preparedStatement , e);
+		} catch (SQLException e) {
+			throw new RuntimeException("Errore nell'esecuzione della query: " + e.toString() , e);
+		} 
+		
+		finally {
+			if (preparedStatement != null) {
+				try {
+					preparedStatement.close();
+					System.out.println("classe GenericDAO metodo executeMultipleUpdate - post preparedStatement.close()");
+				} catch (SQLException e) {
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+					System.out.println("classe GenericDAO metodo executeMultipleUpdate - post conn.close()");
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return results;
+		
+	}
+	
 	public GenericResultsDTO execute(SchemaDTO schemaDTO, QueryDB queryDB) {
 		
 		System.out.println("classe GenericDAO metodo execute");
@@ -93,20 +162,20 @@ public class GenericDAO {
 		try {
 			conn = DBConnect.getConnection(schemaDB);
 			
-			System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post DBConnect.getConnection...");
+			System.out.println("classe GenericDAO metodo execute - post DBConnect.getConnection...");
 			
-			System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - SQL = " + queryDB.getQuery());
+			System.out.println("classe GenericDAO metodo execute - SQL = " + queryDB.getQuery());
 			
 			preparedStatement = conn.prepareStatement(queryDB.getQuery());
 			
 			if (executeUpdate) {
-				System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - ante preparedStatement.executeUpdate...");
+				System.out.println("classe GenericDAO metodo execute - ante preparedStatement.executeUpdate...");
 				results.setRowsUpdated(preparedStatement.executeUpdate());
-				System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post preparedStatement.executeUpdate...");
+				System.out.println("classe GenericDAO metodo execute - post preparedStatement.executeUpdate...");
 			} else {
-				System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - ante preparedStatement.executeQuery...");
+				System.out.println("classe GenericDAO metodo execute - ante preparedStatement.executeQuery...");
 				rs = preparedStatement.executeQuery();
-				System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post preparedStatement.executeQuery...");
+				System.out.println("classe GenericDAO metodo execute - post preparedStatement.executeQuery...");
 				if (createListOfLinkedHashMap) {
 					List<LinkedHashMap<String, Object>> listLinkedHashMap = convertResultSetToListOfLinkedHashMap(rs);
 					results.setListLinkedHashMap(listLinkedHashMap);
@@ -126,21 +195,21 @@ public class GenericDAO {
 			if (rs != null) {
 				try {
 					rs.close();
-					System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post rs.close()");
+					System.out.println("classe GenericDAO metodo execute - post rs.close()");
 				} catch (SQLException e) {
 				}
 			}
 			if (preparedStatement != null) {
 				try {
 					preparedStatement.close();
-					System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post preparedStatement.close()");
+					System.out.println("classe GenericDAO metodo execute - post preparedStatement.close()");
 				} catch (SQLException e) {
 				}
 			}
 			if (conn != null) {
 				try {
 					conn.close();
-					System.out.println("classe GenericDAO metodo execute metodo executeQueryForGenerateInserts - post conn.close()");
+					System.out.println("classe GenericDAO metodo execute - post conn.close()");
 				} catch (SQLException e) {
 				}
 			}

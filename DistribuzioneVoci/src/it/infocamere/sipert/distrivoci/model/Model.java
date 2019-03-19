@@ -1,6 +1,7 @@
 package it.infocamere.sipert.distrivoci.model;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import it.infocamere.sipert.distrivoci.db.QueryDB;
@@ -91,6 +92,18 @@ public class Model {
 		
 		GenericDAO genericDAO = new GenericDAO();
 		risultati = genericDAO.executeUpdate(schema, queryDB);
+		
+		return risultati;
+	}
+	
+	public GenericResultsDTO runMultipleUpdateForDistribution(SchemaDTO schema, ArrayList<QueryDB> listaUpdate) {
+		
+		System.out.println("classe Model metodo runMultipleUpdate");
+		
+		GenericResultsDTO risultati = null;
+		
+		GenericDAO genericDAO = new GenericDAO();
+		risultati = genericDAO.executeMultipleUpdateForDistribution(schema, listaUpdate);
 		
 		return risultati;
 	}

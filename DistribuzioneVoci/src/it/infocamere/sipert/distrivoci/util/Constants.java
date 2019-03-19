@@ -29,7 +29,7 @@ public class Constants {
 	
 	public static final String PREFIX_WHERE_CONDITION_WITH_CDTPFORM = " WHERE CDTPFORM = 'PEVOCI' AND CDVOCEXX  IN('";
 	
-	public static final String INSERT_LABEL_CONTENTS = "Insert - origine valori Schema di partenza ";
+	public static final String INSERT_LABEL_CONTENTS = "Insert - origine valori Schema ";
 	
 	public static final String ESPADE = "ESPADE";
 	public static final String ESPAFM = "ESPAFM";
@@ -44,6 +44,10 @@ public class Constants {
 	public static final String SCHEMI_DI_PARTENZA = "Schemi di Partenza";
 	public static final String ANTEPRIMA_E_RIPRISTINO = "Anteprima e Ripristino";
 	public static final String  DISTRIBUZIONI = "Distribuzioni";
+	
+	public static final String  DELETE = "DELETE";
+	public static final String  INSERT = "INSERT";
+	public static final String  UPDATE = "UPDATE";
 	
 	public static final int COLONNA_ZERO = 0;
 	public static final int RIGA_ZERO = 0;

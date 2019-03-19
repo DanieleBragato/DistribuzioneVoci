@@ -143,7 +143,7 @@
                            <columns>
                               <TableColumn fx:id="dataTabStoricoDistribuzioneColumn" prefWidth="140.0" text="Data" />
                               <TableColumn fx:id="schemaPartenzaTabStoricoDistribuzioneColumn" prefWidth="100.0" text="Origine" />
-                              <TableColumn fx:id="noteTabStoricoDistribuzioneColumn" prefWidth="250.0" text="Note" />
+                              <TableColumn fx:id="noteTabStoricoDistribuzioneColumn" prefWidth="230.0" text="Note" />
                               <TableColumn fx:id="ripristinoTabStoricoDistribuzioneColumn" prefWidth="140.0" text="Ripristino" />
                               <TableColumn fx:id="dummyTabStoricoDistribuzioneColumn" prefWidth="125.0" />
                            </columns>

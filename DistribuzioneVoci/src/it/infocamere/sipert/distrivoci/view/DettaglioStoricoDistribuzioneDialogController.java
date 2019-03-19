@@ -25,6 +25,9 @@ public class DettaglioStoricoDistribuzioneDialogController {
 
     @FXML // fx:id="labelTitle"
     private Label labelTitle; // Value injected by FXMLLoader
+    
+    @FXML // fx:id="labelTitle2"
+    private Label labelTitle2; // Value injected by FXMLLoader
 
     @FXML // fx:id="filterField"
     private TextField filterField; // Value injected by FXMLLoader
@@ -53,6 +56,12 @@ public class DettaglioStoricoDistribuzioneDialogController {
     @FXML // fx:id="textAreaPreviewInsertBckup"
     private TextArea textAreaPreviewInsertBckup; // Value injected by FXMLLoader
 
+    @FXML
+    private Label labelInsertRipristino;
+    
+    @FXML
+    private Label labelInsert;
+    
     @FXML // fx:id="bntHelp"
     private Button bntHelp; // Value injected by FXMLLoader
     
@@ -88,6 +97,11 @@ public class DettaglioStoricoDistribuzioneDialogController {
     void initialize() {
     	
         assert labelTitle != null : "fx:id=\"labelTitle\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
+        assert labelTitle2 != null : "fx:id=\"labelTitle2\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
+        
+        assert labelInsertRipristino != null : "fx:id=\"labelInsertRipristino\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
+        assert labelInsert != null : "fx:id=\"labelInsert\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
+        
         assert filterField != null : "fx:id=\"filterField\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
         assert schemiTable != null : "fx:id=\"schemiTable\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
         assert codiceSchemaColumn != null : "fx:id=\"codiceSchemaColumn\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
@@ -130,9 +144,14 @@ public class DettaglioStoricoDistribuzioneDialogController {
         
         if (storicoDistribuzione != null) {
         	this.storicoDistribuzione = storicoDistribuzione;
-			labelTitle.setText("         DISTRIBUZIONE del " + this.storicoDistribuzione.getDataOraDistribuzione()
-					+ "          SCHEMA di PARTENZA  " + this.storicoDistribuzione.getSchemaPartenza()); 
-//					+ " - "	+ this.storicoDistribuzione.getNote());
+        	String contenuto = "         DISTRIBUZIONE del " + this.storicoDistribuzione.getDataOraDistribuzione();
+			if (this.storicoDistribuzione.getDataOraRipristino() != null) {
+				contenuto += " RIPRISTINATA il " + this.storicoDistribuzione.getDataOraRipristino(); 
+			}
+			labelTitle.setText(contenuto);
+			
+			String contenuto2 = "         SCHEMA di PARTENZA " + this.storicoDistribuzione.getSchemaPartenza() + " - NOTE: " + this.storicoDistribuzione.getNote();
+			labelTitle2.setText(contenuto2);
 			
 			// aggiunta di una observable list alla table
 			if (this.storicoDistribuzione.getElencoSchemi() != null && this.storicoDistribuzione.getElencoSchemi().size() > 0) {
@@ -237,20 +256,28 @@ public class DettaglioStoricoDistribuzioneDialogController {
 				&& newValue.getInsertsListFromSchemaOrigine().size() > 0) {
 			
 			String textArea = "";
+			int countStatement = 0;
+			countStatement = newValue.getInsertsListFromSchemaOrigine().size();
 			for (String insertStatement : newValue.getInsertsListFromSchemaOrigine()) {
 				textArea = textArea + insertStatement + "\n";
 			}
+			labelInsert.setText("Insert - " + countStatement + " statement" );
 			textAreaPreviewInsert.setText(textArea);
 			
 			String textAreaBckup = "";
+			int countStatementBckup = 0;
 			for (Distribuzione distribuzione: newValue.getListaDistribuzione()) {
 				if (codiceSchemaSelezionato.equalsIgnoreCase(distribuzione.getCodiceSchema())) {
-					for (String insertStatementForBckup : distribuzione.getListaInsertGeneratePerBackup()) {
-						textAreaBckup = textAreaBckup + insertStatementForBckup + "\n";
+					if (distribuzione.getListaInsertGeneratePerBackup() != null) {
+						countStatementBckup = distribuzione.getListaInsertGeneratePerBackup().size();
+						for (String insertStatementForBckup : distribuzione.getListaInsertGeneratePerBackup()) {
+							textAreaBckup = textAreaBckup + insertStatementForBckup + "\n";
+						}
 					}
 					break;
 				}
 			}
+			labelInsertRipristino.setText("Insert di ripristino - " + countStatementBckup + " statement" );
 			textAreaPreviewInsertBckup.setText(textAreaBckup);
 		}
 	}
@@ -260,6 +287,10 @@ public class DettaglioStoricoDistribuzioneDialogController {
 		if (newValue != null && newValue.getCodice() != null) {
 			codiceSchemaSelezionato = newValue.getCodice();
 			elencoDelete.clear();
+			textAreaPreviewInsert.setText("");
+			textAreaPreviewInsertBckup.setText("");
+			labelInsert.setText("Insert");
+			labelInsertRipristino.setText("Insert di ripristino");
 			for (int i = 0; i < this.storicoDistribuzione.getListaDeleteStatement().size(); i++) {
 				DeleteStatement deleteStatement = this.storicoDistribuzione.getListaDeleteStatement().get(i);
 				for (int y = 0; y < deleteStatement.getListaDistribuzione().size(); y++) {

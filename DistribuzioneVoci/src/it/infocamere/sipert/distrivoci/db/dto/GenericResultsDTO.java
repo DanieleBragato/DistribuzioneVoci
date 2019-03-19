@@ -13,6 +13,10 @@ public class GenericResultsDTO {
 	
 	private int rowsUpdated = 0;
 	
+	private int rowsDeleted = 0;
+	
+	private int rowsInserted = 0;
+	
 
 	public List<LinkedHashMap<String, Object>> getListLinkedHashMap() {
 		return listLinkedHashMap;
@@ -49,12 +53,6 @@ public class GenericResultsDTO {
 	}
 	
 	@Override
-	public String toString() {
-		return "GenericResultsDTO [schema=" + schema + ", listLinkedHashMap=" + listLinkedHashMap + ", listString="
-				+ listString + ", rowsUpdated=" + rowsUpdated + "]";
-	}
-
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -87,4 +85,27 @@ public class GenericResultsDTO {
 		this.rowsUpdated = rowsUpdated;
 	}
 
+	public int getRowsDeleted() {
+		return rowsDeleted;
+	}
+
+	public void setRowsDeleted(int rowsDeleted) {
+		this.rowsDeleted = rowsDeleted;
+	}
+
+	public int getRowsInserted() {
+		return rowsInserted;
+	}
+
+	public void setRowsInserted(int rowsInserted) {
+		this.rowsInserted = rowsInserted;
+	}
+
+	@Override
+	public String toString() {
+		return "GenericResultsDTO [schema=" + schema + ", listLinkedHashMap=" + listLinkedHashMap + ", listString="
+				+ listString + ", rowsUpdated=" + rowsUpdated + ", rowsDeleted=" + rowsDeleted + ", rowsInserted="
+				+ rowsInserted + "]";
+	}
+	
 }

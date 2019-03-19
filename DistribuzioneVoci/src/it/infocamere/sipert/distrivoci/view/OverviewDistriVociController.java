@@ -312,12 +312,7 @@ public class OverviewDistriVociController {
 		storicoDistribuzioneTable.getSortOrder().add(dataTabStoricoDistribuzioneColumn);
 		
 		storicoDistribuzioneTable.sort();
-		
-//		// Listener per la selezione del dettaglio dello storico distribuzioni 
-//
-//		storicoDistribuzioneTable.getSelectionModel().selectedItemProperty()
-//				.addListener((observable, oldValue, newValue) -> showInfoDistribuzioneDetails(newValue));
-		
+			
 		// Listener per la selezione del dettaglio degli statement di delete Ripristino 
 		schemiRipristinoTable.getSelectionModel().selectedItemProperty()
 				.addListener((observable, oldValue, newValue) -> showDeletesRipristinoDetails(newValue));
@@ -342,23 +337,26 @@ public class OverviewDistriVociController {
 		if (newValue != null && newValue.getInsertsListFromSchemaOrigine() != null
 				&& newValue.getInsertsListFromSchemaOrigine().size() > 0) {
 			String textArea = "";
-			for (String insertStatement : newValue.getInsertsListFromSchemaOrigine()) {
-				textArea = textArea + insertStatement + "\n";
+			String contenuto = Constants.INSERT_LABEL_CONTENTS + main.getSchemaDtoOrigine().getSchemaUserName();
+			if (newValue.getInsertsListFromSchemaOrigine() != null
+					&& newValue.getInsertsListFromSchemaOrigine().size() > 0) {
+				contenuto = contenuto + " - " + newValue.getInsertsListFromSchemaOrigine().size() + " statement";
+				for (String insertStatement : newValue.getInsertsListFromSchemaOrigine()) {
+					textArea = textArea + insertStatement + "\n";
+				}				
 			}
+			labelAnteprimaInsert.setText(contenuto);
 			textAreaPreviewInsert.setText(textArea);
 		}
 
 	}
-	
-//	private void showInfoDistribuzioneDetails(StoricoDistribuzione newValue) {
-//		
-//	}
 
 	private void showDeletesRipristinoDetails(Schema newValue) {
 		
 		if (newValue != null && newValue.getCodice() != null) {
 			codiceSchemaRipristinoSelezionato = newValue.getCodice();
 			newlistaDeleteForRipristino.clear();
+			textAreaRipristinoInsert.setText("");
 			for (int i = 0; i < distribuzioneRipristinabile.getListaDeleteStatement().size(); i++) {
 				DeleteStatement deleteStatement = distribuzioneRipristinabile.getListaDeleteStatement().get(i);
 				for (int y = 0; y < deleteStatement.getListaDistribuzione().size(); y++) {
@@ -796,6 +794,73 @@ public class OverviewDistriVociController {
 			
 	}
 	
+	private ArrayList<DeleteStatement> manageDeleteStatements(ArrayList<DeleteStatement> listaDeleteStatement) {
+		
+		System.out.println("classe OverviewDistriVociController metodo manageDeleteStatements");
+
+		StoricoDistribuzione storicoDistribuzione = new StoricoDistribuzione();
+		
+		storicoDistribuzione.setListaDeleteStatement(listaDeleteStatement);
+		
+		ArrayList<DeleteStatement> listaDeleteStatementOutput = new ArrayList<DeleteStatement>();
+		
+		ObservableList<Schema> listaSchemiSuiQualiDistribuire = schemiTable.getSelectionModel().getSelectedItems();
+		
+		// DETERMINAZIONE DELL'ELENCO DEGLI SCHEMI SUI QUALI DISTRIBUIRE
+		for (int y = 0; y < listaSchemiSuiQualiDistribuire.size(); y++) {
+			
+			Schema schema = listaSchemiSuiQualiDistribuire.get(y);
+			
+			// TODO aggiungere eventualmente (se non già presente) lo schema alla lista
+			//      degli schemi sui quali si esegue la distribuzione >> per storico distribuzione
+			if (listaSchemiPerStoricoDistribuzione.size() == 0  || !listaSchemiPerStoricoDistribuzione.contains(schema)) {
+				listaSchemiPerStoricoDistribuzione.add(schema);
+			}
+		}
+		
+		// DETERMINAZIONE DELL'ELENCO DEGLI AGGIORNAMENTI DEL D.B.
+		ArrayList<QueryDB> listaUpdateDB = new ArrayList<QueryDB>();
+		
+		for (DeleteStatement deleteStatement : listaDeleteStatement) {
+			// STATEMENT DI DELETE
+			listaUpdateDB.add(new QueryDB(null, deleteStatement.getDeleteStatement(), null));
+			for (int i = 0; i < deleteStatement.getInsertsListFromSchemaOrigine().size(); i++) {
+				// STATEMENT DI INSERT
+				listaUpdateDB.add(new QueryDB(null, deleteStatement.getInsertsListFromSchemaOrigine().get(i), null));
+			}
+		}
+
+		// ESECUZIONE DEGLI STATEMENT SQL
+		for (int i = 0 ; i < listaSchemiPerStoricoDistribuzione.size(); i++) {
+			
+			SchemaDTO schemaDTO = searchSchemaDTO(listaSchemiPerStoricoDistribuzione.get(i).getCodice());
+
+			if (schemaDTO != null) {
+				
+				Distribuzione distribuzione = new Distribuzione();
+				distribuzione.setCodiceSchema(listaSchemiPerStoricoDistribuzione.get(i).getCodice());
+				distribuzione.setContatoreInsertGeneratePerBackup(Constants.ZERO);
+				distribuzione.setContatoreRigheCancellate(Constants.ZERO);
+				distribuzione.setContatoreRigheDistribuite(Constants.ZERO);
+				
+				// ESECUZIONE DELLE DELETE E DELLE INSERT
+				risultatiDTO = model.runMultipleUpdateForDistribution(schemaDTO, listaUpdateDB);
+				
+				distribuzione.setContatoreInsertGeneratePerBackup(risultatiDTO.getListString().size());
+				distribuzione.setListaInsertGeneratePerBackup(risultatiDTO.getListString());
+
+				distribuzione.setContatoreRigheCancellate(risultatiDTO.getRowsDeleted());
+				distribuzione.setContatoreRigheDistribuite(risultatiDTO.getRowsInserted());
+			}
+			
+		}
+		
+		DeleteStatement deleteStatementOutput;
+		
+		return listaDeleteStatementOutput;
+		
+	}
+	
 	private DeleteStatement manageDeleteStatement(DeleteStatement deleteStatement) {
 		
 		System.out.println("classe OverviewDistriVociController metodo manageDeleteStatement");
@@ -828,10 +893,10 @@ public class OverviewDistriVociController {
 		ObservableList<Schema> listaSchemiSuiQualiDistribuire = schemiTable.getSelectionModel().getSelectedItems();
 		ArrayList<Distribuzione> listaDistribuzione = new ArrayList<Distribuzione>(
 				listaSchemiSuiQualiDistribuire.size());
-
-		int contatoreRigheDistribuite = 0;
 		
 		for (int y = 0; y < listaSchemiSuiQualiDistribuire.size(); y++) {
+
+			int contatoreRigheDistribuite = 0;
 			
 			Schema schema = listaSchemiSuiQualiDistribuire.get(y);
 			
@@ -893,7 +958,7 @@ public class OverviewDistriVociController {
 		QueryDB deleteDB = new QueryDB();
 		deleteDB.setQuery(deleteStatement.getDeleteStatement());
 		
-		List<Distribuzione> listOfDistribuzioni = new ArrayList<Distribuzione>();
+		List<Distribuzione> listOfDistribuzioni = deleteStatement.getListaDistribuzione();
 		
 		for (Distribuzione distribuzione : listOfDistribuzioni) {
 			
