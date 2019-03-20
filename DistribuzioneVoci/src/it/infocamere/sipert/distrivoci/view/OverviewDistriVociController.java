@@ -823,10 +823,13 @@ public class OverviewDistriVociController {
 		
 		for (DeleteStatement deleteStatement : listaDeleteStatement) {
 			// STATEMENT DI DELETE
-			listaUpdateDB.add(new QueryDB(null, deleteStatement.getDeleteStatement(), null));
+			String selectStatement = Constants.PREFIX_SELECT + deleteStatement.getCodice() + deleteStatement.getWhereCondition();
+			listaUpdateDB.add(
+					new QueryDB(deleteStatement.getCodice(), deleteStatement.getDeleteStatement(), Constants.DELETE, selectStatement));
 			for (int i = 0; i < deleteStatement.getInsertsListFromSchemaOrigine().size(); i++) {
 				// STATEMENT DI INSERT
-				listaUpdateDB.add(new QueryDB(null, deleteStatement.getInsertsListFromSchemaOrigine().get(i), null));
+				listaUpdateDB.add(new QueryDB(deleteStatement.getCodice(),
+						deleteStatement.getInsertsListFromSchemaOrigine().get(i), Constants.INSERT, null));
 			}
 		}
 

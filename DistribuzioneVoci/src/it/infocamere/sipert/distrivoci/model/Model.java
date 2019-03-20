@@ -6,6 +6,7 @@ import java.util.List;
 
 import it.infocamere.sipert.distrivoci.db.QueryDB;
 import it.infocamere.sipert.distrivoci.db.dao.GenericDAO;
+import it.infocamere.sipert.distrivoci.db.dto.DistributionResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.GenericResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.exception.ErroreColonneFileXlsSchemiKo;
@@ -96,16 +97,17 @@ public class Model {
 		return risultati;
 	}
 	
-	public GenericResultsDTO runMultipleUpdateForDistribution(SchemaDTO schema, ArrayList<QueryDB> listaUpdate) {
+	public ArrayList<DistributionResultsDTO> runMultipleUpdateForDistribution(SchemaDTO schema, ArrayList<QueryDB> listaUpdate) {
 		
-		System.out.println("classe Model metodo runMultipleUpdate");
+		System.out.println("classe Model metodo runMultipleUpdateForDistribution");
 		
-		GenericResultsDTO risultati = null;
+		ArrayList<DistributionResultsDTO> listaRisultati = null;
 		
 		GenericDAO genericDAO = new GenericDAO();
-		risultati = genericDAO.executeMultipleUpdateForDistribution(schema, listaUpdate);
+
+		listaRisultati = genericDAO.executeMultipleUpdateForDistribution(schema, listaUpdate);
 		
-		return risultati;
+		return listaRisultati;
 	}
 	
 }

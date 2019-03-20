@@ -14,6 +14,7 @@ import java.util.List;
 
 import it.infocamere.sipert.distrivoci.db.DBConnect;
 import it.infocamere.sipert.distrivoci.db.QueryDB;
+import it.infocamere.sipert.distrivoci.db.dto.DistributionResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.GenericResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.util.Constants;
@@ -27,6 +28,8 @@ public class GenericDAO {
     private static boolean createListOfLinkedHashMap = true;
     private static boolean createListOfInsert = false;
     private static boolean executeUpdate = false;
+    
+    private ArrayList<DistributionResultsDTO> listaRisultatiDistribuzione = new ArrayList<DistributionResultsDTO>();
 	
 	public boolean testConnessioneOK (SchemaDTO schemDTO) {
 		
@@ -67,11 +70,13 @@ public class GenericDAO {
 		
 	}
 	
-	public GenericResultsDTO executeMultipleUpdateForDistribution(SchemaDTO schemaDTO, ArrayList<QueryDB> listaUpdate) {
+	public ArrayList<DistributionResultsDTO> executeMultipleUpdateForDistribution(SchemaDTO schemaDTO, ArrayList<QueryDB> listaUpdate) {
 		
-		System.out.println("classe GenericDAO metodo executeMultipleUpdate");
+		System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution");
 		
 		GenericResultsDTO results = new GenericResultsDTO();
+		
+		ArrayList<DistributionResultsDTO> listaRisultati = null;
 		
 		results.setSchema(schemaDTO.getSchemaUserName());
 		
@@ -79,31 +84,44 @@ public class GenericDAO {
 
 		Connection conn = null;
 		PreparedStatement preparedStatement = null;
+		ResultSet rs = null;
 		
 		try {
 			
 			conn = DBConnect.getConnection(schemaDB);
 			
-			System.out.println("classe GenericDAO metodo executeMultipleUpdate - post DBConnect.getConnection...");
+			System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - post DBConnect.getConnection...");
 			
 			for (int i = 0; i < listaUpdate.size(); i++) {
+				
 				QueryDB updateDB = listaUpdate.get(i);
-				System.out.println("classe GenericDAO metodo executeMultipleUpdate - SQL = " + updateDB.getQuery());
-				preparedStatement = conn.prepareStatement(updateDB.getQuery());
-				if (updateDB.getQuery().toUpperCase().contains(Constants.DELETE)) {
-					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsDeleted ANTE = " + results.getRowsDeleted());
-					results.setRowsDeleted(results.getRowsDeleted() + preparedStatement.executeUpdate());
-					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsDeleted POST = " + results.getRowsDeleted());
+				System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - SQL = " + updateDB.getQuery());
+				
+				if (updateDB.getOperationType().toUpperCase().contains(Constants.DELETE)) {
+					
+					// IMPOSTAZIONE ED ESECUZIONE DELLA SELECT (per le insert di backup)
+					preparedStatement = conn.prepareStatement(updateDB.getSelectStatement());
+					rs = preparedStatement.executeQuery();
+					
+					// impostare la lista delle insert di backup nel corretto oggetto appartenente alla lista di risultati da ritornare in output					
+					aggiornaListaRisultatiDistribuzione(schemaDB.getSchemaUserName(), updateDB.getTableName(),
+							Constants.SELECT, Constants.ZERO, convertResultSetToListOfString(rs));
+
+					// IMPOSTAZIONE ED ESECUZIONE DELLA DELETE con aggiornamento dei relativi risultati da ritornare in output
+					preparedStatement = conn.prepareStatement(updateDB.getQuery());
+					aggiornaListaRisultatiDistribuzione(schemaDB.getSchemaUserName(), updateDB.getTableName(),
+							Constants.DELETE, preparedStatement.executeUpdate(), null);
+					
+//					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - RowsDeleted ANTE = " + results.getRowsDeleted());
+//					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - RowsDeleted POST = " + results.getRowsDeleted());
 				}
-				if (updateDB.getQuery().toUpperCase().contains(Constants.INSERT)) {
-					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsInserted ANTE = " + results.getRowsInserted());
-					results.setRowsInserted(results.getRowsInserted() + preparedStatement.executeUpdate());
-					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsInserted POST = " + results.getRowsInserted());
-				}
-				if (updateDB.getQuery().toUpperCase().contains(Constants.UPDATE)) {
-					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsUpdated ANTE = " + results.getRowsUpdated());
-					results.setRowsUpdated(results.getRowsUpdated() + preparedStatement.executeUpdate());
-					System.out.println("classe GenericDAO metodo executeMultipleUpdate - RowsUpdated POST = " + results.getRowsUpdated());
+				if (updateDB.getOperationType().toUpperCase().contains(Constants.INSERT)) {
+					// IMPOSTAZIONE ED ESECUZIONE DELLA INSERT con aggiornamento dei relativi risultati da ritornare in output
+					preparedStatement = conn.prepareStatement(updateDB.getQuery());
+					aggiornaListaRisultatiDistribuzione(schemaDB.getSchemaUserName(), updateDB.getTableName(),
+							Constants.INSERT, preparedStatement.executeUpdate(), null);
+//					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - RowsInserted ANTE = " + results.getRowsInserted());
+//					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - RowsInserted POST = " + results.getRowsInserted());
 				}
 			}
 			
@@ -115,25 +133,75 @@ public class GenericDAO {
 		} 
 		
 		finally {
+			if (rs != null) {
+				try {
+					rs.close();
+					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - post rs.close()");
+				} catch (SQLException e) {
+				}
+			}
 			if (preparedStatement != null) {
 				try {
 					preparedStatement.close();
-					System.out.println("classe GenericDAO metodo executeMultipleUpdate - post preparedStatement.close()");
+					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - post preparedStatement.close()");
 				} catch (SQLException e) {
 				}
 			}
 			if (conn != null) {
 				try {
 					conn.close();
-					System.out.println("classe GenericDAO metodo executeMultipleUpdate - post conn.close()");
+					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - post conn.close()");
 				} catch (SQLException e) {
 				}
 			}
 		}
 		
-		return results;
+		listaRisultati = listaRisultatiDistribuzione;
+		
+		return listaRisultati;
 		
 	}
+	
+	private void aggiornaListaRisultatiDistribuzione(String schema, String tableName, String tipoOperazione, int contatoreRigheInteressate,
+			List<String> elencoInsertPerBackup) {
+		
+		boolean aggiungiAllaLista = false;
+		
+		DistributionResultsDTO distributionResultsDTO = null;
+		
+		// ricerca se già presente l'elemento corrispondente alla tabella trattata
+		
+		for (DistributionResultsDTO drDTO : listaRisultatiDistribuzione) {
+			if (drDTO.getTableName().equalsIgnoreCase(tableName)) {
+				// è già presente sulla lista
+				distributionResultsDTO = drDTO;
+				break;
+			}
+		}
+		
+		if (distributionResultsDTO == null) {
+			// NON è già presente sulla lista >> viene creato
+			distributionResultsDTO = new DistributionResultsDTO();
+			aggiungiAllaLista = true;
+		}
+		
+		distributionResultsDTO.setSchema(schema);
+		
+		if (tipoOperazione.equalsIgnoreCase(Constants.SELECT)) {
+			distributionResultsDTO.setListString(elencoInsertPerBackup);
+		}
+		if (tipoOperazione.equalsIgnoreCase(Constants.INSERT)) {
+			distributionResultsDTO.setRowsInserted(distributionResultsDTO.getRowsInserted() + contatoreRigheInteressate);
+		}
+		if (tipoOperazione.equalsIgnoreCase(Constants.DELETE)) {
+			distributionResultsDTO.setRowsDeleted(contatoreRigheInteressate);
+		}
+		if (aggiungiAllaLista) {
+			listaRisultatiDistribuzione.add(distributionResultsDTO);
+		}
+
+	}
+	
 	
 	public GenericResultsDTO execute(SchemaDTO schemaDTO, QueryDB queryDB) {
 		
@@ -155,18 +223,18 @@ public class GenericDAO {
 		
 		SchemaDTO schemaDB = schemaDTO;
 
-		Connection conn = null;
+		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		ResultSet rs = null;
 		
 		try {
-			conn = DBConnect.getConnection(schemaDB);
+			connection = DBConnect.getConnection(schemaDB);
 			
 			System.out.println("classe GenericDAO metodo execute - post DBConnect.getConnection...");
 			
 			System.out.println("classe GenericDAO metodo execute - SQL = " + queryDB.getQuery());
 			
-			preparedStatement = conn.prepareStatement(queryDB.getQuery());
+			preparedStatement = connection.prepareStatement(queryDB.getQuery());
 			
 			if (executeUpdate) {
 				System.out.println("classe GenericDAO metodo execute - ante preparedStatement.executeUpdate...");
@@ -206,9 +274,9 @@ public class GenericDAO {
 				} catch (SQLException e) {
 				}
 			}
-			if (conn != null) {
+			if (connection != null) {
 				try {
-					conn.close();
+					connection.close();
 					System.out.println("classe GenericDAO metodo execute - post conn.close()");
 				} catch (SQLException e) {
 				}

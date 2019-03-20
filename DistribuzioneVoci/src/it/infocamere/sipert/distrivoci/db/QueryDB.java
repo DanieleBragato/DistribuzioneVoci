@@ -2,26 +2,36 @@ package it.infocamere.sipert.distrivoci.db;
 
 public class QueryDB {
 	
-	private String descrizione;
+	private String tableName;
 	private String query;
-	private String autore;
+	private String operationType;
+	private String selectStatement;
 	
 	public QueryDB() {
 		super();
 	}
 	
-	public QueryDB(String descrizione, String query, String autore) {
+	/**
+	 * 
+	 * @param tableName
+	 * @param query
+	 * @param operationType
+	 * @param selectStatement
+	 */
+	
+	public QueryDB(String tableName, String query, String operationType, String selectStatement) {
 		super();
-		this.descrizione = descrizione;
+		this.tableName = tableName;
 		this.query = query;
-		this.autore = autore;
+		this.operationType = operationType;
+		this.selectStatement = selectStatement;
 	}
 	
-	public String getDescrizione() {
-		return descrizione;
+	public String getTableName() {
+		return tableName;
 	}
-	public void setDescrizione(String descrizione) {
-		this.descrizione = descrizione;
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
 	}
 	public String getQuery() {
 		return query;
@@ -29,24 +39,34 @@ public class QueryDB {
 	public void setQuery(String query) {
 		this.query = query;
 	}
-	public String getAutore() {
-		return autore;
+	public String getOperationType() {
+		return operationType;
 	}
-	public void setAutore(String autore) {
-		this.autore = autore;
+	public void setOperationType(String operationType) {
+		this.operationType = operationType;
+	}
+
+	
+	public String getSelectStatement() {
+		return selectStatement;
+	}
+
+	public void setSelectStatement(String selectStatement) {
+		this.selectStatement = selectStatement;
 	}
 
 	@Override
 	public String toString() {
-		return "QueryDB [descrizione=" + descrizione + ", query=" + query + ", autore=" + autore + "]";
+		return "QueryDB [tableName=" + tableName + ", query=" + query + ", operationType=" + operationType
+				+ ", selectStatement=" + selectStatement + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((autore == null) ? 0 : autore.hashCode());
-		result = prime * result + ((descrizione == null) ? 0 : descrizione.hashCode());
+		result = prime * result + ((operationType == null) ? 0 : operationType.hashCode());
+		result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
 		return result;
 	}
 
@@ -59,15 +79,15 @@ public class QueryDB {
 		if (getClass() != obj.getClass())
 			return false;
 		QueryDB other = (QueryDB) obj;
-		if (autore == null) {
-			if (other.autore != null)
+		if (operationType == null) {
+			if (other.operationType != null)
 				return false;
-		} else if (!autore.equals(other.autore))
+		} else if (!operationType.equals(other.operationType))
 			return false;
-		if (descrizione == null) {
-			if (other.descrizione != null)
+		if (tableName == null) {
+			if (other.tableName != null)
 				return false;
-		} else if (!descrizione.equals(other.descrizione))
+		} else if (!tableName.equals(other.tableName))
 			return false;
 		return true;
 	}

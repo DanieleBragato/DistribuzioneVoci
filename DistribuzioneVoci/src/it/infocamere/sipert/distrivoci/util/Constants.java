@@ -49,6 +49,8 @@ public class Constants {
 	public static final String  INSERT = "INSERT";
 	public static final String  UPDATE = "UPDATE";
 	
+	public static final String  SELECT = "SELECT";
+	
 	public static final int COLONNA_ZERO = 0;
 	public static final int RIGA_ZERO = 0;
 	
