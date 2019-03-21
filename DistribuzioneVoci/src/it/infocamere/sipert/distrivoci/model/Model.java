@@ -110,4 +110,17 @@ public class Model {
 		return listaRisultati;
 	}
 	
+	public ArrayList<DistributionResultsDTO> runMultipleUpdateForRipristino(SchemaDTO schema, ArrayList<QueryDB> listaUpdate) {
+		
+		System.out.println("classe Model metodo runMultipleUpdateForRipristino");
+		
+		ArrayList<DistributionResultsDTO> listaRisultati = null;
+		
+		GenericDAO genericDAO = new GenericDAO();
+
+		listaRisultati = genericDAO.executeMultipleUpdateForRipristino(schema, listaUpdate);
+		
+		return listaRisultati;
+	}
+	
 }

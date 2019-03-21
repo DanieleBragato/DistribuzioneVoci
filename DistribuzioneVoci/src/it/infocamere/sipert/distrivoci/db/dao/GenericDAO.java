@@ -98,30 +98,25 @@ public class GenericDAO {
 				System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - SQL = " + updateDB.getQuery());
 				
 				if (updateDB.getOperationType().toUpperCase().contains(Constants.DELETE)) {
-					
 					// IMPOSTAZIONE ED ESECUZIONE DELLA SELECT (per le insert di backup)
+					this.tableName = updateDB.getTableName();
 					preparedStatement = conn.prepareStatement(updateDB.getSelectStatement());
 					rs = preparedStatement.executeQuery();
-					
 					// impostare la lista delle insert di backup nel corretto oggetto appartenente alla lista di risultati da ritornare in output					
-					aggiornaListaRisultatiDistribuzione(schemaDB.getSchemaUserName(), updateDB.getTableName(),
+					aggiornaListaRisultati(schemaDB.getSchemaUserName(), updateDB.getTableName(),
 							Constants.SELECT, Constants.ZERO, convertResultSetToListOfString(rs));
-
 					// IMPOSTAZIONE ED ESECUZIONE DELLA DELETE con aggiornamento dei relativi risultati da ritornare in output
 					preparedStatement = conn.prepareStatement(updateDB.getQuery());
-					aggiornaListaRisultatiDistribuzione(schemaDB.getSchemaUserName(), updateDB.getTableName(),
+					aggiornaListaRisultati(schemaDB.getSchemaUserName(), updateDB.getTableName(),
 							Constants.DELETE, preparedStatement.executeUpdate(), null);
 					
-//					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - RowsDeleted ANTE = " + results.getRowsDeleted());
-//					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - RowsDeleted POST = " + results.getRowsDeleted());
 				}
 				if (updateDB.getOperationType().toUpperCase().contains(Constants.INSERT)) {
+					this.tableName = updateDB.getTableName();
 					// IMPOSTAZIONE ED ESECUZIONE DELLA INSERT con aggiornamento dei relativi risultati da ritornare in output
 					preparedStatement = conn.prepareStatement(updateDB.getQuery());
-					aggiornaListaRisultatiDistribuzione(schemaDB.getSchemaUserName(), updateDB.getTableName(),
+					aggiornaListaRisultati(schemaDB.getSchemaUserName(), updateDB.getTableName(),
 							Constants.INSERT, preparedStatement.executeUpdate(), null);
-//					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - RowsInserted ANTE = " + results.getRowsInserted());
-//					System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - RowsInserted POST = " + results.getRowsInserted());
 				}
 			}
 			
@@ -162,7 +157,7 @@ public class GenericDAO {
 		
 	}
 	
-	private void aggiornaListaRisultatiDistribuzione(String schema, String tableName, String tipoOperazione, int contatoreRigheInteressate,
+	private void aggiornaListaRisultati(String schema, String tableName, String tipoOperazione, int contatoreRigheInteressate,
 			List<String> elencoInsertPerBackup) {
 		
 		boolean aggiungiAllaLista = false;
@@ -182,6 +177,7 @@ public class GenericDAO {
 		if (distributionResultsDTO == null) {
 			// NON è già presente sulla lista >> viene creato
 			distributionResultsDTO = new DistributionResultsDTO();
+			distributionResultsDTO.setTableName(tableName);
 			aggiungiAllaLista = true;
 		}
 		
@@ -200,6 +196,79 @@ public class GenericDAO {
 			listaRisultatiDistribuzione.add(distributionResultsDTO);
 		}
 
+	}
+	
+	public ArrayList<DistributionResultsDTO> executeMultipleUpdateForRipristino(SchemaDTO schemaDTO, ArrayList<QueryDB> listaUpdate) {
+		
+		System.out.println("classe GenericDAO metodo executeMultipleUpdateForRipristino");
+		
+		GenericResultsDTO results = new GenericResultsDTO();
+		
+		ArrayList<DistributionResultsDTO> listaRisultati = null;
+		
+		results.setSchema(schemaDTO.getSchemaUserName());
+		
+		SchemaDTO schemaDB = schemaDTO;
+
+		Connection conn = null;
+		PreparedStatement preparedStatement = null;
+		
+		try {
+			
+			conn = DBConnect.getConnection(schemaDB);
+			
+			System.out.println("classe GenericDAO metodo executeMultipleUpdateForRipristino - post DBConnect.getConnection... SCHEMA " + schemaDB.getSchemaUserName());
+			
+			for (int i = 0; i < listaUpdate.size(); i++) {
+				
+				QueryDB updateDB = listaUpdate.get(i);
+				System.out.println("classe GenericDAO metodo executeMultipleUpdateForRipristino - SQL = " + updateDB.getQuery());
+				
+				if (updateDB.getOperationType().toUpperCase().contains(Constants.DELETE)) {
+					this.tableName = updateDB.getTableName();					
+					// IMPOSTAZIONE ED ESECUZIONE DELLA DELETE con aggiornamento dei relativi risultati da ritornare in output
+					preparedStatement = conn.prepareStatement(updateDB.getQuery());
+					aggiornaListaRisultati(schemaDB.getSchemaUserName(), updateDB.getTableName(),
+							Constants.DELETE, preparedStatement.executeUpdate(), null);
+					
+				}
+				if (updateDB.getOperationType().toUpperCase().contains(Constants.INSERT)) {
+					this.tableName = updateDB.getTableName();
+					// IMPOSTAZIONE ED ESECUZIONE DELLA INSERT con aggiornamento dei relativi risultati da ritornare in output
+					preparedStatement = conn.prepareStatement(updateDB.getQuery());
+					aggiornaListaRisultati(schemaDB.getSchemaUserName(), updateDB.getTableName(),
+							Constants.INSERT, preparedStatement.executeUpdate(), null);
+				}
+			}
+			
+			
+		} catch (SQLSyntaxErrorException e) {
+			throw new RuntimeException(e.toString() + "Schema = " + schemaDTO.getSchemaUserName() + " - SQL = " + preparedStatement , e);
+		} catch (SQLException e) {
+			throw new RuntimeException("Errore nell'esecuzione della query: " + e.toString() , e);
+		} 
+		
+		finally {
+			if (preparedStatement != null) {
+				try {
+					preparedStatement.close();
+					System.out.println("classe GenericDAO metodo executeMultipleUpdateForRipristino - post preparedStatement.close()");
+				} catch (SQLException e) {
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+					System.out.println("classe GenericDAO metodo executeMultipleUpdateForRipristino - post conn.close()");
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		listaRisultati = listaRisultatiDistribuzione;
+		
+		return listaRisultati;
+		
 	}
 	
 	

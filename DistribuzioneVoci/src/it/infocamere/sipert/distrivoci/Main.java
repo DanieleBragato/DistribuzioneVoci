@@ -955,6 +955,7 @@ public class Main extends Application {
             // Imposta la query nel controller
             DettaglioStoricoDistribuzioneDialogController controller = loader.getController();
             controller.setMain(this);
+            controller.setFilter();
             controller.setDialogStage(dialogStage);
             controller.setStoricoDistribuzione(storicoDistribuzione);
             

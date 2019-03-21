@@ -9,6 +9,8 @@ import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.StoricoDistribuzione;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -304,6 +306,42 @@ public class DettaglioStoricoDistribuzioneDialogController {
 		}
 	}
 
+	public void setFilter() {
+
+		// 1. Wrap the ObservableList in a FilteredList (initially display all data).
+		FilteredList<Schema> filteredData = new FilteredList<>(schemi, p -> true);
+
+		// 2. Set the filter Predicate whenever the filter changes.
+		filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+			filteredData.setPredicate(schema -> {
+				// If filter text is empty, display all persons.
+				if (newValue == null || newValue.isEmpty()) {
+					return true;
+				}
+
+				// Compare first name and last name of every person with filter text.
+				String lowerCaseFilter = newValue.toLowerCase();
+
+				if (schema.getCodice().toLowerCase().indexOf(lowerCaseFilter) != -1) {
+					return true; // Filter matches first name.
+				} else if (schema.getDescrizione().toLowerCase().indexOf(lowerCaseFilter) != -1) {
+					return true; // Filter matches last name.
+				}
+				return false; // Does not match.
+			});
+		});
+
+		// 3. Wrap the FilteredList in a SortedList.
+		SortedList<Schema> sortedData = new SortedList<>(filteredData);
+
+		// 4. Bind the SortedList comparator to the TableView comparator.
+		// Otherwise, sorting the TableView would have no effect.
+		sortedData.comparatorProperty().bind(schemiTable.comparatorProperty());
+
+		// 5. Add sorted (and filtered) data to the table.
+		schemiTable.setItems(sortedData);
+
+	}
 	
 	public void showAlert(AlertType type, String title, String headerText, String text, Stage stage) {
 

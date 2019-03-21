@@ -76,6 +76,9 @@ public class DeleteStatement {
 	}
 
 	public ArrayList<Distribuzione> getListaDistribuzione() {
+		if (listaDistribuzione == null) {
+			listaDistribuzione = new ArrayList<Distribuzione>();
+		}
 		return listaDistribuzione;
 	}
 
