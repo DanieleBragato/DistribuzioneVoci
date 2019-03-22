@@ -37,13 +37,15 @@ public class Constants {
 	public static final String PREFIX_SELECT = "SELECT * FROM ";
 	public static final String PREFIX_DELETE = "DELETE FROM ";
 	
+	public static final String SELECT_COUNT_ALL_OBJECTS_WHERE = "select count(*) from all_objects where object_type in ('TABLE','VIEW', 'SYNONYM') and object_name = ";
+	
 	public static final String TABELLE = "Tabelle";
 	public static final String VOCI = "Voci";
 	public static final String SCHEMI_SUI_QUALI_DISTRIBUIRE = "Schemi sui quali distribuire";
 	public static final String ANTEPRIMA_E_DISTRIBUZIONE = "Anteprima e Distribuzione";
 	public static final String SCHEMI_DI_PARTENZA = "Schemi di Partenza";
 	public static final String ANTEPRIMA_E_RIPRISTINO = "Anteprima e Ripristino";
-	public static final String  DISTRIBUZIONI = "Distribuzioni";
+	public static final String STORICO_DISTRIBUZIONI = "Distribuzioni";
 	
 	public static final String  DELETE = "DELETE";
 	public static final String  INSERT = "INSERT";
@@ -55,5 +57,13 @@ public class Constants {
 	public static final int RIGA_ZERO = 0;
 	
 	public static final int ZERO = 0;
+	
+	public static final String BOX_TABELLE = "#vboxTabelle";
+	public static final String BOX_VOCI = "#vboxVoci";
+	public static final String BOX_SCHEMI_SUI_QUALI_DISTRIBUIRE = "#vboxSchemi";
+	public static final String BOX_STORICO = "#vboxStorico";
+	public static final String BOX_SCHEMI_PARTENZA = "#vboxSchemiPartenza";
+	public static final String BOX_ANTEPRIMA_DISTRIBUZIONE = "#vboxPreView";
+	public static final String BOX_ANTEPRIMA_RIPRISTINO = "#vboxRipristino";
 	
 }

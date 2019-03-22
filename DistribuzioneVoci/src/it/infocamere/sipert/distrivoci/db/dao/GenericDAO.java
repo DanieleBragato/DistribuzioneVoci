@@ -1,5 +1,6 @@
 package it.infocamere.sipert.distrivoci.db.dao;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +19,7 @@ import it.infocamere.sipert.distrivoci.db.dto.DistributionResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.GenericResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.util.Constants;
+import it.infocamere.sipert.distrivoci.util.EsitoTestConnessioniPresenzaTabelle;
 
 public class GenericDAO {
 	
@@ -31,9 +33,9 @@ public class GenericDAO {
     
     private ArrayList<DistributionResultsDTO> listaRisultatiDistribuzione = new ArrayList<DistributionResultsDTO>();
 	
-	public boolean testConnessioneOK (SchemaDTO schemDTO) {
+	public boolean testConnessioneOK (SchemaDTO schemaDTO) {
 		
-		SchemaDTO schemaDB = schemDTO;
+		SchemaDTO schemaDB = schemaDTO;
 		
 		try {
 			Connection conn = DBConnect.getConnection(schemaDB);
@@ -44,6 +46,77 @@ public class GenericDAO {
 			e.printStackTrace();
 			throw new RuntimeException("Errore nella connessione", e);
 		}
+	}
+	
+	public EsitoTestConnessioniPresenzaTabelle testConnessionePresenzaTabelle (SchemaDTO schemaDTO, ArrayList<QueryDB> listaQueryDB) {
+		
+		EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabelle = new EsitoTestConnessioniPresenzaTabelle();
+		
+		boolean esito = false;
+		String causa = "";
+		SchemaDTO schemaDB = schemaDTO;
+
+		Connection conn = null;
+		PreparedStatement preparedStatement = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = DBConnect.getConnection(schemaDB);
+			System.out.println("classe GenericDAO metodo testConnessionePresenzaTabelle - post DBConnect.getConnection...");
+			for (int i = 0; i < listaQueryDB.size(); i++) {
+				QueryDB queryDB = listaQueryDB.get(i);
+				tableName = queryDB.getTableName();
+				preparedStatement = conn.prepareStatement(queryDB.getQuery());
+				rs = preparedStatement.executeQuery();
+				rs.next();
+				java.math.BigDecimal countBiDec = (java.math.BigDecimal) rs.getObject(1);
+				if (countBiDec.compareTo(BigDecimal.ZERO) == 0) {
+					causa = "Non trovata Tabella " + tableName + " su Schema " + schemaDB.getSchemaUserName(); 
+					break;
+				}
+				if (i == listaQueryDB.size() - 1) esito = true;
+			}
+			
+			
+		} catch (SQLSyntaxErrorException e) {
+			esito = false;
+			throw new RuntimeException(e.toString() + "Schema " + schemaDB.getSchemaUserName() + " tabella " + this.tableName + " SQL " + preparedStatement , e);
+		} catch (SQLException e) {
+			esito = false;
+			throw new RuntimeException("Errore nell'esecuzione della query: " + e.toString() , e);
+		} 
+		
+		finally {
+			if (rs != null) {
+				try {
+					rs.close();
+					System.out.println("classe GenericDAO metodo testConnessionePresenzaTabelle - post rs.close()");
+				} catch (SQLException e) {	
+					esito = false;
+				}
+			}
+			if (preparedStatement != null) {
+				try {
+					preparedStatement.close();
+					System.out.println("classe GenericDAO metodo testConnessionePresenzaTabelle - post preparedStatement.close()");
+				} catch (SQLException e) {	
+					esito = false;
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+					System.out.println("classe GenericDAO metodo testConnessionePresenzaTabelle - post conn.close()");
+				} catch (SQLException e) {	
+					esito = false;
+				}
+			}
+		}	
+		
+		esitoTestConnessioniPresenzaTabelle.setEsitoGlobale(esito);
+		if (!esito) esitoTestConnessioniPresenzaTabelle.setCausaEsitoKO(causa); 
+		
+		return esitoTestConnessioniPresenzaTabelle;
 	}
 	
 	public GenericResultsDTO executeQueryForGenerateInserts(SchemaDTO schemaDTO, QueryDB queryDB, String tableName) {
@@ -95,6 +168,7 @@ public class GenericDAO {
 			for (int i = 0; i < listaUpdate.size(); i++) {
 				
 				QueryDB updateDB = listaUpdate.get(i);
+				tableName = updateDB.getTableName();
 				System.out.println("classe GenericDAO metodo executeMultipleUpdateForDistribution - SQL = " + updateDB.getQuery());
 				
 				if (updateDB.getOperationType().toUpperCase().contains(Constants.DELETE)) {
@@ -122,7 +196,7 @@ public class GenericDAO {
 			
 			
 		} catch (SQLSyntaxErrorException e) {
-			throw new RuntimeException(e.toString() + "Schema = " + schemaDTO.getSchemaUserName() + " - SQL = " + preparedStatement , e);
+			throw new RuntimeException(e.toString() + "Schema " + schemaDTO.getSchemaUserName() + " tabella " + this.tableName + " SQL " + preparedStatement , e);
 		} catch (SQLException e) {
 			throw new RuntimeException("Errore nell'esecuzione della query: " + e.toString() , e);
 		} 
@@ -243,7 +317,7 @@ public class GenericDAO {
 			
 			
 		} catch (SQLSyntaxErrorException e) {
-			throw new RuntimeException(e.toString() + "Schema = " + schemaDTO.getSchemaUserName() + " - SQL = " + preparedStatement , e);
+			throw new RuntimeException(e.toString() + "Schema " + schemaDTO.getSchemaUserName() + " tabella " + this.tableName + " SQL " + preparedStatement , e);
 		} catch (SQLException e) {
 			throw new RuntimeException("Errore nell'esecuzione della query: " + e.toString() , e);
 		} 
@@ -323,7 +397,7 @@ public class GenericDAO {
 			}
 
 		} catch (SQLSyntaxErrorException e) {
-			throw new RuntimeException(e.toString() + "Schema = " + schemaDTO.getSchemaUserName() + " - SQL = " + queryDB.getQuery(), e);
+			throw new RuntimeException(e.toString() + "Schema " + schemaDTO.getSchemaUserName() + " tabella " + this.tableName + " SQL " + preparedStatement , e);
 		} catch (SQLException e) {
 			throw new RuntimeException("Errore nell'esecuzione della query: " + e.toString() , e);
 		} 

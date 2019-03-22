@@ -41,8 +41,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
@@ -123,34 +125,37 @@ public class Main extends Application {
     
     private Map <String, String> mapProvince = new HashMap<String, String>();
     
+//    private Image nodeImageSetup = new Image(
+//            getClass().getResourceAsStream("file:resources/images/ICO_SETUP.png"));
+    
     
 	public Main() {
 		
 		this.rootNode = new TreeItem<>("Distribuzione Voci");
 		
         // Aggiungo alcuni dati di esempio
-    	tabelleDB.add(new Tabella("tabella1", "la prima tabella"));
-    	tabelleDB.add(new Tabella("tabella2", "la seconda tabella"));
-    	
-    	voci.add(new Voce("voce1", "first voice"));
-    	voci.add(new Voce("voce2", "second voice"));
-    	
-    	schemi.add(new Schema("schema1", "first schemi"));
-    	schemi.add(new Schema("schema2", "second schemi"));
-    	schemi.add(new Schema("schema3", "terzo schemi"));
-    	schemi.add(new Schema("schema4", "quarto schemi"));
-    	schemi.add(new Schema("schema5", "quinto schemi"));
-    	schemi.add(new Schema("schema6", "sesto schemi"));
-    	schemi.add(new Schema("schema7", "Settimo schemi"));
-    	schemi.add(new Schema("schema8", "ottavo schemi"));
-    	schemi.add(new Schema("schema9", "nono schemi"));
-    	schemi.add(new Schema("schema10", "decimo schemi"));
-    	schemi.add(new Schema("schema11", "undicesimo schemi"));
-    	schemi.add(new Schema("schema12", "dodicesimo schemi"));
-    	schemi.add(new Schema("schema13", "tredicesimo schemi"));
-    	schemi.add(new Schema("schema14", "quattordicesimo schemi"));
-    	schemi.add(new Schema("schema15", "quindicesimo schemi"));
-    	schemi.add(new Schema("schema16", "sedicesimo schemi"));
+//    	tabelleDB.add(new Tabella("tabella1", "la prima tabella"));
+//    	tabelleDB.add(new Tabella("tabella2", "la seconda tabella"));
+//    	
+//    	voci.add(new Voce("voce1", "first voice"));
+//    	voci.add(new Voce("voce2", "second voice"));
+//    	
+//    	schemi.add(new Schema("schema1", "first schemi"));
+//    	schemi.add(new Schema("schema2", "second schemi"));
+//    	schemi.add(new Schema("schema3", "terzo schemi"));
+//    	schemi.add(new Schema("schema4", "quarto schemi"));
+//    	schemi.add(new Schema("schema5", "quinto schemi"));
+//    	schemi.add(new Schema("schema6", "sesto schemi"));
+//    	schemi.add(new Schema("schema7", "Settimo schemi"));
+//    	schemi.add(new Schema("schema8", "ottavo schemi"));
+//    	schemi.add(new Schema("schema9", "nono schemi"));
+//    	schemi.add(new Schema("schema10", "decimo schemi"));
+//    	schemi.add(new Schema("schema11", "undicesimo schemi"));
+//    	schemi.add(new Schema("schema12", "dodicesimo schemi"));
+//    	schemi.add(new Schema("schema13", "tredicesimo schemi"));
+//    	schemi.add(new Schema("schema14", "quattordicesimo schemi"));
+//    	schemi.add(new Schema("schema15", "quindicesimo schemi"));
+//    	schemi.add(new Schema("schema16", "sedicesimo schemi"));
     	
     	loadProvince();
     	
@@ -190,16 +195,34 @@ public class Main extends Application {
 		
         this.stagePrincipale = stagePrincipale;
         
-        this.stagePrincipale.initStyle(StageStyle.UNDECORATED);
+        this.stagePrincipale.setOnCloseRequest(evt -> {
+            // prevent window from closing
+            evt.consume();
+
+            // execute own shutdown procedure
+            shutdown(this.stagePrincipale);
+        });
+        
+        //this.stagePrincipale.initStyle(StageStyle.UNDECORATED);
         this.stagePrincipale.setTitle("Distribuzione Voci");
         
         // Set the application icon.
-        //this.stagePrincipale.getIcons().add(new Image("file:resources/images/globalquery_32.png"));
+        this.stagePrincipale.getIcons().add(new Image("file:resources/images/ICO_DISTRIB.png"));
 
         initRootLayout();
 
         showOverview();
 		
+	}
+	
+	private void shutdown(Stage mainWindow) {
+
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Usa l'opzione Exit");
+		alert.setHeaderText("Per cortesia usa l'opzione Exit");
+		alert.setContentText("Per cortesia usa l'opzione Exit all'interno del menù File");
+		alert.initOwner(mainWindow);
+		alert.showAndWait();
 	}
 	
     /**
@@ -228,6 +251,8 @@ public class Main extends Application {
 			
 			scene.setFill(Color.LIGHTGRAY);
 			//new JMetro(STYLE).applyTheme(scene);
+			
+			stagePrincipale.setTitle("Distribuzione Voci");
 			
 			stagePrincipale.setScene(scene);
 
@@ -387,8 +412,7 @@ public class Main extends Application {
 			}
 			
 			listSchemiPartenza = model.getSchemiPartenza(fileSchemiXLS);
-			//schemaDtoOrigine = model.getSchema(fileSchemiXLS, Constants.NOME_FOLDER_SETEUR7ES, Constants.SETEUR7ES);
-			//setSchemiDataBaseFilePath(fileSchemiXLS);
+
 			if (listSchemiPartenza.size() > 0) schemiPartenza.clear();
 			for (int i = 0; i < listSchemiPartenza.size(); i++) {
 				Schema schema = new Schema();
@@ -444,7 +468,6 @@ public class Main extends Application {
     }
 
     // gestione salvataggio elenco tabelle
-	
 	public File getTabelleFilePath() {
 		Preferences prefs = Preferences.userNodeForPackage(Main.class);
 		String filePath = prefs.get("filePathTabelle", null);
@@ -492,7 +515,6 @@ public class Main extends Application {
     }
 	
     // gestione salvataggio elenco voci
-    
 	public File getVociFilePath() {
 		Preferences prefs = Preferences.userNodeForPackage(Main.class);
 		String filePath = prefs.get("filePathVoci", null);
@@ -540,7 +562,6 @@ public class Main extends Application {
     }
     
     // gestione salvataggio elenco Storico Distribuzioni
-    
 	public File getStoricoDistribuzioniFilePath() {
 		Preferences prefs = Preferences.userNodeForPackage(Main.class);
 		String filePath = prefs.get("filePathStoricoDistribuzioni", null);
@@ -593,10 +614,18 @@ public class Main extends Application {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(Main.class.getResource("view/OverviewDistriVoci.fxml"));
             AnchorPane overview = (AnchorPane) loader.load();
-
+            
+            //Image img = new Image("file:resources/images/SETUP.png");
+            
             rootNode.setExpanded(true);
             for (DistributionStep step : distributionStep) {
-                TreeItem<String> stepLeaf = new TreeItem<>(step.getName());
+            	TreeItem<String> stepLeaf;
+//            	if ("Parametri".equalsIgnoreCase(step.getStep())) {
+//            		stepLeaf = new TreeItem<>(step.getName(), new ImageView(img));
+//            	} else {
+            		stepLeaf = new TreeItem<>(step.getName());	
+//            	}
+                
                 boolean found = false;
                 for (TreeItem<String> stepNode : rootNode.getChildren()) {
                 	
@@ -615,22 +644,14 @@ public class Main extends Application {
                 }
             }
             
-            
-            
             TreeView<String> treeView = new TreeView<>(rootNode);
 
             treeView.prefWidth(280);
             treeView.minWidth(280);
             treeView.prefHeight(740);
             treeView.minHeight(740);
-
-//            treeView.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
-//                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
             
             AnchorPane anchorPaneSX = (AnchorPane) overview.lookup("#anchorPaneSX");
-            
-//            anchorPaneSX.borderProperty().set(new Border(new BorderStroke(Color.WHITE, 
-//                    BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
             
             anchorPaneSX.getChildren().add(treeView);
             
@@ -841,8 +862,8 @@ public class Main extends Application {
         return deleteStatementForRipristino;
     }
     
-    public void setDeleteStatementForRipristino(ObservableList<DeleteStatement> deleteStatemenForRipristinot ) {
-		this.deleteStatementForRipristino = deleteStatementForRipristino;
+    public void setDeleteStatementForRipristino(ObservableList<DeleteStatement> deleteStatemenForRipristino) {
+		this.deleteStatementForRipristino = deleteStatemenForRipristino;
 	}
     
     public boolean addDeleteStatementForRipristino (DeleteStatement deleteStatementForRipristino) {
@@ -884,17 +905,12 @@ public class Main extends Application {
             
             dialogStage.initStyle(StageStyle.UNDECORATED);
             
-            //.setValue(Boolean.FALSE);
-            
-            //dialogStage.getIcons().add(new Image("file:resources/images/globalquery_32.png"));
+            dialogStage.getIcons().add(new Image("file:resources/images/ICO_DISTRIB.png"));
             
             dialogStage.setTitle("Edit Tabella");
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(stagePrincipale);
             Scene scene = new Scene(page);
-            
-//            scene.setFill(Color.LIGHTGRAY);
-//            new JMetro(STYLE).applyTheme(scene);
             
             dialogStage.setScene(scene);
 
@@ -903,10 +919,6 @@ public class Main extends Application {
             controller.setMain(this);
             controller.setDialogStage(dialogStage);
             controller.setTabella(tabella);
-            
-			// set the model
-//			Model model = new Model() ;
-//			controller.setModel(model);
 
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();
@@ -938,17 +950,12 @@ public class Main extends Application {
             
             dialogStage.initStyle(StageStyle.UNDECORATED);
             
-            //.setValue(Boolean.FALSE);
-            
-            //dialogStage.getIcons().add(new Image("file:resources/images/globalquery_32.png"));
+            dialogStage.getIcons().add(new Image("file:resources/images/ICO_DISTRIB.png"));
             
             dialogStage.setTitle("Dettaglio Distribuzione");
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(stagePrincipale);
             Scene scene = new Scene(page);
-            
-//            scene.setFill(Color.LIGHTGRAY);
-//            new JMetro(STYLE).applyTheme(scene);
             
             dialogStage.setScene(scene);
 
@@ -958,10 +965,6 @@ public class Main extends Application {
             controller.setFilter();
             controller.setDialogStage(dialogStage);
             controller.setStoricoDistribuzione(storicoDistribuzione);
-            
-			// set the model
-//			Model model = new Model() ;
-//			controller.setModel(model);
 
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();
@@ -993,18 +996,13 @@ public class Main extends Application {
             Stage dialogStage = new Stage();
             
             dialogStage.initStyle(StageStyle.UNDECORATED);
-            
-            //.setValue(Boolean.FALSE);
-            
-            //dialogStage.getIcons().add(new Image("file:resources/images/globalquery_32.png"));
+          
+            dialogStage.getIcons().add(new Image("file:resources/images/ICO_DISTRIB.png"));
             
             dialogStage.setTitle("Edit Voce");
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.initOwner(stagePrincipale);
             Scene scene = new Scene(page);
-            
-//            scene.setFill(Color.LIGHTGRAY);
-//            new JMetro(STYLE).applyTheme(scene);
             
             dialogStage.setScene(scene);
 
@@ -1013,10 +1011,6 @@ public class Main extends Application {
             controller.setMain(this);
             controller.setDialogStage(dialogStage);
             controller.setVoce(voce);
-            
-			// set the model
-//			Model model = new Model() ;
-//			controller.setModel(model);
 
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();

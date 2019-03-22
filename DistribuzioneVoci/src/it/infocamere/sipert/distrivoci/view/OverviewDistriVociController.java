@@ -4,11 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import it.infocamere.sipert.distrivoci.Main;
 import it.infocamere.sipert.distrivoci.db.QueryDB;
@@ -23,6 +19,7 @@ import it.infocamere.sipert.distrivoci.model.StoricoDistribuzione;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
 import it.infocamere.sipert.distrivoci.util.Constants;
+import it.infocamere.sipert.distrivoci.util.EsitoTestConnessioniPresenzaTabelle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -195,11 +192,7 @@ public class OverviewDistriVociController {
 	
 	private String nota;
 	
-	private ObservableList<DeleteStatement> newlistaDelete = FXCollections.observableArrayList();
-	
 	private ObservableList<DeleteStatement> newlistaDeleteForRipristino = FXCollections.observableArrayList();
-	
-	private ObservableList<StoricoDistribuzione> newlistaStoricoDistribuzione = FXCollections.observableArrayList();
 
 	private ArrayList<Schema> listaSchemiPerStoricoDistribuzione = new ArrayList<Schema>();
 	
@@ -385,7 +378,8 @@ public class OverviewDistriVociController {
 		if (newValue != null) {
 			// cerco la distribuzione corrispondente allo schema selezionato
 			for (Distribuzione distribuzione : newValue.getListaDistribuzione()) {
-				if (distribuzione.getCodiceSchema().equalsIgnoreCase(schemaSelezionato.get(Constants.ZERO).getCodice())) {
+				if (distribuzione.getCodiceSchema().equalsIgnoreCase(schemaSelezionato.get(Constants.ZERO).getCodice())
+						&& distribuzione.getListaInsertGeneratePerBackup() != null) {
 					for (String insertStatement : distribuzione.getListaInsertGeneratePerBackup()) {
 						textArea = textArea + insertStatement + "\n";
 					}					
@@ -443,18 +437,18 @@ public class OverviewDistriVociController {
 		// 2. Set the filter Predicate whenever the filter changes.
 		filterField.textProperty().addListener((observable, oldValue, newValue) -> {
 			filteredData.setPredicate(schema -> {
-				// If filter text is empty, display all persons.
+				// If filter text is empty, display all schemas.
 				if (newValue == null || newValue.isEmpty()) {
 					return true;
 				}
 
-				// Compare first name and last name of every person with filter text.
+				// Compare name of every schema with filter text.
 				String lowerCaseFilter = newValue.toLowerCase();
 
 				if (schema.getCodice().toLowerCase().indexOf(lowerCaseFilter) != -1) {
-					return true; // Filter matches first name.
+					return true; // Filter matches schema name.
 				} else if (schema.getDescrizione().toLowerCase().indexOf(lowerCaseFilter) != -1) {
-					return true; // Filter matches last name.
+					return true; // Filter matches schema descrizione
 				}
 				return false; // Does not match.
 			});
@@ -607,27 +601,27 @@ public class OverviewDistriVociController {
 
 		tree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue != null) {
+				if (Constants.SCHEMI_DI_PARTENZA.equalsIgnoreCase(newValue.getValue())) {
+					hideAllOutsideOf(Constants.BOX_SCHEMI_PARTENZA);
+				}
 				if (Constants.TABELLE.equalsIgnoreCase(newValue.getValue())) {
-					hideAllOutsideOf("#vboxTabelle");
+					hideAllOutsideOf(Constants.BOX_TABELLE);
 				}
 				if (Constants.VOCI.equalsIgnoreCase(newValue.getValue())) {
-					hideAllOutsideOf("#vboxVoci");
+					hideAllOutsideOf(Constants.BOX_VOCI);
 				}
 				if (Constants.SCHEMI_SUI_QUALI_DISTRIBUIRE.equalsIgnoreCase(newValue.getValue())) {
-					hideAllOutsideOf("#vboxSchemi");
+					hideAllOutsideOf(Constants.BOX_SCHEMI_SUI_QUALI_DISTRIBUIRE);
 				}
 				if (Constants.ANTEPRIMA_E_DISTRIBUZIONE.equalsIgnoreCase(newValue.getValue())) {
 					hideAllOutsideOf(null);
 					handleAnteprimaDistribuzione();
 				}
-				if (Constants.SCHEMI_DI_PARTENZA.equalsIgnoreCase(newValue.getValue())) {
-					hideAllOutsideOf("#vboxSchemiPartenza");
-				}
 				if (Constants.ANTEPRIMA_E_RIPRISTINO.equalsIgnoreCase(newValue.getValue())) {
 					hideAllOutsideOf(null);
 					handleAnteprimaRipristino();
 				}
-				if (Constants.DISTRIBUZIONI.equalsIgnoreCase(newValue.getValue())) {
+				if (Constants.STORICO_DISTRIBUZIONI.equalsIgnoreCase(newValue.getValue())) {
 					hideAllOutsideOf(null);
 					handleStoricoDistribuzioni();
 				}
@@ -639,13 +633,13 @@ public class OverviewDistriVociController {
 
 	private void hideAllOutsideOf(String paneName) {
 		
-		VboxNonVisibile("#vboxTabelle");
-		VboxNonVisibile("#vboxVoci");
-		VboxNonVisibile("#vboxSchemi");
-		VboxNonVisibile("#vboxStorico");
-		VboxNonVisibile("#vboxSchemiPartenza");
-		VboxNonVisibile("#vboxPreView");
-		VboxNonVisibile("#vboxRipristino");
+		VboxNonVisibile(Constants.BOX_TABELLE);
+		VboxNonVisibile(Constants.BOX_VOCI);
+		VboxNonVisibile(Constants.BOX_SCHEMI_SUI_QUALI_DISTRIBUIRE);
+		VboxNonVisibile(Constants.BOX_STORICO);
+		VboxNonVisibile(Constants.BOX_SCHEMI_PARTENZA);
+		VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
+		VboxNonVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO);
 		
 		if (paneName != null && paneName.length() > 0) VboxVisibile(paneName);
 		
@@ -665,18 +659,17 @@ public class OverviewDistriVociController {
 
 		if (isInputValidForAnteprimaDistribuzione()) {
 			try {
-				VboxVisibile("#vboxPreView");
+				VboxVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
 		    	bar.setVisible(true);
-				previewDistribuzione();
+				anteprimaDistribuzione();
 			} catch (Exception e) {
-				VboxNonVisibile("#vboxPreView");
-				showAlert(AlertType.ERROR, "Error", "", e.toString(), null);
+				VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
+				showAlert(AlertType.ERROR, "Error", "", e.toString(), main.getStagePrincipale());
 			}
 		} else {
-			VboxNonVisibile("#vboxPreView");
+			VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
 		}
 
-		// System.out.println("click on Exit button");
 	}
 
 	private void fillAnteprimaDistribuzione() {
@@ -691,7 +684,7 @@ public class OverviewDistriVociController {
 		for (int i = 0; i < listaTabelleSelezionate.size(); i++) {
 			String deleteString = "";
 			String whereCondition = "";
-			deleteString = "DELETE FROM ";
+			deleteString = Constants.PREFIX_DELETE;
 			Tabella tab = listaTabelleSelezionate.get(i);
 			DeleteStatement deleteStatement = new DeleteStatement();
 			deleteStatement.setCodice(tab.getCodice());
@@ -743,49 +736,50 @@ public class OverviewDistriVociController {
 			deleteStatementOutput.setCodiceSchemaOrigine(main.getSchemaDtoOrigine().getSchemaUserName());
 		} else {
 			showAlert(AlertType.ERROR, "Error", "",
-					"Non trovati dati di connessione relativi allo schema " + Constants.SETEUR7ES, null);
+					"Non trovati dati di connessione relativi allo schema " + Constants.SETEUR7ES, main.getStagePrincipale());
 		}
 		return deleteStatementOutput;
 	}
 	
 	private void handleStoricoDistribuzioni() {
 		
-		// TODO  verificare se è presente almeno una distribuzione sullo storico  
+		// verifica se è presente almeno una distribuzione sullo storico
+		
 		if (main.getStoricoDistribuzione() != null && main.getStoricoDistribuzione().size() > 0) {
-			VboxVisibile("#vboxStorico");
+			VboxVisibile(Constants.BOX_STORICO);
 		} else {
-			showAlert(AlertType.WARNING, "Errore", "Nessuna Distribuzione Presente", "Non ci sono Distribuzioni", null); 
+			showAlert(AlertType.WARNING, "Errore", "Nessuna Distribuzione Presente", "Non ci sono Distribuzioni", main.getStagePrincipale()); 
 		}
 	}
 	
 	private void handleAnteprimaRipristino() {
 		
-		// TODO  verificare se è presente almeno una distribuzione sullo storico  
+		// verifica se è presente almeno una distribuzione sullo storico  
+		
 		if (distribuzioneRipristinabile != null) {
-			try {
-				VboxVisibile("#vboxRipristino");
-				barRipristino.setVisible(false);
-				newlistaDeleteForRipristino.clear();
-				textAreaRipristinoInsert.setText("");
-				anteprimaRipristino();
-			} catch (Exception e) {
-				VboxNonVisibile("#vboxRipristino");
-				showAlert(AlertType.ERROR, "Error", "", e.toString(), null);
-			};			
+			if (isInputValidForAnteprimaRipristino()) {
+				try {
+					VboxVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO);
+					barRipristino.setVisible(false);
+					newlistaDeleteForRipristino.clear();
+					textAreaRipristinoInsert.setText("");
+					anteprimaRipristino();
+				} catch (Exception e) {
+					VboxNonVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO);
+					showAlert(AlertType.ERROR, "Error", "", e.toString(), main.getStagePrincipale());
+				};					
+			} else {
+				VboxNonVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO);
+			}
+		
 		} else {
-			showAlert(AlertType.WARNING, "Errore", "Nessuna Distribuzione Ripristinabile", "Non ci sono Distribuzioni Ripristinabili", null); 
+			showAlert(AlertType.WARNING, "Errore", "Nessuna Distribuzione Ripristinabile", "Non ci sono Distribuzioni Ripristinabili", main.getStagePrincipale()); 
 		}
 	}
 	
 	private void anteprimaRipristino() {
 		
-		main.getSchemiRipristino().clear();
-		
 		labelRipristino.setText("Ripristino Distribuzione del " + distribuzioneRipristinabile.getDataOraDistribuzione() );
-		
-		for (Schema schema: distribuzioneRipristinabile.getElencoSchemi()) {
-			main.addSchemiRipristinoData(schema);
-		}
 		
 		schemiRipristinoTable.setItems(main.getSchemiRipristino());
 		
@@ -793,7 +787,7 @@ public class OverviewDistriVociController {
 		
 		showAlert(AlertType.INFORMATION, "Information", contenuto,
 				"Selezionando l'elenco degli Schemi e poi la lista delle Delete verranno esposte le relative Insert predisposte per il ripristino",
-				null);
+				main.getStagePrincipale());
 		
 		bntRipristinoDistribuzioneVoci.setDisable(false);
 			
@@ -802,10 +796,6 @@ public class OverviewDistriVociController {
 	private void manageDeleteStatementsForDistribution(ObservableList<DeleteStatement> listaDeleteStatement) {
 		
 		System.out.println("classe OverviewDistriVociController metodo manageDeleteStatements");
-
-		StoricoDistribuzione storicoDistribuzione = new StoricoDistribuzione();
-		
-		//storicoDistribuzione.setListaDeleteStatement(listaDeleteStatement);
 		
 		ObservableList<Schema> listaSchemiSuiQualiDistribuire = schemiTable.getSelectionModel().getSelectedItems();
 		
@@ -842,7 +832,6 @@ public class OverviewDistriVociController {
 			if (schemaDTO != null && listaUpdateDB.size() > 0) {
 				// GENERAZIONE DELLE INSERT DI BACKUP ED ESECUZIONE DELLE DELETE E DELLE INSERT
 				ArrayList<DistributionResultsDTO> tempListaRisultatiPerSingoloSchema = model.runMultipleUpdateForDistribution(schemaDTO, listaUpdateDB);
-				//linkedHashMap.put(schemaDTO.getSchemaUserName(), tempListaRisultatiPerSingoloSchema);
 				aggiornaElencoDeleteStatement(tempListaRisultatiPerSingoloSchema);
 			}
 		}	
@@ -885,140 +874,9 @@ public class OverviewDistriVociController {
 					}
 				}
 			}
-			
 		}
-		
 	}
-	
-	private DeleteStatement manageDeleteStatement(DeleteStatement deleteStatement) {
 		
-		System.out.println("classe OverviewDistriVociController metodo manageDeleteStatement");
-
-		String tableName = deleteStatement.getCodice();
-		String whereCondition = deleteStatement.getWhereCondition();
-
-		String selectStatement = Constants.PREFIX_SELECT + tableName + whereCondition;
-
-		System.out.println("selectStatement = " + selectStatement);
-
-		DeleteStatement deleteStatementOutput = deleteStatement;
-		
-		deleteStatementOutput.setCodiceSchemaOrigine(main.getSchemaDtoOrigine().getSchemaUserName());
-
-		QueryDB queryDB = new QueryDB();
-		queryDB.setQuery(selectStatement);
-
-		QueryDB deleteDB = new QueryDB();
-		deleteDB.setQuery(deleteStatement.getDeleteStatement());
-
-		List<QueryDB> listOfInserts = new ArrayList<QueryDB>();
-
-		for (int i = 0; i < deleteStatement.getInsertsListFromSchemaOrigine().size(); i++) {
-			QueryDB insertDB = new QueryDB();
-			insertDB.setQuery(deleteStatement.getInsertsListFromSchemaOrigine().get(i));
-			listOfInserts.add(insertDB);
-		}
-
-		ObservableList<Schema> listaSchemiSuiQualiDistribuire = schemiTable.getSelectionModel().getSelectedItems();
-		ArrayList<Distribuzione> listaDistribuzione = new ArrayList<Distribuzione>(
-				listaSchemiSuiQualiDistribuire.size());
-		
-		for (int y = 0; y < listaSchemiSuiQualiDistribuire.size(); y++) {
-
-			int contatoreRigheDistribuite = 0;
-			
-			Schema schema = listaSchemiSuiQualiDistribuire.get(y);
-			
-			// TODO aggiungere eventualmente (se non già presente) lo schema alla lista
-			//      degli schemi sui quali si esegue la distribuzione >> per storico distribuzione
-			if (listaSchemiPerStoricoDistribuzione.size() == 0  || !listaSchemiPerStoricoDistribuzione.contains(schema)) {
-				listaSchemiPerStoricoDistribuzione.add(schema);
-			}
-
-			Distribuzione distribuzione = new Distribuzione();
-			distribuzione.setCodiceSchema(schema.getCodice());
-			distribuzione.setContatoreInsertGeneratePerBackup(Constants.ZERO);
-			distribuzione.setContatoreRigheCancellate(Constants.ZERO);
-			distribuzione.setContatoreRigheDistribuite(Constants.ZERO);
-
-			SchemaDTO schemaDTO = searchSchemaDTO(schema.getCodice());
-
-			if (schemaDTO != null) {
-				// GENERAZIONE DELLE INSERTS PER IL BACKUP 
-				risultatiDTO = model.runQueryForGenerateInserts(schemaDTO, queryDB, tableName);
-				distribuzione.setContatoreRigheCancellate(Constants.ZERO);
-				distribuzione.setContatoreRigheDistribuite(Constants.ZERO);
-				distribuzione.setContatoreInsertGeneratePerBackup(risultatiDTO.getListString().size());
-				distribuzione.setListaInsertGeneratePerBackup(risultatiDTO.getListString());
-				// ESECUZIONE DELLA DELETE 
-				risultatiDTO = model.runUpdate(schemaDTO, deleteDB);
-				distribuzione.setContatoreRigheCancellate(risultatiDTO.getRowsUpdated());
-				// ESECUZIONE DELLE INSERT
-				for (int x = 0; x < listOfInserts.size(); x++) {
-					risultatiDTO = model.runUpdate(schemaDTO, listOfInserts.get(x));
-					if (risultatiDTO.getRowsUpdated() == 1) contatoreRigheDistribuite++;
-				}
-				distribuzione.setContatoreRigheDistribuite(contatoreRigheDistribuite);
-				
-			} else {
-				showAlert(AlertType.ERROR, "Error", "",
-						"Non trovati dati di connessione relativi allo schema " + schema.getCodice(), null);
-			}
-			listaDistribuzione.add(distribuzione);
-		}
-		deleteStatementOutput.setListaDistribuzione(listaDistribuzione);
-
-		return deleteStatementOutput;
-	}
-
-	private boolean manageDeleteStatementForRipristino(DeleteStatement deleteStatement) {
-		
-		boolean esitoOK = true;
-		
-		System.out.println("classe OverviewDistriVociController metodo manageDeleteStatementForRipristino");
-		
-		String tableName = deleteStatement.getCodice();
-		String whereCondition = deleteStatement.getWhereCondition();
-
-		String selectStatement = Constants.PREFIX_SELECT + tableName + whereCondition;
-
-		System.out.println("selectStatement = " + selectStatement);
-		
-		QueryDB deleteDB = new QueryDB();
-		deleteDB.setQuery(deleteStatement.getDeleteStatement());
-		
-		List<Distribuzione> listOfDistribuzioni = deleteStatement.getListaDistribuzione();
-		
-		for (Distribuzione distribuzione : listOfDistribuzioni) {
-			
-			System.out.println("Codice Schema = " + distribuzione.getCodiceSchema());
-			
-			SchemaDTO schemaDTO = searchSchemaDTO(distribuzione.getCodiceSchema());
-			
-			if (schemaDTO != null) {
-				// ESECUZIONE DELLA DELETE (cancello le righe distribuite)
-				risultatiDTO = model.runUpdate(schemaDTO, deleteDB);
-				if (risultatiDTO.getRowsUpdated() != distribuzione.getContatoreRigheDistribuite()) {
-					// TODO msg di errore -->> sembra che il nr. delle righe cancellate non coincida con quanto atteso
-					esitoOK = false;
-				}
-				
-				for (int i = 0; i < distribuzione.getListaInsertGeneratePerBackup().size(); i++) {
-					QueryDB insertDB = new QueryDB();
-					insertDB.setQuery(distribuzione.getListaInsertGeneratePerBackup().get(i));
-					// ESECUZIONE DELLE INSERT (inserisco i valori precedenti alla distribuzione)
-					risultatiDTO = model.runUpdate(schemaDTO, insertDB);
-					if (risultatiDTO.getRowsUpdated() != 1) {
-						// TODO msg di errore -->> sembra che la insert non si è conclusa correttamente
-						esitoOK = false;
-					}
-				}
-			}
-		}
-
-		return esitoOK;
-	}
-	
 	private void manageDeleteStatementsForRipristino() {
 		
 		System.out.println("classe OverviewDistriVociController metodo manageDeleteStatementsForRipristino");
@@ -1047,11 +905,8 @@ public class OverviewDistriVociController {
 				}
 				if (listaUpdateDB.size() > 0) {
 					// ESECUZIONE DELLE DELETE E DELLE INSERT
-					ArrayList<DistributionResultsDTO> tempListaRisultatiPerSingoloSchema = model.runMultipleUpdateForRipristino(schemaDTO, listaUpdateDB);
+					model.runMultipleUpdateForRipristino(schemaDTO, listaUpdateDB);
 				}
-
-				//linkedHashMap.put(schemaDTO.getSchemaUserName(), tempListaRisultatiPerSingoloSchema);
-				//aggiornaElencoDeleteStatement(tempListaRisultatiPerSingoloSchema);
 			}
 		}	
 	}
@@ -1071,7 +926,7 @@ public class OverviewDistriVociController {
 		
 		showAlert(AlertType.INFORMATION, "Information", "Anteprima di Distribuzione",
 				"Selezionando l'elenco degli Statement di Delete verranno esposte le relative Insert predisposte per la distribuzione",
-				null);
+				main.getStagePrincipale());
 		
 		bntDistribuzioneVoci.setDisable(false);
 		
@@ -1081,7 +936,7 @@ public class OverviewDistriVociController {
 		
 		String contenuto = "";
 		
-		showAlert(AlertType.INFORMATION, "Information", "Ripristino Distribuzione concluso regolarmente", contenuto, null);
+		showAlert(AlertType.INFORMATION, "Information", "Ripristino Distribuzione concluso regolarmente", contenuto, main.getStagePrincipale());
 		
 		bntRipristinoDistribuzioneVoci.setDisable(true);
 		
@@ -1141,7 +996,7 @@ public class OverviewDistriVociController {
 		contenuto += "TOTALE RIGHE CANCELLATE :  " + contatoreTotRigheCancellate  + "\n";
 		contenuto += "TOTALE RIGHE DISTRIBUITE :  " + contatoreTotRigheDistribuite  + "\n";
 				
-		showAlert(AlertType.INFORMATION, "Information", "Distribuzione conclusa regolarmente", contenuto, null);
+		showAlert(AlertType.INFORMATION, "Information", "Distribuzione conclusa regolarmente", contenuto, main.getStagePrincipale());
 		
 		bntDistribuzioneVoci.setDisable(true);
 	}
@@ -1168,7 +1023,9 @@ public class OverviewDistriVociController {
 		}
 
 		if (errorMessage.length() == 0) {
-			return isSchemiSelezionatiOK();
+			ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
+			ObservableList<Tabella> listaTabelleSelezionate = tabelledbTable.getSelectionModel().getSelectedItems();
+			return isSchemiTabelleOK(listaSchemiSelezionati, listaTabelleSelezionate);
 			// return true;
 		} else {
 			showAlert(AlertType.ERROR, "Campi non validi",
@@ -1178,30 +1035,80 @@ public class OverviewDistriVociController {
 		}
 	}
 
-	private boolean isSchemiSelezionatiOK() {
+	private boolean isInputValidForAnteprimaRipristino() {
+		
+		main.getSchemiRipristino().clear();		
 
-		ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
+		for (Schema schema : distribuzioneRipristinabile.getElencoSchemi()) {
+			main.addSchemiRipristinoData(schema);
+		}
+		
+		ObservableList<Tabella> listaTabelleDaRipristinare = FXCollections.observableArrayList();
+		
+		for (DeleteStatement deleteStatement : distribuzioneRipristinabile.getListaDeleteStatement()) {
+			listaTabelleDaRipristinare.add(new Tabella(deleteStatement.getCodice(), null));
+		}
 
-		for (Schema s : listaSchemiSelezionati) {
+		if (main.getSchemiRipristino() != null && main.getSchemiRipristino().size() > 0) {
+			return isSchemiTabelleOK(main.getSchemiRipristino(), listaTabelleDaRipristinare);	
+		} else {
+			showAlert(AlertType.ERROR, "Error", "",
+					"Non trovati gli schemi relativi alla Distribuzione da Ripristinare ", main.getStagePrincipale());
+			return false;
+		}
+	}
+	
+	private boolean isSchemiTabelleOK(ObservableList<Schema> listaSchemi, ObservableList<Tabella> listaTabelle) {
+		
+		ArrayList<QueryDB> listaQueryDB = new ArrayList<QueryDB>();
+		
+		for (int i = 0; i < listaTabelle.size(); i++) {
+			
+			String tableName = listaTabelle.get(i).getCodice().toUpperCase();
+
+			String selectStatement = Constants.SELECT_COUNT_ALL_OBJECTS_WHERE + "'" + tableName + "'";
+
+			QueryDB queryDB = new QueryDB();
+			queryDB.setTableName(tableName);
+			queryDB.setQuery(selectStatement);
+			queryDB.setOperationType(Constants.SELECT);
+
+			listaQueryDB.add(queryDB);
+
+		}
+
+		for (Schema s : listaSchemi) {
 			SchemaDTO schemaDTO = searchSchemaDTO(s.getCodice());
 			if (schemaDTO != null) {
-				if (!model.testConnessioneDB(schemaDTO)) {
+				
+				EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabelle = model
+						.testConnessionePresenzaTabelle(schemaDTO, listaQueryDB);
+				
+				if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()
+						&& "".equalsIgnoreCase(esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO())) {
+					
 					showAlert(AlertType.ERROR, "Error", "", "Non riuscita connessione allo schema " + s.getCodice(),
-							null);
+							main.getStagePrincipale());
+					return false;
+				}
+				if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()) {
+					
+					showAlert(AlertType.ERROR, "Error", "",  esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO() ,
+							main.getStagePrincipale());
 					return false;
 				}
 			} else {
 				showAlert(AlertType.ERROR, "Error", "",
-						"Non trovati dati di connessione relativi allo schema " + s.getCodice(), null);
+						"Non trovati dati di connessione relativi allo schema " + s.getCodice(), main.getStagePrincipale());
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private void previewDistribuzione() {
+	private void anteprimaDistribuzione() {
 		
-		System.out.println("OverviewDistriVociController metodo previewDistribuzione");
+		System.out.println("OverviewDistriVociController metodo anteprimaDistribuzione");
 		
 		textAreaPreviewInsert.setText("");
 
@@ -1233,8 +1140,9 @@ public class OverviewDistriVociController {
 				copyWorkerForGenInserts.cancel(true);
 				bar.progressProperty().unbind();
 				bar.setProgress(0);
-				disabledView(true);
-				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), null);
+				disabledView(false);
+				VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
+				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
 				System.out.println("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - eccezione = " + exception.toString());
 			}
@@ -1259,8 +1167,7 @@ public class OverviewDistriVociController {
 		
 		bar.setProgress(0);
 		
-		//copyWorkerForExecuteDistribution = createWorkerForExecuteDistribution();
-		copyWorkerForExecuteDistribution = createWorkerForExecuteDistributionNEW();
+		copyWorkerForExecuteDistribution = createWorkerForExecuteDistribution();
 		
         labelInfoEsecuzione.textProperty().unbind();
         labelInfoEsecuzione.textProperty().bind(copyWorkerForExecuteDistribution.messageProperty());
@@ -1287,7 +1194,7 @@ public class OverviewDistriVociController {
 				bar.setProgress(0);
 				disabledView(false);
 				bar.setVisible(false);
-				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), null);
+				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
 				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - eccezione = " + exception.toString());
 			}
@@ -1352,9 +1259,9 @@ public class OverviewDistriVociController {
 		};
 	}
 
-	public Task createWorkerForExecuteDistributionNEW() {
+	public Task createWorkerForExecuteDistribution() {
 
-		System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistributionNEW");
+		System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution");
 		
 		return new Task() {
 			@Override
@@ -1389,54 +1296,6 @@ public class OverviewDistriVociController {
 		};
 	}
 	
-	
-	public Task createWorkerForExecuteDistribution() {
-
-		System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution");
-		
-		return new Task() {
-			@Override
-			protected Object call() throws Exception {
-
-				if (this.isCancelled()) {
-					System.out.println("Canceling...");
-				}
-				
-				listaSchemiPerStoricoDistribuzione.clear();
-				
-				ObservableList<DeleteStatement> elencoDeleteStatement = FXCollections.observableArrayList();
-				for (int i = 0; i < main.getDeleteStatement().size(); i++) {
-					DeleteStatement deleteStatement  = main.getDeleteStatement().get(i);
-					elencoDeleteStatement.add(manageDeleteStatement(deleteStatement));
-					System.out.println("SQL Statement " + deleteStatement.getDeleteStatement() + " Elaborato!");
-				}
-				newlistaDelete.clear();
-				main.getDeleteStatement().clear();
-				for (DeleteStatement ds: elencoDeleteStatement) {
-					newlistaDelete.add(ds);
-					main.addDeleteStatement(ds);
-				}
-				deleteStatementTable.setItems(main.getDeleteStatement());
-				
-				return true;
-			}
-
-			@Override
-			protected void succeeded() {
-				
-				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - succeeded");
-				super.succeeded();
-				updateMessage("Done!");
-				bar.progressProperty().unbind();
-				bar.setProgress(0);
-				disabledView(false);
-				bar.setVisible(false);
-				showAlertDistribuzioneOK(aggiornaStoricoDistribuzione());
-				clearDistributionInfo();
-			}
-		};
-	}
-	
 	public void setModel(Model model) {
 		this.model = model;
 	}
@@ -1446,7 +1305,6 @@ public class OverviewDistriVociController {
 		StoricoDistribuzione storicoDistribuzione = new StoricoDistribuzione();
 		ArrayList<DeleteStatement> listaDeleteStatement = new ArrayList<DeleteStatement>();
 		String schemaPartenza = "";
-		//for (DeleteStatement deletestatement : newlistaDelete) {
 		for (DeleteStatement deletestatement : main.getDeleteStatement()) {
 			listaDeleteStatement.add(deletestatement);
 			schemaPartenza = deletestatement.getCodiceSchemaOrigine();
@@ -1558,7 +1416,7 @@ public class OverviewDistriVociController {
 				barRipristino.setProgress(0);
 				disabledView(false);
 				barRipristino.setVisible(false);
-				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), null);
+				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
 				System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - eccezione = " + exception.toString());
 			}
@@ -1582,46 +1440,6 @@ public class OverviewDistriVociController {
 		}
 	}
 	
-	public Task createWorkerForExecuteRipristinoNEW() {
-		
-		System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristinoNEW");
-		
-		return new Task() {
-			@Override
-			protected Object call() throws Exception {
-
-				if (this.isCancelled()) {
-					System.out.println("Canceling...");
-				}
-				for (int i = 0; i < main.getDeleteStatementForRipristino().size(); i++) {
-					DeleteStatement deleteStatementForRipristino  = main.getDeleteStatementForRipristino().get(i);
-					manageDeleteStatementForRipristino(main.getDeleteStatementForRipristino().get(i));
-					System.out.println("SQL Statement " + main.getDeleteStatementForRipristino().get(i).getDeleteStatement() + " Elaborato!");
-				}
-				newlistaDeleteForRipristino.clear();
-				main.getDeleteStatementForRipristino().clear();
-				return true;
-			}
-
-			@Override
-			protected void succeeded() {
-				
-				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristino - succeeded");
-				super.succeeded();
-				updateMessage("Done!");
-				barRipristino.progressProperty().unbind();
-				barRipristino.setProgress(0);
-				disabledView(false);
-				barRipristino.setVisible(false);
-				textAreaRipristinoInsert.setText("");
-				main.getSchemiRipristino().clear();
-				aggiornaStoricoDistribuzioneRipristinata();
-				showAlertRipristinoOK();
-				clearRipristinoInfo();
-			}
-		};
-		
-	}
 	
 	public Task createWorkerForExecuteRipristino() {
 
@@ -1634,11 +1452,6 @@ public class OverviewDistriVociController {
 				if (this.isCancelled()) {
 					System.out.println("Canceling...");
 				}
-//				for (int i = 0; i < main.getDeleteStatementForRipristino().size(); i++) {
-//					DeleteStatement deleteStatementForRipristino  = main.getDeleteStatementForRipristino().get(i);
-//					manageDeleteStatementForRipristino(main.getDeleteStatementForRipristino().get(i));
-//					System.out.println("SQL Statement " + main.getDeleteStatementForRipristino().get(i).getDeleteStatement() + " Elaborato!");
-//				}
 				
 				manageDeleteStatementsForRipristino();
 				

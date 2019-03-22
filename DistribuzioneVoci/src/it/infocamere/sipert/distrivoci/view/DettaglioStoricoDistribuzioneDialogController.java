@@ -228,6 +228,7 @@ public class DettaglioStoricoDistribuzioneDialogController {
 		contenuto += "TOTALE RIGHE DISTRIBUITE :  " + contatoreTotRigheDistribuite  + "\n";
 		
 		alert.setContentText(contenuto);
+		alert.initOwner(main.getStagePrincipale());
 		alert.showAndWait();
     }
     
@@ -236,7 +237,7 @@ public class DettaglioStoricoDistribuzioneDialogController {
     private void handleHelp(ActionEvent event) {
     	
 		showAlert(AlertType.INFORMATION, "Informazione", "Seleziona uno Schema", 
-				"Per cortesia, seleziona uno Schema e successivamente gli Statement di Delete per visualizzare i dettagli della Distribuzione" , null);
+				"Per cortesia, seleziona uno Schema e successivamente gli Statement di Delete per visualizzare i dettagli della Distribuzione" , main.getStagePrincipale());
     	
     }
     

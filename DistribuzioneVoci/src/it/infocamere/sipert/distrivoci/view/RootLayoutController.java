@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Optional;
 
 import it.infocamere.sipert.distrivoci.Main;
-import it.infocamere.sipert.distrivoci.MainWithTreeView;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -16,16 +15,10 @@ public class RootLayoutController {
 	
     private Main main;
     
-    private MainWithTreeView main2;
-    
     public void setMain(Main main) {
         this.main = main;
     }
     
-    public void setMain2(MainWithTreeView main2) {
-        this.main2 = main2;
-    }
-	 
     @FXML
     private void handleExit() {
     	
@@ -228,6 +221,17 @@ public class RootLayoutController {
         if (file != null) {
         	main.loadSchemiDataBaseFromFile(file);
         }
+    }
+    
+    @FXML
+    private void handleMenuItemHELP() {
+    	
+    	Alert alert = new Alert(AlertType.INFORMATION);
+    	alert.setTitle("Distribuzione Voci");
+    	alert.setHeaderText("info");
+    	alert.setContentText("Procedere con l'impostazione dei parametri (tabelle/voci/schemi) relativi alla Distribuzione delle Voci, successivamente è possibile accedere alla fase di Anteprima ed effettiva Distribuzione. Le elaborazioni vengono storicizzate con la possibilità di Ripristinare i valori ante Distribuzione");
+
+    	alert.showAndWait();	
     }
     
 }

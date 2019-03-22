@@ -11,6 +11,7 @@ import it.infocamere.sipert.distrivoci.db.dto.GenericResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.exception.ErroreColonneFileXlsSchemiKo;
 import it.infocamere.sipert.distrivoci.exception.ErroreFileSchemiNonTrovato;
+import it.infocamere.sipert.distrivoci.util.EsitoTestConnessioniPresenzaTabelle;
 import it.infocamere.sipert.distrivoci.util.SchemiManager;
 
 public class Model {
@@ -59,6 +60,14 @@ public class Model {
 		GenericDAO genericDAO = new GenericDAO();
 		
 		return genericDAO.testConnessioneOK(schemaDB);
+		
+	}
+	
+	public EsitoTestConnessioniPresenzaTabelle testConnessionePresenzaTabelle(SchemaDTO schemaDB, ArrayList<QueryDB> listaTabelle) {
+		
+		GenericDAO genericDAO = new GenericDAO();
+		
+		return genericDAO.testConnessionePresenzaTabelle(schemaDB, listaTabelle);
 		
 	}
 	
