@@ -2,6 +2,7 @@ package it.infocamere.sipert.distrivoci.model;
 
 import java.util.ArrayList;
 
+import it.infocamere.sipert.distrivoci.util.ColumnsType;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -19,20 +20,25 @@ public class DeleteStatement {
     // elenco delle Insert SQL generate tramite lo schema di partenza/origine (da sviluppo), il codice tabella e la where condition dello statement di Delete 
     private ArrayList<String> insertsListFromSchemaOrigine;
     
+    // informazioni relative alle tabelle (interessate alla distribuzione) e relative colonne delle schema di Origine (nome e tipo colonna)
+    
+    private ColumnsType columnsType = new ColumnsType();
+    
     // informazioni relative alla distribuzione in produzione: elenco per schema di distribuzione
     
     private ArrayList<Distribuzione> listaDistribuzione;
     
 
 	public DeleteStatement() {
-		this(null, null, null, null);
+		this(null, null, null, null, null);
 	}
 
-	public DeleteStatement(String codice, String deleteStatement, String codiceSchemaOrigine,  ArrayList<String> insertsList) {
+	public DeleteStatement(String codice, String deleteStatement, String codiceSchemaOrigine,  ArrayList<String> insertsList, ColumnsType columnsType) {
 		this.codiceTabella = new SimpleStringProperty(codice);
         this.deleteStatement = new SimpleStringProperty(deleteStatement);
         this.codiceSchemaOrigine = codiceSchemaOrigine;
         this.insertsListFromSchemaOrigine = insertsList;
+        this.columnsType = columnsType;
 	}
 
 	public String getCodice() {
@@ -92,7 +98,14 @@ public class DeleteStatement {
 
 	public void setWhereCondition(String whereCondition) {
 		this.whereCondition = whereCondition;
+	}
+
+	public ColumnsType getColumnsType() {
+		return columnsType;
+	}
+
+	public void setColumnsType(ColumnsType columnsType) {
+		this.columnsType = columnsType;
 	}	
-	
-    
+   
 }

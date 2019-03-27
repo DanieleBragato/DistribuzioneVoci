@@ -29,6 +29,8 @@ public class Constants {
 	
 	public static final String PREFIX_WHERE_CONDITION_WITH_CDTPFORM = " WHERE CDTPFORM = 'PEVOCI' AND CDVOCEXX  IN('";
 	
+	public static final String PREFIX_WHERE_ROWCOUNT_EQUAL_ONE = " WHERE ROWNUM = 1";
+	
 	public static final String INSERT_LABEL_CONTENTS = "Insert - origine valori Schema ";
 	
 	public static final String ESPADE = "ESPADE";
@@ -52,6 +54,8 @@ public class Constants {
 	public static final String  UPDATE = "UPDATE";
 	
 	public static final String  SELECT = "SELECT";
+	
+	public static final String  GET_INFO_COLUMNS = "GET_INFO_COLUMNS";
 	
 	public static final int COLONNA_ZERO = 0;
 	public static final int RIGA_ZERO = 0;

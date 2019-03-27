@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 
 import it.infocamere.sipert.distrivoci.Main;
@@ -18,6 +19,7 @@ import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.StoricoDistribuzione;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
+import it.infocamere.sipert.distrivoci.util.ColumnsType;
 import it.infocamere.sipert.distrivoci.util.Constants;
 import it.infocamere.sipert.distrivoci.util.EsitoTestConnessioniPresenzaTabelle;
 import javafx.beans.value.ChangeListener;
@@ -203,6 +205,8 @@ public class OverviewDistriVociController {
 	private int indiceDistribuzioneRipristinabile;
 	
 	protected GenericResultsDTO risultatiDTO;
+	
+	private LinkedHashMap<String , ColumnsType> listTablesColumnsType;
 
 	public OverviewDistriVociController() {
 
@@ -711,6 +715,7 @@ public class OverviewDistriVociController {
 			}
 			deleteStatement.setWhereCondition(whereCondition);
 			deleteStatement.setDeleteStatement(deleteString + whereCondition);
+			deleteStatement.setColumnsType(listTablesColumnsType.get(deleteStatement.getCodice().toUpperCase()));
 			main.addDeleteStatement(manageDeleteStatementGenInserts(deleteStatement));
 		}
 		deleteStatementTable.setItems(main.getDeleteStatement());
@@ -818,11 +823,11 @@ public class OverviewDistriVociController {
 			// STATEMENT DI DELETE
 			String selectStatement = Constants.PREFIX_SELECT + deleteStatement.getCodice() + deleteStatement.getWhereCondition();
 			listaUpdateDB.add(
-					new QueryDB(deleteStatement.getCodice(), deleteStatement.getDeleteStatement(), Constants.DELETE, selectStatement));
+					new QueryDB(deleteStatement.getCodice(), deleteStatement.getDeleteStatement(), Constants.DELETE, selectStatement, null));
 			for (int i = 0; i < deleteStatement.getInsertsListFromSchemaOrigine().size(); i++) {
 				// STATEMENT DI INSERT
 				listaUpdateDB.add(new QueryDB(deleteStatement.getCodice(),
-						deleteStatement.getInsertsListFromSchemaOrigine().get(i), Constants.INSERT, null));
+						deleteStatement.getInsertsListFromSchemaOrigine().get(i), Constants.INSERT, null, null));
 			}
 		}
 		
@@ -891,14 +896,14 @@ public class OverviewDistriVociController {
 				for (DeleteStatement deleteStatement : distribuzioneRipristinabile.getListaDeleteStatement()) {
 					// STATEMENT DI DELETE
 					listaUpdateDB.add(
-							new QueryDB(deleteStatement.getCodice(), deleteStatement.getDeleteStatement(), Constants.DELETE, null));
+							new QueryDB(deleteStatement.getCodice(), deleteStatement.getDeleteStatement(), Constants.DELETE, null, null));
 					for (Distribuzione distribuzione : deleteStatement.getListaDistribuzione()) {
 						if (distribuzione.getCodiceSchema().equalsIgnoreCase(schemaDTO.getSchemaUserName())
 								&& distribuzione.getListaInsertGeneratePerBackup() != null) {
 							// STATEMENT DI INSERT per il Ripristino
 							for (String insertDiBackup : distribuzione.getListaInsertGeneratePerBackup()) {
 								listaUpdateDB.add(new QueryDB(deleteStatement.getCodice(),
-										insertDiBackup, Constants.INSERT, null));
+										insertDiBackup, Constants.INSERT, null, null));
 							}
 						}
 					}
@@ -1025,7 +1030,12 @@ public class OverviewDistriVociController {
 		if (errorMessage.length() == 0) {
 			ObservableList<Schema> listaSchemiSelezionati = schemiTable.getSelectionModel().getSelectedItems();
 			ObservableList<Tabella> listaTabelleSelezionate = tabelledbTable.getSelectionModel().getSelectedItems();
-			return isSchemiTabelleOK(listaSchemiSelezionati, listaTabelleSelezionate);
+			if (estrazioneColonneTabelleOrigine(listaTabelleSelezionate)) {
+				return isSchemiTabelleOK(listaSchemiSelezionati, listaTabelleSelezionate);	
+			} else {
+				return false;
+			}
+			
 			// return true;
 		} else {
 			showAlert(AlertType.ERROR, "Campi non validi",
@@ -1033,6 +1043,47 @@ public class OverviewDistriVociController {
 					main.getStagePrincipale());
 			return false;
 		}
+	}
+
+	private boolean estrazioneColonneTabelleOrigine(ObservableList<Tabella> listaTabelleSelezionate) {
+		
+		ArrayList<QueryDB> listaQueryDB = new ArrayList<QueryDB>();
+		
+		for (int i = 0; i < listaTabelleSelezionate.size(); i++) {
+			
+			String tableName = listaTabelleSelezionate.get(i).getCodice().toUpperCase();
+
+			String selectStatement = Constants.SELECT_COUNT_ALL_OBJECTS_WHERE + "'" + tableName + "'";
+
+			QueryDB queryDB = new QueryDB();
+			queryDB.setTableName(tableName);
+			queryDB.setQuery(selectStatement);
+			queryDB.setOperationType(Constants.GET_INFO_COLUMNS);
+
+			listaQueryDB.add(queryDB);
+
+		}
+		
+		EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabelle = model.runQueryForGetInfoColumnsOfTables(main.getSchemaDtoOrigine(), listaQueryDB);
+		
+		if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()
+				&& "".equalsIgnoreCase(esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO())) {
+			
+			showAlert(AlertType.ERROR, "Error", "", "Non riuscita connessione allo schema " + main.getSchemaDtoOrigine().getSchemaUserName(),
+					main.getStagePrincipale());
+			return false;
+		}
+		if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()) {
+			
+			showAlert(AlertType.ERROR, "Error", "",  esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO() ,
+					main.getStagePrincipale());
+			return false;
+		}
+		
+		listTablesColumnsType = esitoTestConnessioniPresenzaTabelle.getListTablesColumnsType();
+		
+		return true;
+		
 	}
 
 	private boolean isInputValidForAnteprimaRipristino() {
@@ -1045,8 +1096,10 @@ public class OverviewDistriVociController {
 		
 		ObservableList<Tabella> listaTabelleDaRipristinare = FXCollections.observableArrayList();
 		
+		listTablesColumnsType.clear();
 		for (DeleteStatement deleteStatement : distribuzioneRipristinabile.getListaDeleteStatement()) {
 			listaTabelleDaRipristinare.add(new Tabella(deleteStatement.getCodice(), null));
+			listTablesColumnsType.put(deleteStatement.getCodice().toUpperCase(), deleteStatement.getColumnsType());
 		}
 
 		if (main.getSchemiRipristino() != null && main.getSchemiRipristino().size() > 0) {
@@ -1072,6 +1125,8 @@ public class OverviewDistriVociController {
 			queryDB.setTableName(tableName);
 			queryDB.setQuery(selectStatement);
 			queryDB.setOperationType(Constants.SELECT);
+			
+			queryDB.setColumnsType(listTablesColumnsType.get(tableName));
 
 			listaQueryDB.add(queryDB);
 

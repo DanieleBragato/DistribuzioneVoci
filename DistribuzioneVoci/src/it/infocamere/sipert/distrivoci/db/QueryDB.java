@@ -1,11 +1,16 @@
 package it.infocamere.sipert.distrivoci.db;
 
+import java.util.LinkedHashMap;
+
+import it.infocamere.sipert.distrivoci.util.ColumnsType;
+
 public class QueryDB {
 	
 	private String tableName;
 	private String query;
 	private String operationType;
 	private String selectStatement;
+	private ColumnsType columnsType;
 	
 	public QueryDB() {
 		super();
@@ -17,14 +22,16 @@ public class QueryDB {
 	 * @param query
 	 * @param operationType
 	 * @param selectStatement
+	 * @param columnsType
 	 */
 	
-	public QueryDB(String tableName, String query, String operationType, String selectStatement) {
+	public QueryDB(String tableName, String query, String operationType, String selectStatement, ColumnsType columnsType) {
 		super();
 		this.tableName = tableName;
 		this.query = query;
 		this.operationType = operationType;
 		this.selectStatement = selectStatement;
+		this.columnsType = columnsType;
 	}
 	
 	public String getTableName() {
@@ -54,11 +61,21 @@ public class QueryDB {
 	public void setSelectStatement(String selectStatement) {
 		this.selectStatement = selectStatement;
 	}
+	
+
+	public ColumnsType getColumnsType() {
+		return columnsType;
+	}
+
+	public void setColumnsType(ColumnsType columnsType) {
+		this.columnsType = columnsType;
+	}
+
 
 	@Override
 	public String toString() {
 		return "QueryDB [tableName=" + tableName + ", query=" + query + ", operationType=" + operationType
-				+ ", selectStatement=" + selectStatement + "]";
+				+ ", selectStatement=" + selectStatement + ", columnsType=" + columnsType + "]";
 	}
 
 	@Override
@@ -92,6 +109,4 @@ public class QueryDB {
 		return true;
 	}
 
-	
-	
 }

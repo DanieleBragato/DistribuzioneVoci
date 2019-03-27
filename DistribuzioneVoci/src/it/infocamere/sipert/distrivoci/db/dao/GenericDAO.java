@@ -18,6 +18,7 @@ import it.infocamere.sipert.distrivoci.db.QueryDB;
 import it.infocamere.sipert.distrivoci.db.dto.DistributionResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.GenericResultsDTO;
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
+import it.infocamere.sipert.distrivoci.util.ColumnsType;
 import it.infocamere.sipert.distrivoci.util.Constants;
 import it.infocamere.sipert.distrivoci.util.EsitoTestConnessioniPresenzaTabelle;
 
@@ -74,6 +75,30 @@ public class GenericDAO {
 					causa = "Non trovata Tabella " + tableName + " su Schema " + schemaDB.getSchemaUserName(); 
 					break;
 				}
+				
+				preparedStatement = conn.prepareStatement(Constants.PREFIX_SELECT + tableName + Constants.PREFIX_WHERE_ROWCOUNT_EQUAL_ONE);
+				rs = preparedStatement.executeQuery();	
+				
+				LinkedHashMap<String, Integer> colonneTabella = new LinkedHashMap<String, Integer>();
+
+				ColumnsType columnsType = new ColumnsType();
+				
+				ResultSetMetaData rsmd = rs.getMetaData();
+				int numColumns = rsmd.getColumnCount();
+				
+		        for (int y = 0; y < numColumns; y++) {
+		        	
+		        	colonneTabella .put(rsmd.getColumnName(y + 1), rsmd.getColumnType(y + 1));	
+		        }
+		        columnsType.setColumnsType(colonneTabella);
+		        
+		        if (!columnsType.equals(queryDB.getColumnsType())) {
+		        	esito = false;
+					causa = "Tabella " + tableName + " su Schema " + schemaDB.getSchemaUserName()
+							+ " con nomi e/o tipi di colonne non corrispondenti con la medesima tabella dello schema di origine";
+					break;
+		        }
+				
 				if (i == listaQueryDB.size() - 1) esito = true;
 			}
 			
@@ -520,6 +545,96 @@ public class GenericDAO {
                                     columnValues));
         }
 		return listOfString;
+	}
+	
+	public EsitoTestConnessioniPresenzaTabelle executeQueryForGetInfoColumnsOfTables(SchemaDTO schema, ArrayList<QueryDB> listaQuery) {
+		
+		EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabelle = new EsitoTestConnessioniPresenzaTabelle();
+		
+		boolean esito = false;
+		String causa = "";
+		SchemaDTO schemaDB = schema;
+
+		Connection conn = null;
+		PreparedStatement preparedStatement = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = DBConnect.getConnection(schemaDB);
+			System.out.println("classe GenericDAO metodo executeQueryForGetInfoColumnsOfTables - post DBConnect.getConnection...");
+			for (int i = 0; i < listaQuery.size(); i++) {
+				QueryDB queryDB = listaQuery.get(i);
+				tableName = queryDB.getTableName();
+				preparedStatement = conn.prepareStatement(queryDB.getQuery());
+				rs = preparedStatement.executeQuery();
+				rs.next();
+				java.math.BigDecimal countBiDec = (java.math.BigDecimal) rs.getObject(1);
+				if (countBiDec.compareTo(BigDecimal.ZERO) == 0) {
+					causa = "Non trovata Tabella " + tableName + " su Schema " + schemaDB.getSchemaUserName(); 
+					break;
+				}
+				
+				preparedStatement = conn.prepareStatement(Constants.PREFIX_SELECT + tableName + Constants.PREFIX_WHERE_ROWCOUNT_EQUAL_ONE);
+				rs = preparedStatement.executeQuery();	
+				
+				LinkedHashMap<String, Integer> colonneTabella = new LinkedHashMap<String, Integer>();
+
+				ColumnsType columnsType = new ColumnsType();
+				
+				ResultSetMetaData rsmd = rs.getMetaData();
+				int numColumns = rsmd.getColumnCount();
+				
+		        for (int y = 0; y < numColumns; y++) {
+		        	
+		        	colonneTabella .put(rsmd.getColumnName(y + 1), rsmd.getColumnType(y + 1));	
+		        }
+		        columnsType.setColumnsType(colonneTabella);
+		        esitoTestConnessioniPresenzaTabelle.getListTablesColumnsType().put(tableName, columnsType);
+		        
+				if (i == listaQuery.size() - 1) esito = true;
+			}
+			
+			
+		} catch (SQLSyntaxErrorException e) {
+			esito = false;
+			throw new RuntimeException(e.toString() + "Schema " + schemaDB.getSchemaUserName() + " tabella " + this.tableName + " SQL " + preparedStatement , e);
+		} catch (SQLException e) {
+			esito = false;
+			throw new RuntimeException("Errore nell'esecuzione della query: " + e.toString() , e);
+		} 
+		
+		finally {
+			if (rs != null) {
+				try {
+					rs.close();
+					System.out.println("classe GenericDAO metodo executeQueryForGetInfoColumnsOfTables - post rs.close()");
+				} catch (SQLException e) {	
+					esito = false;
+				}
+			}
+			if (preparedStatement != null) {
+				try {
+					preparedStatement.close();
+					System.out.println("classe GenericDAO metodo executeQueryForGetInfoColumnsOfTables - post preparedStatement.close()");
+				} catch (SQLException e) {	
+					esito = false;
+				}
+			}
+			if (conn != null) {
+				try {
+					conn.close();
+					System.out.println("classe GenericDAO metodo executeQueryForGetInfoColumnsOfTables - post conn.close()");
+				} catch (SQLException e) {	
+					esito = false;
+				}
+			}
+		}	
+		
+		esitoTestConnessioniPresenzaTabelle.setEsitoGlobale(esito);
+		if (!esito) esitoTestConnessioniPresenzaTabelle.setCausaEsitoKO(causa); 
+		
+		return esitoTestConnessioniPresenzaTabelle;
+		
 	}
 	
 }

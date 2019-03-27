@@ -82,6 +82,17 @@ public class Model {
 		return risultati;
 	}
 	
+	public EsitoTestConnessioniPresenzaTabelle runQueryForGetInfoColumnsOfTables(SchemaDTO schema, ArrayList<QueryDB> listaQuery) {
+		
+		EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabelle = new EsitoTestConnessioniPresenzaTabelle();
+		
+		GenericDAO genericDAO = new GenericDAO();
+		esitoTestConnessioniPresenzaTabelle = genericDAO.executeQueryForGetInfoColumnsOfTables(schema, listaQuery);
+		
+		return esitoTestConnessioniPresenzaTabelle;
+		
+	}
+	
 	public GenericResultsDTO runQueryForGenerateInserts(SchemaDTO schema, QueryDB queryDB, String tableName) {
 		
 		System.out.println("classe Model metodo runQueryForGenerateInserts");
