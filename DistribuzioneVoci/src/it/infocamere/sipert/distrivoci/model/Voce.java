@@ -7,14 +7,16 @@ public class Voce {
 
     private final StringProperty codiceVoce;
     private final StringProperty descrizioneVoce;
+    private final StringProperty dataOraRipristino;
 
 	public Voce() {
-		this(null, null);
+		this(null, null, null);
 	}
 
-	public Voce(String codice, String descrizione) {
+	public Voce(String codice, String descrizione, String dataOraRipristino) {
 		this.codiceVoce = new SimpleStringProperty(codice);
         this.descrizioneVoce = new SimpleStringProperty(descrizione);
+        this.dataOraRipristino = new SimpleStringProperty(dataOraRipristino);
 	}
 
 	public String getCodice() {
@@ -41,6 +43,16 @@ public class Voce {
         return descrizioneVoce;
     }
 
-	
-	
+	public String getDataOraRipristino() {
+		return dataOraRipristino.get();
+	}
+    
+    public StringProperty dataOraRipristinoProperty() {
+        return dataOraRipristino;
+    }
+
+	public void setDataOraRipristino(String dataOraRipristino) {
+		this.dataOraRipristino.set(dataOraRipristino);
+	}
+    
 }

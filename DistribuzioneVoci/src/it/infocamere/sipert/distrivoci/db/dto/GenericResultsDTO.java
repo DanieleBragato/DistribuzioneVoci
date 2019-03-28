@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import it.infocamere.sipert.distrivoci.util.InsertStatement;
+
 public class GenericResultsDTO {
 
 	private String schema = null;
 	private List<LinkedHashMap<String, Object>> listLinkedHashMap = new ArrayList<LinkedHashMap<String,Object>>();
 	
-	private List<String> listString = new ArrayList<String>();
+	private List<InsertStatement> insertsForBackup = new ArrayList<InsertStatement>();
 	
 	private int rowsUpdated = 0;
 	
@@ -43,15 +45,17 @@ public class GenericResultsDTO {
 	public void setSchema(String schema) {
 		this.schema = schema;
 	}
-
-	public List<String> getListString() {
-		return listString;
-	}
-
-	public void setListString(List<String> listString) {
-		this.listString = listString;
-	}
 	
+
+	
+	public List<InsertStatement> getInsertsForBackup() {
+		return insertsForBackup;
+	}
+
+	public void setInsertsForBackup(List<InsertStatement> insertsForBackup) {
+		this.insertsForBackup = insertsForBackup;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -103,9 +107,9 @@ public class GenericResultsDTO {
 
 	@Override
 	public String toString() {
-		return "GenericResultsDTO [schema=" + schema + ", listLinkedHashMap=" + listLinkedHashMap + ", listString="
-				+ listString + ", rowsUpdated=" + rowsUpdated + ", rowsDeleted=" + rowsDeleted + ", rowsInserted="
-				+ rowsInserted + "]";
+		return "GenericResultsDTO [schema=" + schema + ", listLinkedHashMap=" + listLinkedHashMap
+				+ ", insertsForBackup=" + insertsForBackup + ", rowsUpdated=" + rowsUpdated + ", rowsDeleted="
+				+ rowsDeleted + ", rowsInserted=" + rowsInserted + "]";
 	}
 	
 }

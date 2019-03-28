@@ -30,6 +30,7 @@ import it.infocamere.sipert.distrivoci.model.Voce;
 import it.infocamere.sipert.distrivoci.model.VociListWrapper;
 import it.infocamere.sipert.distrivoci.util.DistributionStep;
 import it.infocamere.sipert.distrivoci.view.DettaglioStoricoDistribuzioneDialogController;
+import it.infocamere.sipert.distrivoci.view.ListaVociRipristinabiliController;
 import it.infocamere.sipert.distrivoci.view.OverviewDistriVociController;
 import it.infocamere.sipert.distrivoci.view.RootLayoutController;
 import it.infocamere.sipert.distrivoci.view.TabellaEditDialogController;
@@ -41,7 +42,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
@@ -65,7 +65,8 @@ public class Main extends Application {
             new DistributionStep("Schemi sui quali distribuire", "Parametri"),
             new DistributionStep("Anteprima e Distribuzione", "Anteprima e Distribuzione Voci"),
     		new DistributionStep("Distribuzioni", "Storico "),
-    		new DistributionStep("Anteprima e Ripristino", "Ripristino "));
+    		new DistributionStep("Anteprima e Ripristino", "Ripristino Distribuzione"),
+    		new DistributionStep("Anteprima e Ripristino Voce", "Ripristino Voce"));
     private TreeItem<String> rootNode;
 	
     /**
@@ -124,6 +125,8 @@ public class Main extends Application {
     private SchemaDTO schemaDtoOrigine;
     
     private Map <String, String> mapProvince = new HashMap<String, String>();
+    
+    private Voce voceDaRipristinare = new Voce();
     
 //    private Image nodeImageSetup = new Image(
 //            getClass().getResourceAsStream("file:resources/images/ICO_SETUP.png"));
@@ -772,7 +775,17 @@ public class Main extends Application {
     	return false;
     }
     
-    /**
+    
+    
+    public Voce getVoceDaRipristinare() {
+		return voceDaRipristinare;
+	}
+
+	public void setVoceDaRipristinare(Voce voceDaRipristinare) {
+		this.voceDaRipristinare = voceDaRipristinare;
+	}
+
+	/**
      * Ritorna i dati nel formato di observable list of Schema per Ripristino 
      * @return
      */
@@ -963,6 +976,51 @@ public class Main extends Application {
             DettaglioStoricoDistribuzioneDialogController controller = loader.getController();
             controller.setMain(this);
             controller.setFilter();
+            controller.setDialogStage(dialogStage);
+            controller.setStoricoDistribuzione(storicoDistribuzione);
+
+            // Show the dialog and wait until the user closes it
+            dialogStage.showAndWait();
+
+            return controller.isexitClicked();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    } 
+    
+	/**
+     * Apre un dialog per visualizzare lista delle Voci Ripristinabili 
+     * 
+     * @param StoricoDistribuzione
+     * @return true , se l'utente clicca su OK, altrimenti false
+     */
+    public boolean showListaVociRipristinabiliDialog(StoricoDistribuzione storicoDistribuzione) {
+        try {
+            // carico dell' fxml file e creazione del nuovo stage per il popup dialog.
+        	
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(Main.class.getResource("view/ListaVociRipristinabili.fxml"));
+            AnchorPane page = (AnchorPane) loader.load();
+
+            // Crea lo Stage di dialogo
+            Stage dialogStage = new Stage();
+            
+            dialogStage.initStyle(StageStyle.UNDECORATED);
+            
+            dialogStage.getIcons().add(new Image("file:resources/images/ICO_DISTRIB.png"));
+            
+            dialogStage.setTitle("Elenco delle Voci Ripristinabili");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(stagePrincipale);
+            Scene scene = new Scene(page);
+            
+            dialogStage.setScene(scene);
+
+            // Imposta la query nel controller
+            ListaVociRipristinabiliController controller = loader.getController();
+            controller.setMain(this);
             controller.setDialogStage(dialogStage);
             controller.setStoricoDistribuzione(storicoDistribuzione);
 

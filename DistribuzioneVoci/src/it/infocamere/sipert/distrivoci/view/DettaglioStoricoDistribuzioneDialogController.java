@@ -1,12 +1,12 @@
 package it.infocamere.sipert.distrivoci.view;
 
-import java.util.List;
-
 import it.infocamere.sipert.distrivoci.Main;
 import it.infocamere.sipert.distrivoci.model.DeleteStatement;
 import it.infocamere.sipert.distrivoci.model.Distribuzione;
 import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.StoricoDistribuzione;
+import it.infocamere.sipert.distrivoci.model.Voce;
+import it.infocamere.sipert.distrivoci.util.InsertStatement;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -181,7 +181,7 @@ public class DettaglioStoricoDistribuzioneDialogController {
 		
 		//ciclo per elencare le Voci distribuite
 		for (int i = 0; i < this.storicoDistribuzione.getElencoVoci().size(); i++) {
-			String voce = this.storicoDistribuzione.getElencoVoci().get(i);
+			Voce voce = this.storicoDistribuzione.getElencoVoci().get(i);
 			if (i == 0) {
 				if (this.storicoDistribuzione.getElencoVoci().size() == 1) {
 					contenuto += "VOCE: ";
@@ -190,7 +190,7 @@ public class DettaglioStoricoDistribuzioneDialogController {
 				}
 			}
 
-			contenuto += voce;
+			contenuto += voce.getCodice();
 			if (i == this.storicoDistribuzione.getElencoVoci().size() - 1) {
 				contenuto += "\n";
 			} else {
@@ -261,8 +261,8 @@ public class DettaglioStoricoDistribuzioneDialogController {
 			String textArea = "";
 			int countStatement = 0;
 			countStatement = newValue.getInsertsListFromSchemaOrigine().size();
-			for (String insertStatement : newValue.getInsertsListFromSchemaOrigine()) {
-				textArea = textArea + insertStatement + "\n";
+			for (InsertStatement insertStatement : newValue.getInsertsListFromSchemaOrigine()) {
+				textArea = textArea + insertStatement.getInsertStatement() + "\n";
 			}
 			labelInsert.setText("Insert - " + countStatement + " statement" );
 			textAreaPreviewInsert.setText(textArea);
@@ -273,8 +273,8 @@ public class DettaglioStoricoDistribuzioneDialogController {
 				if (codiceSchemaSelezionato.equalsIgnoreCase(distribuzione.getCodiceSchema())) {
 					if (distribuzione.getListaInsertGeneratePerBackup() != null) {
 						countStatementBckup = distribuzione.getListaInsertGeneratePerBackup().size();
-						for (String insertStatementForBckup : distribuzione.getListaInsertGeneratePerBackup()) {
-							textAreaBckup = textAreaBckup + insertStatementForBckup + "\n";
+						for (InsertStatement insertStatementForBckup : distribuzione.getListaInsertGeneratePerBackup()) {
+							textAreaBckup = textAreaBckup + insertStatementForBckup.getInsertStatement() + "\n";
 						}
 					}
 					break;

@@ -21,9 +21,12 @@ public class Constants {
 	public static final String PRODUZIONE = "PRODUZIONE";
 	public static final String SVILUPPO = "SVILUPPO";
 	
+	public static final String PARZIALE = "PARZIALE";
+	
 	public static final String SCHEMA = "Schema";
 	public static final String SETEUR7ES = "SETEUR7ES";
 	public static final String NOME_FOLDER_SETEUR7ES = "Connessione_SETEUR7ES";
+	public static final String CDVOCEXX = "CDVOCEXX";
 	
 	public static final String PREFIX_WHERE_CONDITION = " WHERE CDVOCEXX  IN('";
 	
@@ -47,6 +50,7 @@ public class Constants {
 	public static final String ANTEPRIMA_E_DISTRIBUZIONE = "Anteprima e Distribuzione";
 	public static final String SCHEMI_DI_PARTENZA = "Schemi di Partenza";
 	public static final String ANTEPRIMA_E_RIPRISTINO = "Anteprima e Ripristino";
+	public static final String ANTEPRIMA_E_RIPRISTINO_VOCE = "Anteprima e Ripristino Voce";
 	public static final String STORICO_DISTRIBUZIONI = "Distribuzioni";
 	
 	public static final String  DELETE = "DELETE";
@@ -69,5 +73,6 @@ public class Constants {
 	public static final String BOX_SCHEMI_PARTENZA = "#vboxSchemiPartenza";
 	public static final String BOX_ANTEPRIMA_DISTRIBUZIONE = "#vboxPreView";
 	public static final String BOX_ANTEPRIMA_RIPRISTINO = "#vboxRipristino";
+	public static final String BOX_ANTEPRIMA_RIPRISTINO_VOCE = "#vboxRipristinoVoce";
 	
 }

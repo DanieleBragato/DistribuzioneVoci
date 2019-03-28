@@ -21,6 +21,7 @@ import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.util.ColumnsType;
 import it.infocamere.sipert.distrivoci.util.Constants;
 import it.infocamere.sipert.distrivoci.util.EsitoTestConnessioniPresenzaTabelle;
+import it.infocamere.sipert.distrivoci.util.InsertStatement;
 
 public class GenericDAO {
 	
@@ -257,7 +258,7 @@ public class GenericDAO {
 	}
 	
 	private void aggiornaListaRisultati(String schema, String tableName, String tipoOperazione, int contatoreRigheInteressate,
-			List<String> elencoInsertPerBackup) {
+			List<InsertStatement> elencoInsertPerBackup) {
 		
 		boolean aggiungiAllaLista = false;
 		
@@ -283,7 +284,7 @@ public class GenericDAO {
 		distributionResultsDTO.setSchema(schema);
 		
 		if (tipoOperazione.equalsIgnoreCase(Constants.SELECT)) {
-			distributionResultsDTO.setListString(elencoInsertPerBackup);
+			distributionResultsDTO.setInsertsForBackup(elencoInsertPerBackup);
 		}
 		if (tipoOperazione.equalsIgnoreCase(Constants.INSERT)) {
 			distributionResultsDTO.setRowsInserted(distributionResultsDTO.getRowsInserted() + contatoreRigheInteressate);
@@ -417,7 +418,7 @@ public class GenericDAO {
 					results.setListLinkedHashMap(listLinkedHashMap);
 				}
 				if (createListOfInsert) {
-					results.setListString(convertResultSetToListOfString(rs));
+					results.setInsertsForBackup(convertResultSetToListOfString(rs));
 				}
 			}
 
@@ -472,12 +473,14 @@ public class GenericDAO {
 	    return list;
 	}
 	
-	private List<String> convertResultSetToListOfString(ResultSet rs) throws SQLException {
+	private List<InsertStatement> convertResultSetToListOfString(ResultSet rs) throws SQLException {
 		
-		List<String> listOfString = new ArrayList<String>();
+		List<InsertStatement>  listaPerBackup = new ArrayList<InsertStatement>();
 		
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int numColumns = rsmd.getColumnCount();
+		
+		int indiceCDVOCEXX = 0;
 		
         int[] columnTypes = new int[numColumns];
         String columnNames = "";
@@ -487,11 +490,17 @@ public class GenericDAO {
                 columnNames += ",";
             }
             columnNames += rsmd.getColumnName(i + 1);
+            if (Constants.CDVOCEXX.equalsIgnoreCase(rsmd.getColumnName(i + 1))) {
+            	indiceCDVOCEXX = i + 1;
+            }
         }
         java.util.Date d = null; 
 		
+        String cdvocexx = "";
+        
         while (rs.next()) {
             String columnValues = "";
+            cdvocexx = rs.getString(indiceCDVOCEXX);
             for (int i = 0; i < numColumns; i++) {
                 if (i != 0) {
                     columnValues += ",";
@@ -539,12 +548,15 @@ public class GenericDAO {
                         break;
                 }
             }
-            listOfString.add(String.format("INSERT INTO %s (%s) values (%s)\n", 
+            InsertStatement insertStatement = new InsertStatement();
+            insertStatement.setVoce(cdvocexx);
+            insertStatement.setInsertStatement(String.format("INSERT INTO %s (%s) values (%s)\n", 
                                     tableName,
                                     columnNames,
                                     columnValues));
+            listaPerBackup.add(insertStatement);
         }
-		return listOfString;
+		return listaPerBackup;
 	}
 	
 	public EsitoTestConnessioniPresenzaTabelle executeQueryForGetInfoColumnsOfTables(SchemaDTO schema, ArrayList<QueryDB> listaQuery) {

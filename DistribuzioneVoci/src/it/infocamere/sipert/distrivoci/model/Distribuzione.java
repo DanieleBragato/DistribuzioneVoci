@@ -3,11 +3,13 @@ package it.infocamere.sipert.distrivoci.model;
 import java.util.Date;
 import java.util.List;
 
+import it.infocamere.sipert.distrivoci.util.InsertStatement;
+
 public class Distribuzione {
 	
 	private String codiceSchema;
 	private int contatoreInsertGeneratePerBackup;
-	private List<String> listaInsertGeneratePerBackup;
+	private List<InsertStatement> listaInsertGeneratePerBackup;
 	private int contatoreRigheCancellate;
 	private int contatoreRigheDistribuite;
 	
@@ -29,11 +31,11 @@ public class Distribuzione {
 		this.contatoreInsertGeneratePerBackup = contatoreInsertGeneratePerBackup;
 	}
 
-	public List<String> getListaInsertGeneratePerBackup() {
+	public List<InsertStatement> getListaInsertGeneratePerBackup() {
 		return listaInsertGeneratePerBackup;
 	}
 
-	public void setListaInsertGeneratePerBackup(List<String> listaInsertGeneratePerBackup) {
+	public void setListaInsertGeneratePerBackup(List<InsertStatement> listaInsertGeneratePerBackup) {
 		this.listaInsertGeneratePerBackup = listaInsertGeneratePerBackup;
 	}
 
@@ -67,5 +69,6 @@ public class Distribuzione {
 				+ contatoreInsertGeneratePerBackup + ", listaInsertGeneratePerBackup=" + listaInsertGeneratePerBackup
 				+ ", contatoreRigheCancellate=" + contatoreRigheCancellate + ", contatoreRigheDistribuite="
 				+ contatoreRigheDistribuite + ", dataOraDistribuzione=" + dataOraDistribuzione + "]";
-	}	
+	}
+	
 }

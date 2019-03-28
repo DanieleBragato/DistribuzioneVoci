@@ -1,8 +1,10 @@
 package it.infocamere.sipert.distrivoci.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import it.infocamere.sipert.distrivoci.util.ColumnsType;
+import it.infocamere.sipert.distrivoci.util.InsertStatement;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -18,7 +20,7 @@ public class DeleteStatement {
     private String codiceSchemaOrigine;
     
     // elenco delle Insert SQL generate tramite lo schema di partenza/origine (da sviluppo), il codice tabella e la where condition dello statement di Delete 
-    private ArrayList<String> insertsListFromSchemaOrigine;
+    private List<InsertStatement> insertsListFromSchemaOrigine;
     
     // informazioni relative alle tabelle (interessate alla distribuzione) e relative colonne delle schema di Origine (nome e tipo colonna)
     
@@ -33,7 +35,7 @@ public class DeleteStatement {
 		this(null, null, null, null, null);
 	}
 
-	public DeleteStatement(String codice, String deleteStatement, String codiceSchemaOrigine,  ArrayList<String> insertsList, ColumnsType columnsType) {
+	public DeleteStatement(String codice, String deleteStatement, String codiceSchemaOrigine,  List<InsertStatement> insertsList, ColumnsType columnsType) {
 		this.codiceTabella = new SimpleStringProperty(codice);
         this.deleteStatement = new SimpleStringProperty(deleteStatement);
         this.codiceSchemaOrigine = codiceSchemaOrigine;
@@ -65,12 +67,12 @@ public class DeleteStatement {
         return deleteStatement;
     }
 
-	public ArrayList<String> getInsertsListFromSchemaOrigine() {
+	public List<InsertStatement> getInsertsListFromSchemaOrigine() {
 		return insertsListFromSchemaOrigine;
 	}
 
-	public void setInsertsListFromSchemaOrigine(ArrayList<String> insertsList) {
-		this.insertsListFromSchemaOrigine = insertsList;
+	public void setInsertsListFromSchemaOrigine(List<InsertStatement> insertsListFromSchemaOrigine) {
+		this.insertsListFromSchemaOrigine = insertsListFromSchemaOrigine;
 	}
 
 	public String getCodiceSchemaOrigine() {

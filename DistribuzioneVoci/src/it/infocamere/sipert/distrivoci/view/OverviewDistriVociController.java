@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Optional;
 
 import it.infocamere.sipert.distrivoci.Main;
@@ -22,6 +23,7 @@ import it.infocamere.sipert.distrivoci.model.Voce;
 import it.infocamere.sipert.distrivoci.util.ColumnsType;
 import it.infocamere.sipert.distrivoci.util.Constants;
 import it.infocamere.sipert.distrivoci.util.EsitoTestConnessioniPresenzaTabelle;
+import it.infocamere.sipert.distrivoci.util.InsertStatement;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -180,7 +182,43 @@ public class OverviewDistriVociController {
     @FXML
     private Label labelRipristino;
 
-	
+    @FXML
+    private VBox vboxRipristinoVoce;
+
+    @FXML
+    private Label labelRipristinoVoce;
+
+    @FXML
+    private TableView<Schema> schemiRipristinoTableVoce;
+
+    @FXML
+    private TableColumn<Schema, String> codiceSchemaRipristinoVoceColumn;
+
+    @FXML
+    private TableColumn<Schema, String> descrizioneSchemaRipristinoVoceColumn;
+
+    @FXML
+    private TableView<DeleteStatement> deleteStatementRipristinoVoceTable;
+
+    @FXML
+    private TableColumn<DeleteStatement, String> codiceTabRipristinoVoceDeleteColumn;
+
+    @FXML
+    private TableColumn<DeleteStatement, String> statementRipristinoVoceDeleteColumn;
+
+    @FXML
+    private Label labelRipristinoVoceInsert;
+
+    @FXML
+    private TextArea textAreaRipristinoVoceInsert;
+
+    @FXML
+    private ProgressBar barRipristinoVoce;
+
+    @FXML
+    private Button bntRipristinoDistribuzioneVoce;
+    
+    
 	// Referimento al main
 	private Main main;
 
@@ -188,9 +226,13 @@ public class OverviewDistriVociController {
 
 	private Task copyWorkerForGenInserts;
 	
+	private Task copyWorkerForCheckConnessioniTabelle;
+	
 	private Task copyWorkerForExecuteDistribution;
 	
 	private Task copyWorkerForExecuteRipristino;
+	
+	private Task copyWorkerForExecuteRipristinoVoce;
 	
 	private String nota;
 	
@@ -206,7 +248,7 @@ public class OverviewDistriVociController {
 	
 	protected GenericResultsDTO risultatiDTO;
 	
-	private LinkedHashMap<String , ColumnsType> listTablesColumnsType;
+	private LinkedHashMap<String , ColumnsType> listTablesColumnsType = new LinkedHashMap<String , ColumnsType>(); 
 
 	public OverviewDistriVociController() {
 
@@ -343,8 +385,9 @@ public class OverviewDistriVociController {
 			if (newValue.getInsertsListFromSchemaOrigine() != null
 					&& newValue.getInsertsListFromSchemaOrigine().size() > 0) {
 				contenuto = contenuto + " - " + newValue.getInsertsListFromSchemaOrigine().size() + " statement";
-				for (String insertStatement : newValue.getInsertsListFromSchemaOrigine()) {
-					textArea = textArea + insertStatement + "\n";
+				for (InsertStatement insertStatement: newValue.getInsertsListFromSchemaOrigine()) {
+					
+					textArea = textArea + insertStatement.getInsertStatement() + "\n";
 				}				
 			}
 			labelAnteprimaInsert.setText(contenuto);
@@ -384,8 +427,8 @@ public class OverviewDistriVociController {
 			for (Distribuzione distribuzione : newValue.getListaDistribuzione()) {
 				if (distribuzione.getCodiceSchema().equalsIgnoreCase(schemaSelezionato.get(Constants.ZERO).getCodice())
 						&& distribuzione.getListaInsertGeneratePerBackup() != null) {
-					for (String insertStatement : distribuzione.getListaInsertGeneratePerBackup()) {
-						textArea = textArea + insertStatement + "\n";
+					for (InsertStatement insertStatement : distribuzione.getListaInsertGeneratePerBackup()) {
+						textArea = textArea + insertStatement.getInsertStatement() + "\n";
 					}					
 				}
 			}
@@ -625,14 +668,80 @@ public class OverviewDistriVociController {
 					hideAllOutsideOf(null);
 					handleAnteprimaRipristino();
 				}
+				if (Constants.ANTEPRIMA_E_RIPRISTINO_VOCE.equalsIgnoreCase(newValue.getValue())) {
+					hideAllOutsideOf(null);
+					handleAnteprimaRipristinoVoce();
+				}
 				if (Constants.STORICO_DISTRIBUZIONI.equalsIgnoreCase(newValue.getValue())) {
 					hideAllOutsideOf(null);
 					handleStoricoDistribuzioni();
 				}
 
-				System.out.println(newValue.getValue());
+				LocalDateTime ldt = LocalDateTime.now();
+				DateTimeFormatter FOMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy kk:mm:ss");
+				System.out.println(newValue.getValue() + " " + FOMATTER.format(ldt));
 			}
 		});
+	}
+
+	private void handleAnteprimaRipristinoVoce() {
+
+		// verifica se è presente almeno una distribuzione sullo storico  
+		
+		if (distribuzioneRipristinabile != null) {
+			if (isInputValidForAnteprimaRipristinoVoce()) {
+				try {
+					VboxVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO_VOCE);
+					barRipristinoVoce.setVisible(false);
+					newlistaDeleteForRipristino.clear();
+					textAreaRipristinoVoceInsert.setText("");
+					anteprimaRipristinoVoce();
+				} catch (Exception e) {
+					VboxNonVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO_VOCE);
+					showAlert(AlertType.ERROR, "Error", "", e.toString(), main.getStagePrincipale());
+				};					
+			} else {
+				VboxNonVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO_VOCE);
+			}
+		
+		} else {
+			showAlert(AlertType.WARNING, "Errore", "Nessuna Distribuzione Ripristinabile", "Non ci sono Distribuzioni Ripristinabili", main.getStagePrincipale()); 
+		}
+		
+	}
+
+	private void anteprimaRipristinoVoce() {
+
+		labelRipristinoVoce.setText("Ripristino Distribuzione del " + distribuzioneRipristinabile.getDataOraDistribuzione() );
+		
+		schemiRipristinoTableVoce.setItems(main.getSchemiRipristino());
+		
+		String contenuto = "Anteprima di Ripristino Distribuzione\ndel " + distribuzioneRipristinabile.getDataOraDistribuzione() + "\n" + "NOTE: " + distribuzioneRipristinabile.getNote();
+		
+		showAlert(AlertType.INFORMATION, "Information", contenuto,
+				"Selezionando l'elenco degli Schemi e poi la lista delle Delete verranno esposte le relative Insert predisposte per il ripristino",
+				main.getStagePrincipale());
+		
+		bntRipristinoDistribuzioneVoce.setDisable(false);
+	
+		
+	}
+
+	private boolean isInputValidForAnteprimaRipristinoVoce() {
+		// TODO Auto-generated method stub
+		
+		if (isInputValidForAnteprimaRipristino()) {
+			main.showListaVociRipristinabiliDialog(distribuzioneRipristinabile);
+			if (main.getVoceDaRipristinare() == null) {
+				return false;
+			} else {
+				return true;
+			}
+			
+		} else {
+			return false;
+		}
+
 	}
 
 	private void hideAllOutsideOf(String paneName) {
@@ -644,6 +753,7 @@ public class OverviewDistriVociController {
 		VboxNonVisibile(Constants.BOX_SCHEMI_PARTENZA);
 		VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
 		VboxNonVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO);
+		VboxNonVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO_VOCE);
 		
 		if (paneName != null && paneName.length() > 0) VboxVisibile(paneName);
 		
@@ -737,7 +847,7 @@ public class OverviewDistriVociController {
 		
 		if (main.getSchemaDtoOrigine() != null) {
 			risultatiDTO = model.runQueryForGenerateInserts(main.getSchemaDtoOrigine(), queryDB, tableName);
-			deleteStatementOutput.setInsertsListFromSchemaOrigine((ArrayList<String>) risultatiDTO.getListString());
+			deleteStatementOutput.setInsertsListFromSchemaOrigine((List<InsertStatement>) risultatiDTO.getInsertsForBackup());
 			deleteStatementOutput.setCodiceSchemaOrigine(main.getSchemaDtoOrigine().getSchemaUserName());
 		} else {
 			showAlert(AlertType.ERROR, "Error", "",
@@ -827,7 +937,7 @@ public class OverviewDistriVociController {
 			for (int i = 0; i < deleteStatement.getInsertsListFromSchemaOrigine().size(); i++) {
 				// STATEMENT DI INSERT
 				listaUpdateDB.add(new QueryDB(deleteStatement.getCodice(),
-						deleteStatement.getInsertsListFromSchemaOrigine().get(i), Constants.INSERT, null, null));
+						deleteStatement.getInsertsListFromSchemaOrigine().get(i).getInsertStatement(), Constants.INSERT, null, null));
 			}
 		}
 		
@@ -857,9 +967,9 @@ public class OverviewDistriVociController {
 							distribuzionePresente = true;
 							distribuzione.setContatoreRigheCancellate(distributionResultsDTO.getRowsDeleted());
 							distribuzione.setContatoreRigheDistribuite(distributionResultsDTO.getRowsInserted());
-							if (distributionResultsDTO.getListString() != null && distributionResultsDTO.getListString().size() > 0) {
-								distribuzione.setListaInsertGeneratePerBackup(distributionResultsDTO.getListString());
-								distribuzione.setContatoreInsertGeneratePerBackup(distributionResultsDTO.getListString().size());
+							if (distributionResultsDTO.getInsertsForBackup() != null && distributionResultsDTO.getInsertsForBackup().size() > 0) {
+								distribuzione.setListaInsertGeneratePerBackup(distributionResultsDTO.getInsertsForBackup());
+								distribuzione.setContatoreInsertGeneratePerBackup(distributionResultsDTO.getInsertsForBackup().size());
 							}
 						}
 					}
@@ -871,9 +981,9 @@ public class OverviewDistriVociController {
 						distribuzione.setContatoreRigheDistribuite(distributionResultsDTO.getRowsInserted());
 						distribuzione.setContatoreRigheCancellate(distributionResultsDTO.getRowsDeleted());
 						
-						if (distributionResultsDTO.getListString() != null && distributionResultsDTO.getListString().size() > 0) {
-							distribuzione.setListaInsertGeneratePerBackup(distributionResultsDTO.getListString());
-							distribuzione.setContatoreInsertGeneratePerBackup(distributionResultsDTO.getListString().size());
+						if (distributionResultsDTO.getInsertsForBackup() != null && distributionResultsDTO.getInsertsForBackup().size() > 0) {
+							distribuzione.setListaInsertGeneratePerBackup(distributionResultsDTO.getInsertsForBackup());
+							distribuzione.setContatoreInsertGeneratePerBackup(distributionResultsDTO.getInsertsForBackup().size());
 						}
 						ds.getListaDistribuzione().add(distribuzione);
 					}
@@ -901,9 +1011,9 @@ public class OverviewDistriVociController {
 						if (distribuzione.getCodiceSchema().equalsIgnoreCase(schemaDTO.getSchemaUserName())
 								&& distribuzione.getListaInsertGeneratePerBackup() != null) {
 							// STATEMENT DI INSERT per il Ripristino
-							for (String insertDiBackup : distribuzione.getListaInsertGeneratePerBackup()) {
+							for (InsertStatement insertDiBackup : distribuzione.getListaInsertGeneratePerBackup()) {
 								listaUpdateDB.add(new QueryDB(deleteStatement.getCodice(),
-										insertDiBackup, Constants.INSERT, null, null));
+										insertDiBackup.getInsertStatement(), Constants.INSERT, null, null));
 							}
 						}
 					}
@@ -915,6 +1025,64 @@ public class OverviewDistriVociController {
 			}
 		}	
 	}
+	
+	private void manageDeleteStatementsForRipristinoVoce(Voce voce) {
+		
+		System.out.println("classe OverviewDistriVociController metodo manageDeleteStatementsForRipristinoVoce");
+		
+		ArrayList<QueryDB> listaUpdateDB = new ArrayList<QueryDB>();
+		
+		for (int i = 0 ; i < distribuzioneRipristinabile.getElencoSchemi().size(); i++) {
+			SchemaDTO schemaDTO = searchSchemaDTO(distribuzioneRipristinabile.getElencoSchemi().get(i).getCodice());
+			if (schemaDTO != null) {
+				// PREDISPOSIZIONE DELLA LISTA DELLE QUERY DA ESEGUIRE SULLO STESSO SCHEMA
+				listaUpdateDB.clear();
+				for (DeleteStatement deleteStatement : distribuzioneRipristinabile.getListaDeleteStatement()) {
+					// STATEMENT DI DELETE DELLA SINGOLA VOCE
+					listaUpdateDB.add(
+							new QueryDB(deleteStatement.getCodice(),
+									creaDeleteTableSuSingolaVoce(deleteStatement.getCodice(), voce),
+									Constants.DELETE, null, null));
+					for (Distribuzione distribuzione : deleteStatement.getListaDistribuzione()) {
+						if (distribuzione.getCodiceSchema().equalsIgnoreCase(schemaDTO.getSchemaUserName())
+								&& distribuzione.getListaInsertGeneratePerBackup() != null) {
+							// STATEMENT DI INSERT per il Ripristino DELLA SINGOLA VOCE
+							for (InsertStatement insertDiBackup : distribuzione.getListaInsertGeneratePerBackup()) {
+								if (voce.getCodice().equalsIgnoreCase(insertDiBackup.getVoce())) {
+									listaUpdateDB.add(new QueryDB(deleteStatement.getCodice(),
+											insertDiBackup.getInsertStatement(), Constants.INSERT, null, null));
+								}
+							}
+						}
+					}
+				}
+				if (listaUpdateDB.size() > 0) {
+					// ESECUZIONE DELLE DELETE E DELLE INSERT
+					model.runMultipleUpdateForRipristino(schemaDTO, listaUpdateDB);
+				}
+			}
+		}	
+	}
+	
+	private String creaDeleteTableSuSingolaVoce(String tableName, Voce voce) {
+		
+		String deleteString = "";
+		String whereCondition = "";
+		deleteString = Constants.PREFIX_DELETE;
+		
+		deleteString += tableName;
+		
+		if (tableName.toUpperCase().contains(Constants.ESPADE) || tableName.contains(Constants.ESPAFM)) {
+			whereCondition = Constants.PREFIX_WHERE_CONDITION_WITH_CDTPFORM;
+		} else {
+			whereCondition = Constants.PREFIX_WHERE_CONDITION;	
+		}
+		
+		whereCondition += voce.getCodice() + "')";
+		
+		return deleteString + whereCondition;
+	}
+
 	
 	private SchemaDTO searchSchemaDTO(String codiceSchema) {
 
@@ -955,7 +1123,7 @@ public class OverviewDistriVociController {
 		
 		//ciclo per elencare le Voci distribuite
 		for (int i = 0; i < storicoDistribuzione.getElencoVoci().size(); i++) {
-			String voce = storicoDistribuzione.getElencoVoci().get(i);
+			Voce voce = storicoDistribuzione.getElencoVoci().get(i);
 			if (i == 0) {
 				if (storicoDistribuzione.getElencoVoci().size() == 1) {
 					contenuto += "VOCE: ";
@@ -964,7 +1132,7 @@ public class OverviewDistriVociController {
 				}
 			}
 
-			contenuto += voce;
+			contenuto += voce.getCodice();
 			if (i == storicoDistribuzione.getElencoVoci().size() - 1) {
 				contenuto += "\n";
 			} else {
@@ -1132,6 +1300,9 @@ public class OverviewDistriVociController {
 
 		}
 
+		// TODO lanciare su apposito Task Thread il check sulle connessioni e le tabelle
+		// copyWorkerForCheckConnessioniTabelle
+		
 		for (Schema s : listaSchemi) {
 			SchemaDTO schemaDTO = searchSchemaDTO(s.getCodice());
 			if (schemaDTO != null) {
@@ -1367,9 +1538,9 @@ public class OverviewDistriVociController {
 		storicoDistribuzione.setElencoSchemi(listaSchemiPerStoricoDistribuzione);
 		
 		ObservableList<Voce> listaVociSelezionate = vociTable.getSelectionModel().getSelectedItems();
-		ArrayList<String> elencoVoci = new ArrayList<String>();
+		ArrayList<Voce> elencoVoci = new ArrayList<Voce>();
 		for (Voce voce: listaVociSelezionate) {
-			elencoVoci.add(voce.getCodice());
+			elencoVoci.add(voce);
 		}
 		storicoDistribuzione.setElencoVoci(elencoVoci);
 		
@@ -1432,7 +1603,7 @@ public class OverviewDistriVociController {
 		
 		System.out.println("OverviewDistriVociController metodo ripristino");
 		
-		if (!checkConfirmOfRipristino()) {
+		if (!checkConfirmOfRipristino(null)) {
 			return;
 		}
 		
@@ -1479,12 +1650,16 @@ public class OverviewDistriVociController {
 		
 	}
 
-	private boolean checkConfirmOfRipristino() {
+	private boolean checkConfirmOfRipristino(Voce voce) {
+		
+		String voceDaRipristinare = "";
+		
+		if (voce != null) voceDaRipristinare = " della Voce " + voce.getCodice();
 		
 		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle("Conferma Ripristino");
-		alert.setHeaderText("Conferma Ripristino");
-		alert.setContentText("Confermi il Ripristino?");
+		alert.setTitle("Conferma Ripristino" + voceDaRipristinare);
+		alert.setHeaderText("Conferma Ripristino" + voceDaRipristinare);
+		alert.setContentText("Confermi il Ripristino" + voceDaRipristinare + "?");
 		
 		Optional<ButtonType> result = alert.showAndWait();
 		
@@ -1541,6 +1716,123 @@ public class OverviewDistriVociController {
 		this.main.getStoricoDistribuzione().get(indiceDistribuzioneRipristinabile).setDataOraRipristino(FOMATTER.format(ldt));
 		
 		impostaDistribuzioneRipristinabile();
+	}
+	
+	private void aggiornaStoricoDistribuzioneRipristinataParzialmente(Voce voceInput) {
+		
+		boolean parziale = false;
+		
+		for (Voce voce : this.main.getStoricoDistribuzione().get(indiceDistribuzioneRipristinabile).getElencoVoci()) {
+			if (voceInput.getCodice().equalsIgnoreCase(voce.getCodice())) {
+				LocalDateTime ldt = LocalDateTime.now();
+				DateTimeFormatter FOMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy kk:mm:ss");
+				voce.setDataOraRipristino(FOMATTER.format(ldt));
+			} else {
+				if (voce.getDataOraRipristino() == null) {
+					parziale = true;
+				}
+			}
+		}
+		
+		if (parziale) {
+			this.main.getStoricoDistribuzione().get(indiceDistribuzioneRipristinabile).setDataOraRipristino(Constants.PARZIALE);	
+		} else {
+			aggiornaStoricoDistribuzioneRipristinata();			
+		}
+
+	}
+	
+	/**
+	 * chiamata quando l'utente fa click sul bottone RIPRISTINO DELLA Distribuzione Voce
+	 */
+	@FXML
+	private void ripristinoVoce() {
+		
+		System.out.println("OverviewDistriVociController metodo ripristinoVoce");
+		
+		if (!checkConfirmOfRipristino(main.getVoceDaRipristinare())) {
+			return;
+		}
+		
+		disabledView(true);
+		barRipristinoVoce.setVisible(true);
+		
+		barRipristinoVoce.setProgress(0);
+		
+		main.getDeleteStatementForRipristino().clear();
+		
+		for (DeleteStatement deleteStatement : distribuzioneRipristinabile.getListaDeleteStatement()) {
+			main.addDeleteStatementForRipristino(deleteStatement);	
+		}
+		
+		copyWorkerForExecuteRipristinoVoce = createWorkerForExecuteRipristinoVoce(main.getVoceDaRipristinare());
+
+        barRipristinoVoce.progressProperty().unbind();
+        barRipristinoVoce.progressProperty().bind(copyWorkerForExecuteRipristinoVoce.progressProperty());
+
+        copyWorkerForExecuteRipristinoVoce.messageProperty().addListener(new ChangeListener<String>() {
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                System.out.println("newValue " + newValue);
+            }
+        });
+        
+		Thread backgroundThreadUpdateDBripristinoVoce = new Thread(copyWorkerForExecuteRipristinoVoce, "updateDBripristinoVoce-thread");
+		backgroundThreadUpdateDBripristinoVoce.setDaemon(true);
+		backgroundThreadUpdateDBripristinoVoce.start();
+		
+		copyWorkerForExecuteRipristinoVoce.setOnFailed(e -> {
+			Throwable exception = ((Task) e.getSource()).getException();
+			if (exception != null) {
+				System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - no eccezione");
+				copyWorkerForExecuteRipristinoVoce.cancel(true);
+				barRipristinoVoce.progressProperty().unbind();
+				barRipristinoVoce.setProgress(0);
+				disabledView(false);
+				barRipristinoVoce.setVisible(false);
+				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
+			} else {
+				System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - eccezione = " + exception.toString());
+			}
+		});
+		
+	}
+	
+	public Task createWorkerForExecuteRipristinoVoce(Voce voce) {
+
+		System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristinoVoce");
+		
+		return new Task() {
+			@Override
+			protected Object call() throws Exception {
+
+				if (this.isCancelled()) {
+					System.out.println("Canceling...");
+				}
+				
+				manageDeleteStatementsForRipristinoVoce(voce);
+				
+				newlistaDeleteForRipristino.clear();
+				main.getDeleteStatementForRipristino().clear();
+				return true;
+			}
+
+			@Override
+			protected void succeeded() {
+				
+				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristinoVoce - succeeded");
+				super.succeeded();
+				updateMessage("Done!");
+				barRipristinoVoce.progressProperty().unbind();
+				barRipristinoVoce.setProgress(0);
+				disabledView(false);
+				barRipristinoVoce.setVisible(false);
+				textAreaRipristinoInsert.setText("");
+				main.getSchemiRipristino().clear();
+				aggiornaStoricoDistribuzioneRipristinataParzialmente(voce);
+				showAlertRipristinoOK();
+				clearRipristinoInfo();
+			}
+		};
 	}
 	
 	public void showAlert(AlertType type, String title, String headerText, String text, Stage stage) {

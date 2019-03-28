@@ -1,9 +1,7 @@
 package it.infocamere.sipert.distrivoci.model;
 
 import java.util.ArrayList;
-import java.util.Date;
 
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -19,7 +17,7 @@ public class StoricoDistribuzione {
 	
 	// informazioni relative alla distribuzione in produzione: elenco delle Voci distribuite
     
-    private ArrayList<String> elencoVoci;
+    private ArrayList<Voce> elencoVoci;
     
 	// informazioni relative alla distribuzione in produzione: elenco degli schemi
 	// sui quali è stata effettuata la distribuzione
@@ -35,7 +33,7 @@ public class StoricoDistribuzione {
     }
     
 	public StoricoDistribuzione(String dataOraDistribuzione, String dataOraRipristino, String note, String schemaPartenza,
-			ArrayList<String> elencoVoci,   ArrayList<Schema> elencoSchemi, ArrayList<DeleteStatement> listaDeleteStatement) {
+			ArrayList<Voce> elencoVoci,   ArrayList<Schema> elencoSchemi, ArrayList<DeleteStatement> listaDeleteStatement) {
 		
 		this.dataOraDistribuzione = new SimpleStringProperty(dataOraDistribuzione);
 		this.dataOraRipristino = new SimpleStringProperty(dataOraRipristino);
@@ -47,11 +45,11 @@ public class StoricoDistribuzione {
 	}
 
 	
-	public ArrayList<String> getElencoVoci() {
+	public ArrayList<Voce> getElencoVoci() {
 		return elencoVoci;
 	}
 
-	public void setElencoVoci(ArrayList<String> elencoVoci) {
+	public void setElencoVoci(ArrayList<Voce> elencoVoci) {
 		this.elencoVoci = elencoVoci;
 	}
 	
