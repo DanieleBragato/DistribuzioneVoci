@@ -109,6 +109,12 @@ public class Main extends Application {
      */
     private ObservableList<StoricoDistribuzione> storicoDistribuzione = FXCollections.observableArrayList();
     
+    /**
+     * i dati nel formato di observable list di Schema >> per RIPRISTINO VOCE
+     */
+    private ObservableList<Schema> schemiRipristinoVoce = FXCollections.observableArrayList();
+    
+    
 	/**
      *  gli schemi dei data base oracle da trattare
      */
@@ -135,30 +141,6 @@ public class Main extends Application {
 	public Main() {
 		
 		this.rootNode = new TreeItem<>("Distribuzione Voci");
-		
-        // Aggiungo alcuni dati di esempio
-//    	tabelleDB.add(new Tabella("tabella1", "la prima tabella"));
-//    	tabelleDB.add(new Tabella("tabella2", "la seconda tabella"));
-//    	
-//    	voci.add(new Voce("voce1", "first voice"));
-//    	voci.add(new Voce("voce2", "second voice"));
-//    	
-//    	schemi.add(new Schema("schema1", "first schemi"));
-//    	schemi.add(new Schema("schema2", "second schemi"));
-//    	schemi.add(new Schema("schema3", "terzo schemi"));
-//    	schemi.add(new Schema("schema4", "quarto schemi"));
-//    	schemi.add(new Schema("schema5", "quinto schemi"));
-//    	schemi.add(new Schema("schema6", "sesto schemi"));
-//    	schemi.add(new Schema("schema7", "Settimo schemi"));
-//    	schemi.add(new Schema("schema8", "ottavo schemi"));
-//    	schemi.add(new Schema("schema9", "nono schemi"));
-//    	schemi.add(new Schema("schema10", "decimo schemi"));
-//    	schemi.add(new Schema("schema11", "undicesimo schemi"));
-//    	schemi.add(new Schema("schema12", "dodicesimo schemi"));
-//    	schemi.add(new Schema("schema13", "tredicesimo schemi"));
-//    	schemi.add(new Schema("schema14", "quattordicesimo schemi"));
-//    	schemi.add(new Schema("schema15", "quindicesimo schemi"));
-//    	schemi.add(new Schema("schema16", "sedicesimo schemi"));
     	
     	loadProvince();
     	
@@ -806,6 +788,27 @@ public class Main extends Application {
     	return false;
     }
     
+	/**
+     * Ritorna i dati nel formato di observable list of Schema per Ripristino Voce 
+     * @return
+     */
+    public ObservableList<Schema> getSchemiRipristinoVoce() {
+        return schemiRipristinoVoce;
+    }
+    
+    public void setSchemiRipristinoVoce(ObservableList<Schema> schemiRipristinoVoce ) {
+		this.schemiRipristinoVoce = schemiRipristinoVoce;
+	}
+    
+    public boolean addSchemiRipristinoVoceData (Schema schemaRipristinoVoce) {
+    	
+    	if (schemaRipristinoVoce != null) {
+    		this.schemiRipristinoVoce.add(schemaRipristinoVoce);
+    		return true;
+    	}
+    	return false;
+    }
+    
     
     /**
      * Ritorna i dati nel formato di observable list of DeleteStatement. 
@@ -996,7 +999,7 @@ public class Main extends Application {
      * @param StoricoDistribuzione
      * @return true , se l'utente clicca su OK, altrimenti false
      */
-    public boolean showListaVociRipristinabiliDialog(StoricoDistribuzione storicoDistribuzione) {
+    public void showListaVociRipristinabiliDialog(StoricoDistribuzione storicoDistribuzione) {
         try {
             // carico dell' fxml file e creazione del nuovo stage per il popup dialog.
         	
@@ -1027,11 +1030,11 @@ public class Main extends Application {
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();
 
-            return controller.isexitClicked();
+            //return controller.isexitClicked();
             
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            //return false;
         }
     } 
     

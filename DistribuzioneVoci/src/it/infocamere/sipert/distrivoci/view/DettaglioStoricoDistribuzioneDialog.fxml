@@ -130,6 +130,7 @@
             </AnchorPane>
             <ButtonBar prefHeight="40.0" prefWidth="200.0">
               <buttons>
+                  <Button fx:id="bntDettRipristini" alignment="CENTER" contentDisplay="CENTER" layoutX="800.0" layoutY="10.0" mnemonicParsing="false" onAction="#handleDettRipristino" text="Dettaglio Ripristino" />
                   <Button fx:id="bntHelp" alignment="CENTER" contentDisplay="CENTER" layoutX="680.0" layoutY="10.0" mnemonicParsing="false" onAction="#handleHelp" text="Help" />
                 <Button fx:id="bntStatistiche" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleStatistiche" text="Statistiche" />
                   <Button fx:id="bntExit1" alignment="CENTER" contentDisplay="CENTER" layoutX="855.0" layoutY="16.0" mnemonicParsing="false" onAction="#handleExit" text="Exit" />

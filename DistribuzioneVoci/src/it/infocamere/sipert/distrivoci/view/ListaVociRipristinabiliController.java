@@ -62,9 +62,17 @@ public class ListaVociRipristinabiliController {
 
 		Voce selectedVoce = vociTable.getSelectionModel().getSelectedItem();
 		if (selectedVoce != null) {
-			main.setVoceDaRipristinare(selectedVoce);
-	        exitClicked = true;
-	        dialogStage.close();
+			
+			if (selectedVoce.getDataOraRipristino() != null) {
+				String contenuto = "Voce " + selectedVoce.getCodice() + " già ripristinata";
+				showAlert(AlertType.WARNING, "Voce non valida", contenuto,
+						"Per cortesia, seleziona una Voce non ripristinata",
+						main.getStagePrincipale());
+			} else {
+				main.setVoceDaRipristinare(selectedVoce);
+		        exitClicked = true;
+		        dialogStage.close();
+			}
 		} else {
 			// Nothing selected.
 			Alert alert = new Alert(AlertType.CONFIRMATION);

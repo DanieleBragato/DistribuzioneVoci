@@ -6,6 +6,7 @@ import it.infocamere.sipert.distrivoci.model.Distribuzione;
 import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.StoricoDistribuzione;
 import it.infocamere.sipert.distrivoci.model.Voce;
+import it.infocamere.sipert.distrivoci.util.Constants;
 import it.infocamere.sipert.distrivoci.util.InsertStatement;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -67,6 +68,9 @@ public class DettaglioStoricoDistribuzioneDialogController {
     @FXML // fx:id="bntHelp"
     private Button bntHelp; // Value injected by FXMLLoader
     
+    @FXML
+    private Button bntDettRipristini;
+    
     @FXML // fx:id="bntStatistiche"
     private Button bntStatistiche; // Value injected by FXMLLoader
     
@@ -116,6 +120,9 @@ public class DettaglioStoricoDistribuzioneDialogController {
         
         assert bntHelp != null : "fx:id=\"bntHelp\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
         assert bntStatistiche != null : "fx:id=\"bntStatistiche\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
+        
+        assert bntDettRipristini != null : "fx:id=\"bntDettRipristini\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
+        
         assert bntExit != null : "fx:id=\"bntExit\" was not injected: check your FXML file 'DettaglioStoricoDistribuzioneDialog.fxml'.";
 
 		// Initializza la lista degli schemi con 2 colonne - codice e descrizione
@@ -144,11 +151,18 @@ public class DettaglioStoricoDistribuzioneDialogController {
 	
     public void setStoricoDistribuzione(StoricoDistribuzione storicoDistribuzione) {    	
         
+    	bntDettRipristini.setVisible(false);
+    	
         if (storicoDistribuzione != null) {
         	this.storicoDistribuzione = storicoDistribuzione;
         	String contenuto = "         DISTRIBUZIONE del " + this.storicoDistribuzione.getDataOraDistribuzione();
 			if (this.storicoDistribuzione.getDataOraRipristino() != null) {
-				contenuto += " RIPRISTINATA il " + this.storicoDistribuzione.getDataOraRipristino(); 
+				if (Constants.PARZIALE.equalsIgnoreCase(this.storicoDistribuzione.getDataOraRipristino())) {
+					contenuto += " - RIPRISTINATA PARZIALMENTE ";
+					bntDettRipristini.setVisible(true);
+				} else {
+					contenuto += " - RIPRISTINATA il " + this.storicoDistribuzione.getDataOraRipristino();	
+				}
 			}
 			labelTitle.setText(contenuto);
 			
@@ -240,6 +254,14 @@ public class DettaglioStoricoDistribuzioneDialogController {
 				"Per cortesia, seleziona uno Schema e successivamente gli Statement di Delete per visualizzare i dettagli della Distribuzione" , main.getStagePrincipale());
     	
     }
+   
+    @FXML
+    private void handleDettRipristino(ActionEvent event) {
+    	
+    	this.main.showListaVociRipristinabiliDialog(storicoDistribuzione);
+    	
+    }
+    
     
     @FXML
     private boolean handleExit(ActionEvent event) {

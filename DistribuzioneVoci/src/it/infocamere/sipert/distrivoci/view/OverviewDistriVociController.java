@@ -237,6 +237,8 @@ public class OverviewDistriVociController {
 	private String nota;
 	
 	private ObservableList<DeleteStatement> newlistaDeleteForRipristino = FXCollections.observableArrayList();
+	
+	private ObservableList<DeleteStatement> newlistaDeleteForRipristinoVoce = FXCollections.observableArrayList();
 
 	private ArrayList<Schema> listaSchemiPerStoricoDistribuzione = new ArrayList<Schema>();
 	
@@ -248,7 +250,9 @@ public class OverviewDistriVociController {
 	
 	protected GenericResultsDTO risultatiDTO;
 	
-	private LinkedHashMap<String , ColumnsType> listTablesColumnsType = new LinkedHashMap<String , ColumnsType>(); 
+	private LinkedHashMap<String , ColumnsType> listTablesColumnsType = new LinkedHashMap<String , ColumnsType>();
+	
+	private TreeView<String> mainTree;
 
 	public OverviewDistriVociController() {
 
@@ -290,6 +294,14 @@ public class OverviewDistriVociController {
 		codiceTabDeleteColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
 		statementDeleteColumn.setCellValueFactory(cellData -> cellData.getValue().deleteStatementProperty());
 
+		// Initializza la lista degli schemi per il ripristino Voce con 2 colonne - codice e descrizione
+		codiceSchemaRipristinoVoceColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
+		descrizioneSchemaRipristinoVoceColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
+		
+		// Initializza la lista degli statement di delete per il RIPRISTINO VOCE (2 colonne - codice tabella e
+		// relativo statement)
+		codiceTabRipristinoVoceDeleteColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
+		statementRipristinoVoceDeleteColumn.setCellValueFactory(cellData -> cellData.getValue().deleteStatementProperty());
 		
 		// Initializza la lista degli statement di delete per il RIPRISTINO (2 colonne - codice tabella e
 		// relativo statement)
@@ -366,6 +378,17 @@ public class OverviewDistriVociController {
 		deleteStatementRipristinoTable.getSelectionModel().selectedItemProperty()
 				.addListener((observable, oldValue, newValue) -> showInsertsDetailsForRipristino(newValue));
 		
+		
+		// Listener per la selezione del dettaglio degli statement di delete Ripristino Voce 
+		schemiRipristinoTableVoce.getSelectionModel().selectedItemProperty()
+				.addListener((observable, oldValue, newValue) -> showDeletesRipristinoVoceDetails(newValue));
+		
+		
+		// Listener per la selezione del dettaglio dello statement di delete e dei
+		// relativi statement di insert per RIPRISTINO VOCE
+		deleteStatementRipristinoVoceTable.getSelectionModel().selectedItemProperty()
+				.addListener((observable, oldValue, newValue) -> showInsertsDetailsForRipristinoVoce(newValue));
+		
 	}
 
 	private void saveInfoSchemaPartenza(Schema newValue) {
@@ -436,6 +459,73 @@ public class OverviewDistriVociController {
 		}
 	}
 	
+	private void showDeletesRipristinoVoceDetails(Schema newValue) {
+		
+		if (newValue != null && newValue.getCodice() != null) {
+			codiceSchemaRipristinoSelezionato = newValue.getCodice();
+			newlistaDeleteForRipristinoVoce.clear();
+			textAreaRipristinoVoceInsert.setText("");
+			for (int i = 0; i < distribuzioneRipristinabile.getListaDeleteStatement().size(); i++) {
+				DeleteStatement deleteStatement = distribuzioneRipristinabile.getListaDeleteStatement().get(i);
+				for (int y = 0; y < deleteStatement.getListaDistribuzione().size(); y++) {
+					Distribuzione distr = deleteStatement.getListaDistribuzione().get(y);
+					if (distr.getCodiceSchema().equalsIgnoreCase(codiceSchemaRipristinoSelezionato)) {
+						newlistaDeleteForRipristinoVoce.add(generaDeleteStatementPerRipristinoVoce(deleteStatement));
+					}
+				}
+			}
+			deleteStatementRipristinoVoceTable.setItems(newlistaDeleteForRipristinoVoce);
+		}
+	}
+	
+	private DeleteStatement generaDeleteStatementPerRipristinoVoce(DeleteStatement deleteStatement) {
+		
+		DeleteStatement ds = new DeleteStatement();
+		ds.setCodice(deleteStatement.getCodice());
+		ds.setCodiceSchemaOrigine(deleteStatement.getCodiceSchemaOrigine());
+		ds.setColumnsType(deleteStatement.getColumnsType());
+		ds.setDeleteStatement(creaDeleteTableSuSingolaVoce(ds.getCodice(), main.getVoceDaRipristinare()));
+		ds.setInsertsListFromSchemaOrigine(deleteStatement.getInsertsListFromSchemaOrigine());
+		ds.setWhereCondition("");  // ??????????????
+		
+		ArrayList<Distribuzione> nuovaListaDistrib = new ArrayList<Distribuzione>();
+		
+		for (Distribuzione distrib : deleteStatement.getListaDistribuzione()) {
+			Distribuzione d = new Distribuzione();
+			d.setCodiceSchema(distrib.getCodiceSchema());
+			d.setListaInsertGeneratePerBackup(distrib.getListaInsertGeneratePerBackup());
+			nuovaListaDistrib.add(d);
+		}
+		
+		ds.setListaDistribuzione(nuovaListaDistrib);
+		return ds;
+		
+	}
+	
+	private void showInsertsDetailsForRipristinoVoce (DeleteStatement newValue) {
+		
+		// NB >> un solo schema selezionabile 
+		ObservableList<Schema> schemaSelezionato = schemiRipristinoTableVoce.getSelectionModel().getSelectedItems();
+		
+		String textArea = "";
+		
+		if (newValue != null) {
+			// cerco la distribuzione corrispondente allo schema selezionato
+			for (Distribuzione distribuzione : newValue.getListaDistribuzione()) {
+				if (distribuzione.getCodiceSchema().equalsIgnoreCase(schemaSelezionato.get(Constants.ZERO).getCodice())
+						&& distribuzione.getListaInsertGeneratePerBackup() != null) {
+					for (InsertStatement insertStatement : distribuzione.getListaInsertGeneratePerBackup()) {
+						if (main.getVoceDaRipristinare().getCodice().equalsIgnoreCase(insertStatement.getVoce())) {
+							textArea = textArea + insertStatement.getInsertStatement() + "\n";
+						}
+
+					}					
+				}
+			}
+			textAreaRipristinoVoceInsert.setText(textArea);
+		}
+	}
+	
 	public void setMain(Main main) {
 		this.main = main;
 
@@ -467,7 +557,8 @@ public class OverviewDistriVociController {
 		
 		if (this.main.getStoricoDistribuzione().size() > 0) {
 			for (int i = 0 ; i < this.main.getStoricoDistribuzione().size() ; i++) {
-				if (this.main.getStoricoDistribuzione().get(i).getDataOraRipristino() == null) {
+				if (this.main.getStoricoDistribuzione().get(i).getDataOraRipristino() == null || Constants.PARZIALE
+						.equalsIgnoreCase(this.main.getStoricoDistribuzione().get(i).getDataOraRipristino())) {
 					distribuzioneRipristinabile = this.main.getStoricoDistribuzione().get(i);
 					indiceDistribuzioneRipristinabile = i;
 					break;
@@ -630,6 +721,9 @@ public class OverviewDistriVociController {
 	}
 	
 	public void setTreeCellFactory(TreeView<String> tree) {
+		
+		mainTree = tree;
+		
 		tree.setCellFactory(param -> new TreeCell<String>() {
 			@Override
 			public void updateItem(String item, boolean empty) {
@@ -712,36 +806,57 @@ public class OverviewDistriVociController {
 
 	private void anteprimaRipristinoVoce() {
 
-		labelRipristinoVoce.setText("Ripristino Distribuzione del " + distribuzioneRipristinabile.getDataOraDistribuzione() );
+		labelRipristinoVoce.setText("Distribuzione del " + distribuzioneRipristinabile.getDataOraDistribuzione() + " - Ripristino VOCE " + main.getVoceDaRipristinare().getCodice());
 		
-		schemiRipristinoTableVoce.setItems(main.getSchemiRipristino());
+		schemiRipristinoTableVoce.setItems(main.getSchemiRipristinoVoce());
 		
-		String contenuto = "Anteprima di Ripristino Distribuzione\ndel " + distribuzioneRipristinabile.getDataOraDistribuzione() + "\n" + "NOTE: " + distribuzioneRipristinabile.getNote();
+		String contenuto = "Anteprima di Ripristino Distribuzione\ndel "
+				+ distribuzioneRipristinabile.getDataOraDistribuzione() + "\n" + "NOTE: "
+				+ distribuzioneRipristinabile.getNote() + "\n" + "Ripristino della VOCE " + main.getVoceDaRipristinare().getCodice();
 		
-		showAlert(AlertType.INFORMATION, "Information", contenuto,
-				"Selezionando l'elenco degli Schemi e poi la lista delle Delete verranno esposte le relative Insert predisposte per il ripristino",
+		showAlert(AlertType.INFORMATION, "Informazione", contenuto,
+				"Selezionando l'elenco degli Schemi e poi la lista delle Delete verranno esposte le relative Insert predisposte per il ripristino della VOCE " + main.getVoceDaRipristinare().getCodice(),
 				main.getStagePrincipale());
 		
 		bntRipristinoDistribuzioneVoce.setDisable(false);
 	
+		newlistaDeleteForRipristinoVoce.clear();
 		
 	}
 
 	private boolean isInputValidForAnteprimaRipristinoVoce() {
-		// TODO Auto-generated method stub
 		
-		if (isInputValidForAnteprimaRipristino()) {
-			main.showListaVociRipristinabiliDialog(distribuzioneRipristinabile);
-			if (main.getVoceDaRipristinare() == null) {
-				return false;
+		main.getSchemiRipristinoVoce().clear();		
+		
+		for (Schema schema : distribuzioneRipristinabile.getElencoSchemi()) {
+			main.addSchemiRipristinoVoceData(schema);
+		}
+		
+		ObservableList<Tabella> listaTabelleDaRipristinare = FXCollections.observableArrayList();
+		
+		listTablesColumnsType.clear();
+		for (DeleteStatement deleteStatement : distribuzioneRipristinabile.getListaDeleteStatement()) {
+			listaTabelleDaRipristinare.add(new Tabella(deleteStatement.getCodice(), null));
+			listTablesColumnsType.put(deleteStatement.getCodice().toUpperCase(), deleteStatement.getColumnsType());
+		};
+
+		if (main.getSchemiRipristinoVoce() != null && main.getSchemiRipristinoVoce().size() > 0) {
+			if (isSchemiTabelleOK(main.getSchemiRipristinoVoce(), listaTabelleDaRipristinare)) {
+				main.showListaVociRipristinabiliDialog(distribuzioneRipristinabile);
+				if (main.getVoceDaRipristinare() == null) {
+					return false;
+				} else {
+					return true;
+				}
 			} else {
-				return true;
+				return false;
 			}
-			
 		} else {
+			showAlert(AlertType.ERROR, "Error", "",
+					"Non trovati gli schemi relativi alla Distribuzione da Ripristinare ", main.getStagePrincipale());
 			return false;
 		}
-
+			
 	}
 
 	private void hideAllOutsideOf(String paneName) {
@@ -1115,6 +1230,15 @@ public class OverviewDistriVociController {
 		
 	}
 	
+	private void showAlertRipristinoVoceOK(String voce) {
+		
+		String contenuto = "";
+		
+		showAlert(AlertType.INFORMATION, "Information", "Voce " + voce + " ripristinata", contenuto, main.getStagePrincipale());
+		
+	}
+	
+	
     private void showAlertDistribuzioneOK(StoricoDistribuzione storicoDistribuzione) {
 		
 		String contenuto = "";
@@ -1255,6 +1379,15 @@ public class OverviewDistriVociController {
 	}
 
 	private boolean isInputValidForAnteprimaRipristino() {
+		
+		if (Constants.PARZIALE.equalsIgnoreCase(distribuzioneRipristinabile.getDataOraRipristino())) {
+			showAlert(AlertType.WARNING, "Attenzione Distribuzione Parzialmente Ripristinata",
+					"Distribuzione del " + distribuzioneRipristinabile.getDataOraDistribuzione()
+							+ " Parzialmente Ripristinata",
+
+					"Utilizzare il Ripristino Voce", main.getStagePrincipale());
+			return false;
+		}
 		
 		main.getSchemiRipristino().clear();		
 
@@ -1518,6 +1651,7 @@ public class OverviewDistriVociController {
 				bar.setVisible(false);
 				showAlertDistribuzioneOK(aggiornaStoricoDistribuzione());
 				clearDistributionInfo();
+				mainTree.getSelectionModel().select(1);
 			}
 		};
 	}
@@ -1540,7 +1674,11 @@ public class OverviewDistriVociController {
 		ObservableList<Voce> listaVociSelezionate = vociTable.getSelectionModel().getSelectedItems();
 		ArrayList<Voce> elencoVoci = new ArrayList<Voce>();
 		for (Voce voce: listaVociSelezionate) {
-			elencoVoci.add(voce);
+			Voce vc = new Voce();
+			vc.setCodice(voce.getCodice());
+			vc.setDataOraRipristino(voce.getDataOraRipristino());
+			vc.setDescrizione(voce.getDescrizione());
+			elencoVoci.add(vc);
 		}
 		storicoDistribuzione.setElencoVoci(elencoVoci);
 		
@@ -1705,6 +1843,7 @@ public class OverviewDistriVociController {
 				aggiornaStoricoDistribuzioneRipristinata();
 				showAlertRipristinoOK();
 				clearRipristinoInfo();
+				mainTree.getSelectionModel().select(1);
 			}
 		};
 	}
@@ -1739,7 +1878,6 @@ public class OverviewDistriVociController {
 		} else {
 			aggiornaStoricoDistribuzioneRipristinata();			
 		}
-
 	}
 	
 	/**
@@ -1825,12 +1963,12 @@ public class OverviewDistriVociController {
 				barRipristinoVoce.progressProperty().unbind();
 				barRipristinoVoce.setProgress(0);
 				disabledView(false);
-				barRipristinoVoce.setVisible(false);
-				textAreaRipristinoInsert.setText("");
-				main.getSchemiRipristino().clear();
+				VboxNonVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO_VOCE);
+				main.getSchemiRipristinoVoce().clear();
 				aggiornaStoricoDistribuzioneRipristinataParzialmente(voce);
-				showAlertRipristinoOK();
+				showAlertRipristinoVoceOK(voce.getCodice());
 				clearRipristinoInfo();
+				mainTree.getSelectionModel().select(1);
 			}
 		};
 	}
