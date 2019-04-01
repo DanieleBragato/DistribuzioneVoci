@@ -1,8 +1,18 @@
 package it.infocamere.sipert.distrivoci.util;
 
-import java.io.*;
-import java.sql.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
+
+import org.apache.log4j.Logger;
 
 public class GenerateInsertStatements {
     private static final String JDBC_DRIVER = "oracle.jdbc.driver.OracleDriver";
@@ -12,6 +22,8 @@ public class GenerateInsertStatements {
 
     private static final SimpleDateFormat dateFormat = 
                          new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    
+    static Logger logger = Logger.getLogger(GenerateInsertStatements.class);
 
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
@@ -74,7 +86,8 @@ public class GenerateInsertStatements {
 
     public static void generateInsertStatements(Connection conn, String tableName) 
                         throws Exception {
-        log("Generating Insert statements for: " + tableName);
+    	logger.info("Generating Insert statements for: " + tableName);
+        //log("Generating Insert statements for: " + tableName);
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName); 
         ResultSetMetaData rsmd = rs.getMetaData();
@@ -151,9 +164,9 @@ public class GenerateInsertStatements {
         p.close();
     }
 
-    private static void log(String s) {
-        System.out.println(s);
-    }
+//    private static void log(String s) {
+//        System.out.println(s);
+//    }
 
     private static void usage() {
         System.out.println("java GenerateInsertStatements [username/password] tableName|-f fileName");

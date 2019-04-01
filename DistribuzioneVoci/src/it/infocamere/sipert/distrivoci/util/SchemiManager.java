@@ -147,7 +147,7 @@ public class SchemiManager {
 							}
 						}
 //						if (cellType == CellType.LABEL) {
-//							System.out.println("CELLA (riga " + iRiga + " colonna " + iColonna + ") tipo LABEL - valore = " + cell.getContents());
+//							\.println("CELLA (riga " + iRiga + " colonna " + iColonna + ") tipo LABEL - valore = " + cell.getContents());
 //						}
 //						if (cellType == CellType.NUMBER) {
 //							System.out.println("CELLA (riga " + iRiga + " colonna " + iColonna + ") tipo NUMBER - valore = " + cell.getContents());

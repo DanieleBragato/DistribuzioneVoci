@@ -75,4 +75,6 @@ public class Constants {
 	public static final String BOX_ANTEPRIMA_RIPRISTINO = "#vboxRipristino";
 	public static final String BOX_ANTEPRIMA_RIPRISTINO_VOCE = "#vboxRipristinoVoce";
 	
+	public static final String VOCI_PER_RIPRISTINO = "ripristinoVoce";
+	
 }

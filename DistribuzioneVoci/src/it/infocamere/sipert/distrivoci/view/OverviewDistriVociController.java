@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.log4j.Logger;
+
 import it.infocamere.sipert.distrivoci.Main;
 import it.infocamere.sipert.distrivoci.db.QueryDB;
 import it.infocamere.sipert.distrivoci.db.dto.DistributionResultsDTO;
@@ -79,6 +81,9 @@ public class OverviewDistriVociController {
 
 	@FXML
 	private TableColumn<StoricoDistribuzione, String> dataTabStoricoDistribuzioneColumn;
+	
+	@FXML
+	private TableColumn<StoricoDistribuzione, String> sequenceTabStoricoDistribuzioneColumn;
 
 	@FXML
 	private TableColumn<StoricoDistribuzione, String> ripristinoTabStoricoDistribuzioneColumn;
@@ -253,6 +258,8 @@ public class OverviewDistriVociController {
 	private LinkedHashMap<String , ColumnsType> listTablesColumnsType = new LinkedHashMap<String , ColumnsType>();
 	
 	private TreeView<String> mainTree;
+	
+	static Logger logger = Logger.getLogger(OverviewDistriVociController.class);
 
 	public OverviewDistriVociController() {
 
@@ -310,7 +317,10 @@ public class OverviewDistriVociController {
 		
 		// Initializza la lista dello storico delle distribuzioni (2 colonne - data e note della distribuzione
 		dataTabStoricoDistribuzioneColumn.setCellValueFactory(cellData -> cellData.getValue().dataOraDistribuzioneProperty());
-		dataTabStoricoDistribuzioneColumn.setSortType(TableColumn.SortType.DESCENDING);
+		//dataTabStoricoDistribuzioneColumn.setSortType(TableColumn.SortType.DESCENDING);
+		
+		sequenceTabStoricoDistribuzioneColumn.setCellValueFactory(cellData -> cellData.getValue().SequenceDistribuzioneProperty());
+		sequenceTabStoricoDistribuzioneColumn.setSortType(TableColumn.SortType.DESCENDING);
 		
 		ripristinoTabStoricoDistribuzioneColumn.setCellValueFactory(cellData -> cellData.getValue().dataOraRipristinoProperty());
 		
@@ -338,8 +348,8 @@ public class OverviewDistriVociController {
 									btn.setOnAction(event -> {
 										StoricoDistribuzione storicoDistribuzione = getTableView().getItems()
 												.get(getIndex());
-										System.out.println(storicoDistribuzione.getDataOraDistribuzione() + "   "
-												+ storicoDistribuzione.getNote());
+//										System.out.println(storicoDistribuzione.getDataOraDistribuzione() + "   "
+//												+ storicoDistribuzione.getNote());
 										handleApriDettaglioDistribuzione(storicoDistribuzione);
 									});
 									setGraphic(btn);
@@ -365,7 +375,8 @@ public class OverviewDistriVociController {
 		deleteStatementTable.getSelectionModel().selectedItemProperty()
 				.addListener((observable, oldValue, newValue) -> showInsertsDetails(newValue));
 
-		storicoDistribuzioneTable.getSortOrder().add(dataTabStoricoDistribuzioneColumn);
+		//storicoDistribuzioneTable.getSortOrder().add(dataTabStoricoDistribuzioneColumn);
+		storicoDistribuzioneTable.getSortOrder().add(sequenceTabStoricoDistribuzioneColumn);
 		
 		storicoDistribuzioneTable.sort();
 			
@@ -773,7 +784,9 @@ public class OverviewDistriVociController {
 
 				LocalDateTime ldt = LocalDateTime.now();
 				DateTimeFormatter FOMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy kk:mm:ss");
-				System.out.println(newValue.getValue() + " " + FOMATTER.format(ldt));
+				String contenuto = newValue.getValue() + " " + FOMATTER.format(ldt);
+				//System.out.println(contenuto);
+				logger.info(contenuto);
 			}
 		});
 	}
@@ -810,7 +823,7 @@ public class OverviewDistriVociController {
 		
 		schemiRipristinoTableVoce.setItems(main.getSchemiRipristinoVoce());
 		
-		String contenuto = "Anteprima di Ripristino Distribuzione\ndel "
+		String contenuto = "Anteprima di Ripristino \nDistribuzione del "
 				+ distribuzioneRipristinabile.getDataOraDistribuzione() + "\n" + "NOTE: "
 				+ distribuzioneRipristinabile.getNote() + "\n" + "Ripristino della VOCE " + main.getVoceDaRipristinare().getCodice();
 		
@@ -842,7 +855,7 @@ public class OverviewDistriVociController {
 
 		if (main.getSchemiRipristinoVoce() != null && main.getSchemiRipristinoVoce().size() > 0) {
 			if (isSchemiTabelleOK(main.getSchemiRipristinoVoce(), listaTabelleDaRipristinare)) {
-				main.showListaVociRipristinabiliDialog(distribuzioneRipristinabile);
+				main.showListaVociRipristinabiliDialog(distribuzioneRipristinabile, Constants.VOCI_PER_RIPRISTINO);
 				if (main.getVoceDaRipristinare() == null) {
 					return false;
 				} else {
@@ -934,7 +947,8 @@ public class OverviewDistriVociController {
 				if (x == listaVociSelezionate.size() - 1) {
 					whereCondition += ")";
 					listDelete.add(deleteString + whereCondition);
-					System.out.println(deleteString + whereCondition);
+					//System.out.println(deleteString + whereCondition);
+					logger.info(deleteString + whereCondition);
 
 				}
 			}
@@ -953,7 +967,8 @@ public class OverviewDistriVociController {
 
 		String selectStatement = Constants.PREFIX_SELECT + tableName + whereCondition;
 
-		System.out.println("selectStatement = " + selectStatement);
+		//System.out.println("selectStatement = " + selectStatement);
+		logger.info("selectStatement = " + selectStatement);
 
 		DeleteStatement deleteStatementOutput = deleteStatement;
 		
@@ -1013,7 +1028,9 @@ public class OverviewDistriVociController {
 		
 		schemiRipristinoTable.setItems(main.getSchemiRipristino());
 		
-		String contenuto = "Anteprima di Ripristino Distribuzione\ndel " + distribuzioneRipristinabile.getDataOraDistribuzione() + "\n" + "NOTE: " + distribuzioneRipristinabile.getNote();
+		String contenuto = "Anteprima di Ripristino \nDistribuzione del "
+				+ distribuzioneRipristinabile.getDataOraDistribuzione() + "\n" + "NOTE: "
+				+ distribuzioneRipristinabile.getNote();
 		
 		showAlert(AlertType.INFORMATION, "Information", contenuto,
 				"Selezionando l'elenco degli Schemi e poi la lista delle Delete verranno esposte le relative Insert predisposte per il ripristino",
@@ -1025,7 +1042,7 @@ public class OverviewDistriVociController {
 	
 	private void manageDeleteStatementsForDistribution(ObservableList<DeleteStatement> listaDeleteStatement) {
 		
-		System.out.println("classe OverviewDistriVociController metodo manageDeleteStatements");
+		//System.out.println("classe OverviewDistriVociController metodo manageDeleteStatements");
 		
 		ObservableList<Schema> listaSchemiSuiQualiDistribuire = schemiTable.getSelectionModel().getSelectedItems();
 		
@@ -1109,7 +1126,7 @@ public class OverviewDistriVociController {
 		
 	private void manageDeleteStatementsForRipristino() {
 		
-		System.out.println("classe OverviewDistriVociController metodo manageDeleteStatementsForRipristino");
+		//System.out.println("classe OverviewDistriVociController metodo manageDeleteStatementsForRipristino");
 		
 		ArrayList<QueryDB> listaUpdateDB = new ArrayList<QueryDB>();
 		
@@ -1143,7 +1160,7 @@ public class OverviewDistriVociController {
 	
 	private void manageDeleteStatementsForRipristinoVoce(Voce voce) {
 		
-		System.out.println("classe OverviewDistriVociController metodo manageDeleteStatementsForRipristinoVoce");
+		//System.out.println("classe OverviewDistriVociController metodo manageDeleteStatementsForRipristinoVoce");
 		
 		ArrayList<QueryDB> listaUpdateDB = new ArrayList<QueryDB>();
 		
@@ -1467,7 +1484,7 @@ public class OverviewDistriVociController {
 
 	private void anteprimaDistribuzione() {
 		
-		System.out.println("OverviewDistriVociController metodo anteprimaDistribuzione");
+		//System.out.println("OverviewDistriVociController metodo anteprimaDistribuzione");
 		
 		textAreaPreviewInsert.setText("");
 
@@ -1484,7 +1501,8 @@ public class OverviewDistriVociController {
 				
         copyWorkerForGenInserts.messageProperty().addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                System.out.println("newValue " + newValue);
+                //System.out.println("newValue " + newValue);
+                logger.info("newValue " + newValue);
             }
         });
         
@@ -1495,7 +1513,8 @@ public class OverviewDistriVociController {
 		copyWorkerForGenInserts.setOnFailed(e -> {
 			Throwable exception = ((Task) e.getSource()).getException();
 			if (exception != null) {
-				System.out.println("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - no eccezione" );
+				//System.out.println("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - no eccezione" );
+				logger.error("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - no eccezione" );
 				copyWorkerForGenInserts.cancel(true);
 				bar.progressProperty().unbind();
 				bar.setProgress(0);
@@ -1503,7 +1522,8 @@ public class OverviewDistriVociController {
 				VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
 				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
-				System.out.println("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - eccezione = " + exception.toString());
+				//System.out.println("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - eccezione = " + exception.toString());
+				logger.error("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - eccezione = " + exception.toString());
 			}
 		});
 		
@@ -1515,7 +1535,7 @@ public class OverviewDistriVociController {
 	@FXML
 	private void distribuzione() {
 		
-		System.out.println("OverviewDistriVociController metodo distribuzione");
+		//System.out.println("OverviewDistriVociController metodo distribuzione");
 		
 		if (!checkNoteAndConfirmForDistribuzione()) {
 			return;
@@ -1536,7 +1556,8 @@ public class OverviewDistriVociController {
 
         copyWorkerForExecuteDistribution.messageProperty().addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                System.out.println("newValue " + newValue);
+                //System.out.println("newValue " + newValue);
+                logger.info("newValue " + newValue);
             }
         });
         
@@ -1547,7 +1568,8 @@ public class OverviewDistriVociController {
 		copyWorkerForExecuteDistribution.setOnFailed(e -> {
 			Throwable exception = ((Task) e.getSource()).getException();
 			if (exception != null) {
-				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - no eccezione");
+				//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - no eccezione");
+				logger.error("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - no eccezione");
 				copyWorkerForExecuteDistribution.cancel(true);
 				bar.progressProperty().unbind();
 				bar.setProgress(0);
@@ -1555,7 +1577,9 @@ public class OverviewDistriVociController {
 				bar.setVisible(false);
 				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
-				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - eccezione = " + exception.toString());
+				//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - eccezione = " + exception.toString());
+				logger.error("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - eccezione = " + exception.toString());
+
 			}
 		});
 		
@@ -1567,6 +1591,7 @@ public class OverviewDistriVociController {
 		dialog.setTitle("Conferma Distribuzione");
 		dialog.setHeaderText("Per cortesia, imposta una nota informativa relativa alla distribuzione");
 		dialog.setContentText("Nota informativa:");
+		dialog.initOwner(main.getStagePrincipale());
 		// Traditional way to get the response value.
 		Optional<String> result = dialog.showAndWait();
 		if (result.isPresent()){
@@ -1589,14 +1614,16 @@ public class OverviewDistriVociController {
 	
 	public Task createWorkerForGenInserts() {
 
-		System.out.println("OverviewDistriVociController metodo createWorkerForGenInserts");
+		//System.out.println("OverviewDistriVociController metodo createWorkerForGenInserts");
 		
 		return new Task() {
 			@Override
 			protected Object call() throws Exception {
 
 				if (this.isCancelled()) {
-					System.out.println("Canceling...");
+					//System.out.println("Canceling...");
+					logger.error("Canceling of createWorkerForGenInserts...");
+
 				}
 				
 				fillAnteprimaDistribuzione();
@@ -1606,7 +1633,8 @@ public class OverviewDistriVociController {
 
 			@Override
 			protected void succeeded() {
-				System.out.println("OverviewDistriVociController metodo createWorkerForGenInserts - succeeded");
+				//System.out.println("OverviewDistriVociController metodo createWorkerForGenInserts - succeeded");
+				logger.info("OverviewDistriVociController metodo createWorkerForGenInserts - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
 				bar.progressProperty().unbind();
@@ -1620,14 +1648,15 @@ public class OverviewDistriVociController {
 
 	public Task createWorkerForExecuteDistribution() {
 
-		System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution");
+		//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution");
 		
 		return new Task() {
 			@Override
 			protected Object call() throws Exception {
 
 				if (this.isCancelled()) {
-					System.out.println("Canceling...");
+					//System.out.println("Canceling...");
+					logger.error("Canceling of createWorkerForExecuteDistribution...");
 				}
 				
 				listaSchemiPerStoricoDistribuzione.clear();
@@ -1642,13 +1671,14 @@ public class OverviewDistriVociController {
 			@Override
 			protected void succeeded() {
 				
-				System.out.println("OverviewDistriVociController metodo createWorkerForExcreateWorkerForExecuteDistributionNEWecuteDistribution - succeeded");
+				//System.out.println("OverviewDistriVociController metodo createWorkerForExcreateWorkerForExecuteDistributionNEWecuteDistribution - succeeded");
+				logger.info("OverviewDistriVociController metodo createWorkerForExcreateWorkerForExecuteDistributionNEWecuteDistribution - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
 				bar.progressProperty().unbind();
 				bar.setProgress(0);
 				disabledView(false);
-				bar.setVisible(false);
+				VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
 				showAlertDistribuzioneOK(aggiornaStoricoDistribuzione());
 				clearDistributionInfo();
 				mainTree.getSelectionModel().select(1);
@@ -1694,8 +1724,12 @@ public class OverviewDistriVociController {
 		main.addStoricoDistribuzione(storicoDistribuzione);
 		storicoDistribuzioneTable.setItems(main.getStoricoDistribuzione());
 		
-		dataTabStoricoDistribuzioneColumn.setSortType(TableColumn.SortType.DESCENDING);
-		storicoDistribuzioneTable.getSortOrder().add(dataTabStoricoDistribuzioneColumn);
+		//dataTabStoricoDistribuzioneColumn.setSortType(TableColumn.SortType.DESCENDING);
+		sequenceTabStoricoDistribuzioneColumn.setSortType(TableColumn.SortType.DESCENDING);
+		
+		//storicoDistribuzioneTable.getSortOrder().add(dataTabStoricoDistribuzioneColumn);
+		storicoDistribuzioneTable.getSortOrder().add(sequenceTabStoricoDistribuzioneColumn);
+		
 		storicoDistribuzioneTable.sort();
 		
 		impostaDistribuzioneRipristinabile();
@@ -1739,7 +1773,7 @@ public class OverviewDistriVociController {
 	@FXML
 	private void ripristino() {
 		
-		System.out.println("OverviewDistriVociController metodo ripristino");
+		//System.out.println("OverviewDistriVociController metodo ripristino");
 		
 		if (!checkConfirmOfRipristino(null)) {
 			return;
@@ -1763,7 +1797,8 @@ public class OverviewDistriVociController {
 
         copyWorkerForExecuteRipristino.messageProperty().addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                System.out.println("newValue " + newValue);
+                //System.out.println("newValue " + newValue);
+                logger.info("newValue " + newValue);
             }
         });
         
@@ -1774,7 +1809,8 @@ public class OverviewDistriVociController {
 		copyWorkerForExecuteRipristino.setOnFailed(e -> {
 			Throwable exception = ((Task) e.getSource()).getException();
 			if (exception != null) {
-				System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - no eccezione");
+				//System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - no eccezione");
+				logger.error("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - no eccezione");
 				copyWorkerForExecuteRipristino.cancel(true);
 				barRipristino.progressProperty().unbind();
 				barRipristino.setProgress(0);
@@ -1782,7 +1818,8 @@ public class OverviewDistriVociController {
 				barRipristino.setVisible(false);
 				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
-				System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - eccezione = " + exception.toString());
+				logger.error("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - eccezione = " + exception.toString());
+				//System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - eccezione = " + exception.toString());
 			}
 		});
 		
@@ -1811,14 +1848,15 @@ public class OverviewDistriVociController {
 	
 	public Task createWorkerForExecuteRipristino() {
 
-		System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristino");
+		//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristino");
 		
 		return new Task() {
 			@Override
 			protected Object call() throws Exception {
 
 				if (this.isCancelled()) {
-					System.out.println("Canceling...");
+					//System.out.println("Canceling...");
+					logger.error("Canceling for createWorkerForExecuteRipristino...");
 				}
 				
 				manageDeleteStatementsForRipristino();
@@ -1831,7 +1869,8 @@ public class OverviewDistriVociController {
 			@Override
 			protected void succeeded() {
 				
-				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristino - succeeded");
+				//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristino - succeeded");
+				logger.info("OverviewDistriVociController metodo createWorkerForExecuteRipristino - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
 				barRipristino.progressProperty().unbind();
@@ -1886,7 +1925,7 @@ public class OverviewDistriVociController {
 	@FXML
 	private void ripristinoVoce() {
 		
-		System.out.println("OverviewDistriVociController metodo ripristinoVoce");
+		//System.out.println("OverviewDistriVociController metodo ripristinoVoce");
 		
 		if (!checkConfirmOfRipristino(main.getVoceDaRipristinare())) {
 			return;
@@ -1910,7 +1949,8 @@ public class OverviewDistriVociController {
 
         copyWorkerForExecuteRipristinoVoce.messageProperty().addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                System.out.println("newValue " + newValue);
+                //System.out.println("newValue " + newValue);
+                logger.info("newValue " + newValue);
             }
         });
         
@@ -1921,7 +1961,8 @@ public class OverviewDistriVociController {
 		copyWorkerForExecuteRipristinoVoce.setOnFailed(e -> {
 			Throwable exception = ((Task) e.getSource()).getException();
 			if (exception != null) {
-				System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - no eccezione");
+				//System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - no eccezione");
+				logger.error("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - no eccezione");
 				copyWorkerForExecuteRipristinoVoce.cancel(true);
 				barRipristinoVoce.progressProperty().unbind();
 				barRipristinoVoce.setProgress(0);
@@ -1929,7 +1970,8 @@ public class OverviewDistriVociController {
 				barRipristinoVoce.setVisible(false);
 				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
-				System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - eccezione = " + exception.toString());
+				logger.error("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - eccezione = " + exception.toString());
+				//System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - eccezione = " + exception.toString());
 			}
 		});
 		
@@ -1937,14 +1979,15 @@ public class OverviewDistriVociController {
 	
 	public Task createWorkerForExecuteRipristinoVoce(Voce voce) {
 
-		System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristinoVoce");
+		//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristinoVoce");
 		
 		return new Task() {
 			@Override
 			protected Object call() throws Exception {
 
 				if (this.isCancelled()) {
-					System.out.println("Canceling...");
+					//System.out.println("Canceling...");
+					logger.error("Canceling for createWorkerForExecuteRipristinoVoce...");
 				}
 				
 				manageDeleteStatementsForRipristinoVoce(voce);
@@ -1957,7 +2000,8 @@ public class OverviewDistriVociController {
 			@Override
 			protected void succeeded() {
 				
-				System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristinoVoce - succeeded");
+				//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristinoVoce - succeeded");
+				logger.info("OverviewDistriVociController metodo createWorkerForExecuteRipristinoVoce - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
 				barRipristinoVoce.progressProperty().unbind();

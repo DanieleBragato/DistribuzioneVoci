@@ -16,6 +16,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.log4j.Logger;
+
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.exception.ErroreColonneFileXlsSchemiKo;
 import it.infocamere.sipert.distrivoci.exception.ErroreFileSchemiNonTrovato;
@@ -28,6 +30,7 @@ import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.TabelleListWrapper;
 import it.infocamere.sipert.distrivoci.model.Voce;
 import it.infocamere.sipert.distrivoci.model.VociListWrapper;
+import it.infocamere.sipert.distrivoci.util.Constants;
 import it.infocamere.sipert.distrivoci.util.DistributionStep;
 import it.infocamere.sipert.distrivoci.view.DettaglioStoricoDistribuzioneDialogController;
 import it.infocamere.sipert.distrivoci.view.ListaVociRipristinabiliController;
@@ -54,6 +57,8 @@ import javafx.stage.StageStyle;
 
 
 public class Main extends Application {
+	
+	static Logger logger = Logger.getLogger(Main.class);
 	
 	private Stage stagePrincipale;
     private BorderPane rootLayout;
@@ -167,11 +172,14 @@ public class Main extends Application {
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
+			logger.error("eccezione in fase di lettura file delle province (non trovato) - eccezione = " + e.toString());
 			System.out.println("eccezione in fase di lettura file delle province (non trovato) - eccezione = " + e.toString());
 		} catch (IOException e) {
+			logger.error("eccezione in fase di lettura file delle province - eccezione = " + e.toString());
 			System.out.println("eccezione in fase di lettura file delle province - eccezione = " + e.toString());
 		} 
         
+        logger.info("trovate " + mapProvince.size() + " province");
 		System.out.println("trovate " + mapProvince.size() + " province");
 	}
 
@@ -855,6 +863,13 @@ public class Main extends Application {
     public boolean addStoricoDistribuzione (StoricoDistribuzione storicoDistribuzione) {
     	
     	if (storicoDistribuzione != null) {
+    		int sequenza = 0;
+    		if (this.storicoDistribuzione == null || this.storicoDistribuzione.size() == Constants.ZERO) {
+    			sequenza++;
+    		} else {
+    			sequenza = this.storicoDistribuzione.size() + 1;
+    		}
+    		storicoDistribuzione.setSequenceDistribuzione( Integer.toString(sequenza) );	
     		this.storicoDistribuzione.add(storicoDistribuzione);
     		return true;
     	}
@@ -999,7 +1014,7 @@ public class Main extends Application {
      * @param StoricoDistribuzione
      * @return true , se l'utente clicca su OK, altrimenti false
      */
-    public void showListaVociRipristinabiliDialog(StoricoDistribuzione storicoDistribuzione) {
+    public void showListaVociRipristinabiliDialog(StoricoDistribuzione storicoDistribuzione, String scope) {
         try {
             // carico dell' fxml file e creazione del nuovo stage per il popup dialog.
         	
@@ -1026,6 +1041,7 @@ public class Main extends Application {
             controller.setMain(this);
             controller.setDialogStage(dialogStage);
             controller.setStoricoDistribuzione(storicoDistribuzione);
+            controller.setScope(scope);
 
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();

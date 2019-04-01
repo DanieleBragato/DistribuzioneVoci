@@ -17,9 +17,9 @@
    <children>
       <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
          <children>
-            <Label fx:id="labelTitle" styleClass="label-bright13" text="Label">
+            <Label fx:id="labelTitle" styleClass="label-header" text="Label">
                <VBox.margin>
-                  <Insets bottom="5.0" left="50.0" right="10.0" top="10.0" />
+                  <Insets bottom="5.0" right="5.0" top="10.0" />
                </VBox.margin>
                <font>
                   <Font name="System Bold" size="12.0" />
@@ -30,7 +30,7 @@
                   <Font name="System Bold" size="12.0" />
                </font>
                <VBox.margin>
-                  <Insets bottom="20.0" left="50.0" right="10.0" />
+                  <Insets bottom="20.0" left="60.0" right="10.0" />
                </VBox.margin>
             </Label>
         <AnchorPane minHeight="0.0" minWidth="0.0">

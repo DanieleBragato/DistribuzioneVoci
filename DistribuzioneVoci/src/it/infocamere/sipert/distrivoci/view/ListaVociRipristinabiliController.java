@@ -2,9 +2,12 @@ package it.infocamere.sipert.distrivoci.view;
 
 import java.util.Optional;
 
+import org.apache.log4j.Logger;
+
 import it.infocamere.sipert.distrivoci.Main;
 import it.infocamere.sipert.distrivoci.model.StoricoDistribuzione;
 import it.infocamere.sipert.distrivoci.model.Voce;
+import it.infocamere.sipert.distrivoci.util.Constants;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -47,7 +50,11 @@ public class ListaVociRipristinabiliController {
     private Stage dialogStage;
 	private Main main;
 	
+	static Logger logger = Logger.getLogger(ListaVociRipristinabiliController.class);
+	
 	private StoricoDistribuzione storicoDistribuzione;
+
+	private boolean ripristinoVoce;
 	
     public void setMain(Main main) {
         this.main = main;
@@ -59,6 +66,18 @@ public class ListaVociRipristinabiliController {
     
     @FXML
     private boolean handleExit(ActionEvent event) {
+
+    	if (this.ripristinoVoce) {
+    		return checkSelezioneVoce();
+    	} else {
+	        exitClicked = true;
+	        dialogStage.close();
+	        return exitClicked;
+    	}
+    	
+    }
+    
+    private boolean checkSelezioneVoce() {
 
 		Voce selectedVoce = vociTable.getSelectionModel().getSelectedItem();
 		if (selectedVoce != null) {
@@ -87,9 +106,9 @@ public class ListaVociRipristinabiliController {
 			} 
 		}
         return exitClicked;
-    }
-    
-    public boolean isexitClicked() {
+	}
+
+	public boolean isexitClicked() {
         return exitClicked;
     }
 
@@ -139,6 +158,16 @@ public class ListaVociRipristinabiliController {
         }
     }
   
+    public void setScope(String scope) {    	
+        
+        if (scope != null && Constants.VOCI_PER_RIPRISTINO.equalsIgnoreCase(scope)) {
+        	this.ripristinoVoce = true;
+        } else {
+        	this.ripristinoVoce = false;
+        }
+    
+       }
+        	
 	public void showAlert(AlertType type, String title, String headerText, String text, Stage stage) {
 
 		Alert alert = new Alert(type);

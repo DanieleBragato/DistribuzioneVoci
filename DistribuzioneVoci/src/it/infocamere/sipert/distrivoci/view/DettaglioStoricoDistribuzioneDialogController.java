@@ -1,5 +1,7 @@
 package it.infocamere.sipert.distrivoci.view;
 
+import org.apache.log4j.Logger;
+
 import it.infocamere.sipert.distrivoci.Main;
 import it.infocamere.sipert.distrivoci.model.DeleteStatement;
 import it.infocamere.sipert.distrivoci.model.Distribuzione;
@@ -95,6 +97,8 @@ public class DettaglioStoricoDistribuzioneDialogController {
 	
 	private String codiceSchemaSelezionato;
 	
+	static Logger logger = Logger.getLogger(DettaglioStoricoDistribuzioneDialogController.class);
+	
     public void setMain(Main main) {
         this.main = main;
     }
@@ -158,10 +162,10 @@ public class DettaglioStoricoDistribuzioneDialogController {
         	String contenuto = "         DISTRIBUZIONE del " + this.storicoDistribuzione.getDataOraDistribuzione();
 			if (this.storicoDistribuzione.getDataOraRipristino() != null) {
 				if (Constants.PARZIALE.equalsIgnoreCase(this.storicoDistribuzione.getDataOraRipristino())) {
-					contenuto += " - RIPRISTINATA PARZIALMENTE ";
+					contenuto += " - RIPRISTINO PARZIALE";
 					bntDettRipristini.setVisible(true);
 				} else {
-					contenuto += " - RIPRISTINATA il " + this.storicoDistribuzione.getDataOraRipristino();	
+					contenuto += " - RIPRISTINATA";	
 				}
 			}
 			labelTitle.setText(contenuto);
@@ -185,7 +189,11 @@ public class DettaglioStoricoDistribuzioneDialogController {
 		alert.setTitle("STATISTICHE DISTRIBUZIONE");
 		
 		String header = "ESECUZIONE DEL " + this.storicoDistribuzione.dataOraDistribuzioneProperty().getValue() + "\n";
-		header += "NOTE: " + this.storicoDistribuzione.getNote();
+		header += "NOTE: " + this.storicoDistribuzione.getNote() + "\n";
+		if (this.storicoDistribuzione.dataOraRipristinoProperty().getValue() != null && !Constants.PARZIALE
+				.equalsIgnoreCase(this.storicoDistribuzione.dataOraRipristinoProperty().getValue())) {
+			header += "RIPRISTINO DEL " + this.storicoDistribuzione.dataOraRipristinoProperty().getValue();
+		}
 		
 		alert.setHeaderText(header);
 		
@@ -258,7 +266,7 @@ public class DettaglioStoricoDistribuzioneDialogController {
     @FXML
     private void handleDettRipristino(ActionEvent event) {
     	
-    	this.main.showListaVociRipristinabiliDialog(storicoDistribuzione);
+    	this.main.showListaVociRipristinabiliDialog(storicoDistribuzione, null);
     	
     }
     

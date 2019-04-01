@@ -7,6 +7,8 @@ import javafx.beans.property.StringProperty;
 
 public class StoricoDistribuzione {
 	
+	private StringProperty sequenceDistribuzione;
+	
 	private StringProperty dataOraDistribuzione;
 	
 	private StringProperty dataOraRipristino;
@@ -29,12 +31,13 @@ public class StoricoDistribuzione {
     private ArrayList<DeleteStatement> listaDeleteStatement;
 
     public StoricoDistribuzione() {
-    	this(null, null, null, null, null, null, null);
+    	this(null, null, null, null, null, null, null, null);
     }
     
-	public StoricoDistribuzione(String dataOraDistribuzione, String dataOraRipristino, String note, String schemaPartenza,
+	public StoricoDistribuzione(String sequenceDistribuzione , String dataOraDistribuzione, String dataOraRipristino, String note, String schemaPartenza,
 			ArrayList<Voce> elencoVoci,   ArrayList<Schema> elencoSchemi, ArrayList<DeleteStatement> listaDeleteStatement) {
 		
+		this.sequenceDistribuzione = new SimpleStringProperty(sequenceDistribuzione);
 		this.dataOraDistribuzione = new SimpleStringProperty(dataOraDistribuzione);
 		this.dataOraRipristino = new SimpleStringProperty(dataOraRipristino);
         this.note = new SimpleStringProperty(note);
@@ -69,6 +72,20 @@ public class StoricoDistribuzione {
 		this.listaDeleteStatement = listaDeleteStatement;
 	}
 
+	//
+	public String getSequenceDistribuzione() {
+		return sequenceDistribuzione.get();
+	}
+
+	public void setSequenceDistribuzione(String sequenceDistribuzione) {
+		this.sequenceDistribuzione.set(sequenceDistribuzione);
+	}
+
+    public StringProperty SequenceDistribuzioneProperty() {
+        return sequenceDistribuzione;
+    }
+	//
+	
 
 	public String getDataOraDistribuzione() {
 		return dataOraDistribuzione.get();
