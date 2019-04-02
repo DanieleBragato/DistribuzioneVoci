@@ -41,6 +41,9 @@ public class ListaVociRipristinabiliController {
     @FXML
     Label labelTitolo;
     
+    @FXML
+    Label labelTitolo1;
+    
     /**
      * i dati nel formato di observable list di Voce.
      */
@@ -98,6 +101,7 @@ public class ListaVociRipristinabiliController {
 			alert.setTitle("Conferma");
 			alert.setHeaderText("Attenzione non hai selezionato alcuna Voce");
 			alert.setContentText("Chiusura senza selezione?");
+			alert.initOwner(main.getStagePrincipale());
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.get() == ButtonType.OK){
 				main.setVoceDaRipristinare(null);
@@ -126,6 +130,12 @@ public class ListaVociRipristinabiliController {
         codiceVoceColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
 		descrizioneVoceColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());
 		ripristinoVoceColumn.setCellValueFactory(cellData -> cellData.getValue().dataOraRipristinoProperty());
+		
+    	if (ripristinoVoce) {
+			showAlert(AlertType.INFORMATION, "Anteprima e Ripristino Voce", "Indicare la Voce da Ripristinare",
+					"Per cortesia, seleziona una Voce NON ripristinata",
+					main.getStagePrincipale());
+    	}
 
     }
     
@@ -135,26 +145,17 @@ public class ListaVociRipristinabiliController {
         	this.storicoDistribuzione = storicoDistribuzione;
         	
         	labelTitolo.setText("Distribuzione del " + this.storicoDistribuzione.getDataOraDistribuzione());
-        	
-        	//ArrayList<Voce> voci = new ArrayList<Voce>();
+        	        	
         	for (Voce voce : this.storicoDistribuzione.getElencoVoci()) {
         		voci.add(voce);
         	}
         	vociTable.setItems(voci);
-//        	String contenuto = "         DISTRIBUZIONE del " + this.storicoDistribuzione.getDataOraDistribuzione();
-//			if (this.storicoDistribuzione.getDataOraRipristino() != null) {
-//				contenuto += " RIPRISTINATA il " + this.storicoDistribuzione.getDataOraRipristino(); 
-//			}
-//			labelTitle.setText(contenuto);
-//			
-//			String contenuto2 = "         SCHEMA di PARTENZA " + this.storicoDistribuzione.getSchemaPartenza() + " - NOTE: " + this.storicoDistribuzione.getNote();
-//			labelTitle2.setText(contenuto2);
-//			
-//			// aggiunta di una observable list alla table
-//			if (this.storicoDistribuzione.getElencoSchemi() != null && this.storicoDistribuzione.getElencoSchemi().size() > 0) {
-//				schemi.addAll(this.storicoDistribuzione.getElencoSchemi());
-//				schemiTable.setItems(schemi);				
-//			}
+        	
+        	if (!ripristinoVoce) {
+        		labelTitolo1.setText("");
+        	} else {
+        		labelTitolo1.setText("                  Voci Ripristinabili");
+        	}
         }
     }
   

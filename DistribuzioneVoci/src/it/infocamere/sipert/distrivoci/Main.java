@@ -17,6 +17,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.exception.ErroreColonneFileXlsSchemiKo;
@@ -144,6 +145,9 @@ public class Main extends Application {
     
     
 	public Main() {
+		
+	    //load configuration File
+	    PropertyConfigurator.configure("resources/log4j.properties");
 		
 		this.rootNode = new TreeItem<>("Distribuzione Voci");
     	
@@ -1040,8 +1044,8 @@ public class Main extends Application {
             ListaVociRipristinabiliController controller = loader.getController();
             controller.setMain(this);
             controller.setDialogStage(dialogStage);
-            controller.setStoricoDistribuzione(storicoDistribuzione);
             controller.setScope(scope);
+            controller.setStoricoDistribuzione(storicoDistribuzione);
 
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();

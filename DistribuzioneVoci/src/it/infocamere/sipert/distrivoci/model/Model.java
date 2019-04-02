@@ -95,8 +95,6 @@ public class Model {
 	
 	public GenericResultsDTO runQueryForGenerateInserts(SchemaDTO schema, QueryDB queryDB, String tableName) {
 		
-		//System.out.println("classe Model metodo runQueryForGenerateInserts");
-		
 		GenericResultsDTO risultati = null;
 		
 		GenericDAO genericDAO = new GenericDAO();
@@ -106,8 +104,6 @@ public class Model {
 	}
 
 	public GenericResultsDTO runUpdate(SchemaDTO schema, QueryDB queryDB) {
-		
-		//System.out.println("classe Model metodo runUpdate");
 		
 		GenericResultsDTO risultati = null;
 		
@@ -119,8 +115,6 @@ public class Model {
 	
 	public ArrayList<DistributionResultsDTO> runMultipleUpdateForDistribution(SchemaDTO schema, ArrayList<QueryDB> listaUpdate) {
 		
-		//System.out.println("classe Model metodo runMultipleUpdateForDistribution");
-		
 		ArrayList<DistributionResultsDTO> listaRisultati = null;
 		
 		GenericDAO genericDAO = new GenericDAO();
@@ -131,8 +125,6 @@ public class Model {
 	}
 	
 	public ArrayList<DistributionResultsDTO> runMultipleUpdateForRipristino(SchemaDTO schema, ArrayList<QueryDB> listaUpdate) {
-		
-		//System.out.println("classe Model metodo runMultipleUpdateForRipristino");
 		
 		ArrayList<DistributionResultsDTO> listaRisultati = null;
 		

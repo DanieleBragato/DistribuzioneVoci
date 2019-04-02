@@ -194,6 +194,9 @@ public class OverviewDistriVociController {
     private Label labelRipristinoVoce;
 
     @FXML
+    private Label labelRipristinoVoce1;
+    
+    @FXML
     private TableView<Schema> schemiRipristinoTableVoce;
 
     @FXML
@@ -819,7 +822,8 @@ public class OverviewDistriVociController {
 
 	private void anteprimaRipristinoVoce() {
 
-		labelRipristinoVoce.setText("Distribuzione del " + distribuzioneRipristinabile.getDataOraDistribuzione() + " - Ripristino VOCE " + main.getVoceDaRipristinare().getCodice());
+		labelRipristinoVoce.setText("Distribuzione del " + distribuzioneRipristinabile.getDataOraDistribuzione() );
+		labelRipristinoVoce1.setText("             Ripristino Voce " + main.getVoceDaRipristinare().getCodice());
 		
 		schemiRipristinoTableVoce.setItems(main.getSchemiRipristinoVoce());
 		
@@ -1042,7 +1046,6 @@ public class OverviewDistriVociController {
 	
 	private void manageDeleteStatementsForDistribution(ObservableList<DeleteStatement> listaDeleteStatement) {
 		
-		//System.out.println("classe OverviewDistriVociController metodo manageDeleteStatements");
 		
 		ObservableList<Schema> listaSchemiSuiQualiDistribuire = schemiTable.getSelectionModel().getSelectedItems();
 		
@@ -1126,8 +1129,6 @@ public class OverviewDistriVociController {
 		
 	private void manageDeleteStatementsForRipristino() {
 		
-		//System.out.println("classe OverviewDistriVociController metodo manageDeleteStatementsForRipristino");
-		
 		ArrayList<QueryDB> listaUpdateDB = new ArrayList<QueryDB>();
 		
 		for (int i = 0 ; i < distribuzioneRipristinabile.getElencoSchemi().size(); i++) {
@@ -1159,8 +1160,6 @@ public class OverviewDistriVociController {
 	}
 	
 	private void manageDeleteStatementsForRipristinoVoce(Voce voce) {
-		
-		//System.out.println("classe OverviewDistriVociController metodo manageDeleteStatementsForRipristinoVoce");
 		
 		ArrayList<QueryDB> listaUpdateDB = new ArrayList<QueryDB>();
 		
@@ -1514,7 +1513,7 @@ public class OverviewDistriVociController {
 			Throwable exception = ((Task) e.getSource()).getException();
 			if (exception != null) {
 				//System.out.println("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - no eccezione" );
-				logger.error("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - no eccezione" );
+				logger.error("task copyWorkerForGenInserts - setOnFailed - no eccezione" );
 				copyWorkerForGenInserts.cancel(true);
 				bar.progressProperty().unbind();
 				bar.setProgress(0);
@@ -1523,7 +1522,7 @@ public class OverviewDistriVociController {
 				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
 				//System.out.println("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - eccezione = " + exception.toString());
-				logger.error("OverviewDistriVociController task copyWorkerForGenInserts - setOnFailed - eccezione = " + exception.toString());
+				logger.error("task copyWorkerForGenInserts - setOnFailed - eccezione = " + exception.toString());
 			}
 		});
 		
@@ -1569,7 +1568,7 @@ public class OverviewDistriVociController {
 			Throwable exception = ((Task) e.getSource()).getException();
 			if (exception != null) {
 				//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - no eccezione");
-				logger.error("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - no eccezione");
+				logger.error("metodo createWorkerForExecuteDistribution - setOnFailed - no eccezione");
 				copyWorkerForExecuteDistribution.cancel(true);
 				bar.progressProperty().unbind();
 				bar.setProgress(0);
@@ -1578,7 +1577,7 @@ public class OverviewDistriVociController {
 				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
 				//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - eccezione = " + exception.toString());
-				logger.error("OverviewDistriVociController metodo createWorkerForExecuteDistribution - setOnFailed - eccezione = " + exception.toString());
+				logger.error("metodo createWorkerForExecuteDistribution - setOnFailed - eccezione = " + exception.toString());
 
 			}
 		});
@@ -1634,7 +1633,7 @@ public class OverviewDistriVociController {
 			@Override
 			protected void succeeded() {
 				//System.out.println("OverviewDistriVociController metodo createWorkerForGenInserts - succeeded");
-				logger.info("OverviewDistriVociController metodo createWorkerForGenInserts - succeeded");
+				logger.info("metodo createWorkerForGenInserts - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
 				bar.progressProperty().unbind();
@@ -1672,7 +1671,7 @@ public class OverviewDistriVociController {
 			protected void succeeded() {
 				
 				//System.out.println("OverviewDistriVociController metodo createWorkerForExcreateWorkerForExecuteDistributionNEWecuteDistribution - succeeded");
-				logger.info("OverviewDistriVociController metodo createWorkerForExcreateWorkerForExecuteDistributionNEWecuteDistribution - succeeded");
+				logger.info("metodo createWorkerForExcreateWorkerForExecuteDistributionNEWecuteDistribution - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
 				bar.progressProperty().unbind();
@@ -1810,7 +1809,7 @@ public class OverviewDistriVociController {
 			Throwable exception = ((Task) e.getSource()).getException();
 			if (exception != null) {
 				//System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - no eccezione");
-				logger.error("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - no eccezione");
+				logger.error("metodo copyWorkerForExecuteRipristino - setOnFailed - no eccezione");
 				copyWorkerForExecuteRipristino.cancel(true);
 				barRipristino.progressProperty().unbind();
 				barRipristino.setProgress(0);
@@ -1818,7 +1817,7 @@ public class OverviewDistriVociController {
 				barRipristino.setVisible(false);
 				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
-				logger.error("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - eccezione = " + exception.toString());
+				logger.error("metodo copyWorkerForExecuteRipristino - setOnFailed - eccezione = " + exception.toString());
 				//System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristino - setOnFailed - eccezione = " + exception.toString());
 			}
 		});
@@ -1870,7 +1869,7 @@ public class OverviewDistriVociController {
 			protected void succeeded() {
 				
 				//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristino - succeeded");
-				logger.info("OverviewDistriVociController metodo createWorkerForExecuteRipristino - succeeded");
+				logger.info("metodo createWorkerForExecuteRipristino - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
 				barRipristino.progressProperty().unbind();
@@ -1962,7 +1961,7 @@ public class OverviewDistriVociController {
 			Throwable exception = ((Task) e.getSource()).getException();
 			if (exception != null) {
 				//System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - no eccezione");
-				logger.error("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - no eccezione");
+				logger.error("metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - no eccezione");
 				copyWorkerForExecuteRipristinoVoce.cancel(true);
 				barRipristinoVoce.progressProperty().unbind();
 				barRipristinoVoce.setProgress(0);
@@ -1970,7 +1969,7 @@ public class OverviewDistriVociController {
 				barRipristinoVoce.setVisible(false);
 				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
-				logger.error("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - eccezione = " + exception.toString());
+				logger.error("metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - eccezione = " + exception.toString());
 				//System.out.println("OverviewDistriVociController metodo copyWorkerForExecuteRipristinoVoce - setOnFailed - eccezione = " + exception.toString());
 			}
 		});
@@ -2001,7 +2000,7 @@ public class OverviewDistriVociController {
 			protected void succeeded() {
 				
 				//System.out.println("OverviewDistriVociController metodo createWorkerForExecuteRipristinoVoce - succeeded");
-				logger.info("OverviewDistriVociController metodo createWorkerForExecuteRipristinoVoce - succeeded");
+				logger.info("metodo createWorkerForExecuteRipristinoVoce - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
 				barRipristinoVoce.progressProperty().unbind();

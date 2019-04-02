@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.infocamere.sipert.distrivoci.db.dto.SchemaDTO;
 import it.infocamere.sipert.distrivoci.exception.ErroreColonneFileXlsSchemiKo;
@@ -26,6 +27,7 @@ public class SchemiManager {
 		SchemaDTO schema = new SchemaDTO();
 		
 		if (!fileSchemiXLS.exists()) {
+			LOGGER.error("Errore File Schemi Non Trovato");
 			throw new ErroreFileSchemiNonTrovato();
 		}
 		
@@ -81,9 +83,11 @@ public class SchemiManager {
 			}
 		
 		} catch (BiffException e) {
+			LOGGER.error("Errore nella lettura del file xls delle connessioni " + e.toString());
 			e.printStackTrace();
 			throw new RuntimeException("Errore nella lettura del file xls delle connessioni", e);
 		} catch (IOException e) {
+			LOGGER.error("Errore nella lettura del file xls delle connessioni " + e.toString());
 			e.printStackTrace();
 			throw new RuntimeException("Errore nella lettura del file xls delle connessioni", e);
 		}
@@ -101,6 +105,7 @@ public class SchemiManager {
 		List<SchemaDTO> schemi  = new ArrayList<>() ;
 		
 		if (!fileSchemiXLS.exists()) {
+			LOGGER.error("Errore File Schemi Non Trovato");
 			throw new ErroreFileSchemiNonTrovato();
 		}
 		
@@ -116,6 +121,7 @@ public class SchemiManager {
 				if (iRiga == 0) colonneFileXlsSchemiOk = checkTestataColonne(sheet.getRow(iRiga));
 				
 				if (!colonneFileXlsSchemiOk) {
+					LOGGER.error("Errore Colonne File Xls Schemi KO");
 					throw new ErroreColonneFileXlsSchemiKo();
 				}
 				
@@ -146,24 +152,17 @@ public class SchemiManager {
 								schemaDTO.setHostServerURL(cell.getContents());
 							}
 						}
-//						if (cellType == CellType.LABEL) {
-//							\.println("CELLA (riga " + iRiga + " colonna " + iColonna + ") tipo LABEL - valore = " + cell.getContents());
-//						}
-//						if (cellType == CellType.NUMBER) {
-//							System.out.println("CELLA (riga " + iRiga + " colonna " + iColonna + ") tipo NUMBER - valore = " + cell.getContents());
-//						}
-//						if (cellType == CellType.DATE) {
-//							System.out.println("CELLA (riga " + iRiga + " colonna " + iColonna + ") tipo DATE - valore = " + cell.getContents());
-//						}
 					}					
 					schemi.add(schemaDTO) ;
 				}
 			}
 			
 		} catch (BiffException e) {
+			LOGGER.error("Errore nella lettura del file xls delle connessioni " + e.toString());
 			e.printStackTrace();
 			throw new RuntimeException("Errore nella lettura del file xls delle connessioni", e);
 		} catch (IOException e) {
+			LOGGER.error("Errore nella lettura del file xls delle connessioni " + e.toString());
 			e.printStackTrace();
 			throw new RuntimeException("Errore nella lettura del file xls delle connessioni", e);
 		}
