@@ -226,6 +226,9 @@ public class OverviewDistriVociController {
     @FXML
     private Button bntRipristinoDistribuzioneVoce;
     
+    @FXML
+    private Button bntDeleteOldest;
+    
     
 	// Referimento al main
 	private Main main;
@@ -261,6 +264,8 @@ public class OverviewDistriVociController {
 	private LinkedHashMap<String , ColumnsType> listTablesColumnsType = new LinkedHashMap<String , ColumnsType>();
 	
 	private TreeView<String> mainTree;
+	
+	private EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabellePerTask = new EsitoTestConnessioniPresenzaTabelle();
 	
 	static Logger logger = Logger.getLogger(OverviewDistriVociController.class);
 
@@ -995,10 +1000,41 @@ public class OverviewDistriVociController {
 		// verifica se è presente almeno una distribuzione sullo storico
 		
 		if (main.getStoricoDistribuzione() != null && main.getStoricoDistribuzione().size() > 0) {
+			bntDeleteOldest.setDisable(false);
 			VboxVisibile(Constants.BOX_STORICO);
 		} else {
 			showAlert(AlertType.WARNING, "Errore", "Nessuna Distribuzione Presente", "Non ci sono Distribuzioni", main.getStagePrincipale()); 
 		}
+	}
+	
+	@FXML
+	private void handleDeleteOldest(ActionEvent event) {
+		
+		String dataDistribuzione = "";
+		if (main.getStoricoDistribuzione().size() > 0) {
+			int indiceDistribuzionePiùVecchia = main.getStoricoDistribuzione().size() - 1;  
+			dataDistribuzione = main.getStoricoDistribuzione().get(indiceDistribuzionePiùVecchia).getDataOraDistribuzione();
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			alert.setTitle("Cancellazione Distribuzione del " + dataDistribuzione);
+			alert.setHeaderText("Conferma la cancellazione della Distribuzione del " + dataDistribuzione );
+			alert.setContentText("Confermi la cancellazione?");
+			alert.initOwner(main.getStagePrincipale());
+			
+			Optional<ButtonType> result = alert.showAndWait();
+			
+			if (result.get() == ButtonType.OK){
+				main.getStoricoDistribuzione().remove(indiceDistribuzionePiùVecchia);
+				storicoDistribuzioneTable.setItems(main.getStoricoDistribuzione());
+				logger.info("Cancellata la Distribuzione del " + dataDistribuzione);
+				if (main.getStoricoDistribuzione().size() == 0) {
+					// SVUOTATO STORICO DISTRIBUZIONI >> PULIZIA DATI RELATIVI ALLA DISTRIBUZIONE RIPRISTINABILE
+					distribuzioneRipristinabile = null;
+					indiceDistribuzioneRipristinabile = Constants.ZERO;
+					bntDeleteOldest.setDisable(true);
+				}
+			} 
+		}
+
 	}
 	
 	private void handleAnteprimaRipristino() {
@@ -1449,36 +1485,161 @@ public class OverviewDistriVociController {
 
 		}
 
-		// TODO lanciare su apposito Task Thread il check sulle connessioni e le tabelle
-		// copyWorkerForCheckConnessioniTabelle
+		// lancio su apposito Task Thread del check sulle connessioni e le tabelle
 		
-		for (Schema s : listaSchemi) {
-			SchemaDTO schemaDTO = searchSchemaDTO(s.getCodice());
-			if (schemaDTO != null) {
-				
-				EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabelle = model
-						.testConnessionePresenzaTabelle(schemaDTO, listaQueryDB);
-				
-				if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()
-						&& "".equalsIgnoreCase(esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO())) {
-					
-					showAlert(AlertType.ERROR, "Error", "", "Non riuscita connessione allo schema " + s.getCodice(),
-							main.getStagePrincipale());
-					return false;
-				}
-				if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()) {
-					
-					showAlert(AlertType.ERROR, "Error", "",  esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO() ,
-							main.getStagePrincipale());
-					return false;
-				}
+		copyWorkerForCheckConnessioniTabelle = createcopyWorkerForCheckConnessioniTabelle(listaSchemi, listaQueryDB);
+		
+//        labelInfoEsecuzione.textProperty().unbind();
+//        labelInfoEsecuzione.textProperty().bind(copyWorkerForCheckConnessioniTabelle.messageProperty());
+//
+//        bar.progressProperty().unbind();
+//        bar.progressProperty().bind(copyWorkerForCheckConnessioniTabelle.progressProperty());
+
+        copyWorkerForCheckConnessioniTabelle.messageProperty().addListener(new ChangeListener<String>() {
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                //System.out.println("newValue " + newValue);
+                logger.info("newValue " + newValue);
+            }
+        });
+        
+		Thread backgroundThreadCheckConnessioniTabelle = new Thread(copyWorkerForCheckConnessioniTabelle, "checkConnessioniTabelle-thread");
+		backgroundThreadCheckConnessioniTabelle.setDaemon(true);
+		backgroundThreadCheckConnessioniTabelle.start();
+		
+		copyWorkerForCheckConnessioniTabelle.setOnFailed(e -> {
+			esitoTestConnessioniPresenzaTabellePerTask.setEsitoGlobale(false);
+			Throwable exception = ((Task) e.getSource()).getException();
+			if (exception != null) {
+				logger.error("metodo isSchemiTabelleOK Task copyWorkerForCheckConnessioniTabelle - setOnFailed - no eccezione");
+				copyWorkerForCheckConnessioniTabelle.cancel(true);
+//				bar.progressProperty().unbind();
+//				bar.setProgress(0);
+				disabledView(false);
+//				bar.setVisible(false);
+				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
-				showAlert(AlertType.ERROR, "Error", "",
-						"Non trovati dati di connessione relativi allo schema " + s.getCodice(), main.getStagePrincipale());
-				return false;
+				logger.error("metodo isSchemiTabelleOK Task copyWorkerForCheckConnessioniTabelle - setOnFailed - eccezione = " + exception.toString());
+
 			}
-		}
-		return true;
+		});
+		
+        synchronized(backgroundThreadCheckConnessioniTabelle){
+            try{
+            	logger.info("Waiting for backgroundThreadCheckConnessioniTabelle to complete...");        
+                backgroundThreadCheckConnessioniTabelle.wait();
+            }catch(InterruptedException e){
+            	logger.error("backgroundThreadCheckConnessioniTabelle InterruptedException " + e.toString());
+                e.printStackTrace();
+                return false;
+            }
+			logger.info("terminata esecuzione di backgroundThreadCheckConnessioniTabelle esito "
+					+ esitoTestConnessioniPresenzaTabellePerTask.isEsitoGlobale());        
+            return esitoTestConnessioniPresenzaTabellePerTask.isEsitoGlobale();
+        }
+		
+		
+		
+		//*******************************************************************************************************************
+		
+//		for (Schema s : listaSchemi) {
+//			SchemaDTO schemaDTO = searchSchemaDTO(s.getCodice());
+//			if (schemaDTO != null) {
+//				
+//				EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabelle = model
+//						.testConnessionePresenzaTabelle(schemaDTO, listaQueryDB);
+//				
+//				if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()
+//						&& "".equalsIgnoreCase(esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO())) {
+//					
+//					showAlert(AlertType.ERROR, "Error", "", "Non riuscita connessione allo schema " + s.getCodice(),
+//							main.getStagePrincipale());
+//					return false;
+//				}
+//				if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()) {
+//					
+//					showAlert(AlertType.ERROR, "Error", "",  esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO() ,
+//							main.getStagePrincipale());
+//					return false;
+//				}
+//			} else {
+//				showAlert(AlertType.ERROR, "Error", "",
+//						"Non trovati dati di connessione relativi allo schema " + s.getCodice(), main.getStagePrincipale());
+//				return false;
+//			}
+//		}
+//		return true;
+	}
+
+	private Task createcopyWorkerForCheckConnessioniTabelle(ObservableList<Schema> listaSchemi,
+			ArrayList<QueryDB> listaQueryDB) {
+
+		return new Task() {
+			@Override
+			protected Object call() throws Exception {
+
+				if (this.isCancelled()) {
+					logger.error("Canceling of createcopyWorkerForCheckConnessioniTabelle...");
+				}
+				esitoTestConnessioniPresenzaTabellePerTask.setEsitoGlobale(true);
+				for (Schema s : listaSchemi) {
+					SchemaDTO schemaDTO = searchSchemaDTO(s.getCodice());
+					if (schemaDTO != null) {
+						
+						EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabelle = model
+								.testConnessionePresenzaTabelle(schemaDTO, listaQueryDB);
+						
+						if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()
+								&& "".equalsIgnoreCase(esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO())) {
+							
+							esitoTestConnessioniPresenzaTabellePerTask.setEsitoGlobale(false);
+							esitoTestConnessioniPresenzaTabellePerTask.setCausaEsitoKO("Non riuscita connessione allo schema " + s.getCodice());
+							
+//							showAlert(AlertType.ERROR, "Error", "", "Non riuscita connessione allo schema " + s.getCodice(),
+//									main.getStagePrincipale());
+//							return false;
+						}
+						if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()) {
+							
+							esitoTestConnessioniPresenzaTabellePerTask.setEsitoGlobale(false);
+							esitoTestConnessioniPresenzaTabellePerTask.setCausaEsitoKO(esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO());
+							
+//							showAlert(AlertType.ERROR, "Error", "",  esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO() ,
+//									main.getStagePrincipale());
+//							return false;
+						}
+					} else {
+						esitoTestConnessioniPresenzaTabellePerTask.setEsitoGlobale(false);
+						esitoTestConnessioniPresenzaTabellePerTask.setCausaEsitoKO("Non trovati dati di connessione relativi allo schema " + s.getCodice());
+						
+//						showAlert(AlertType.ERROR, "Error", "",
+//								"Non trovati dati di connessione relativi allo schema " + s.getCodice(), main.getStagePrincipale());
+//						return false;
+					}
+				}
+				
+				return true;
+			}
+
+			@Override
+			protected void succeeded() {
+				
+				logger.info("metodo createcopyWorkerForCheckConnessioniTabelle - succeeded");
+				super.succeeded();
+				updateMessage("Done!");
+//				bar.progressProperty().unbind();
+//				bar.setProgress(0);
+				disabledView(false);
+//				VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
+//				showAlertDistribuzioneOK(aggiornaStoricoDistribuzione());
+//				clearDistributionInfo();
+				//mainTree.getSelectionModel().select(1);
+				if (!esitoTestConnessioniPresenzaTabellePerTask.isEsitoGlobale()) {
+					showAlert(AlertType.ERROR, "Error", "",  esitoTestConnessioniPresenzaTabellePerTask.getCausaEsitoKO() ,
+					main.getStagePrincipale());
+				}
+			}
+		};
+		
 	}
 
 	private void anteprimaDistribuzione() {
@@ -1670,8 +1831,7 @@ public class OverviewDistriVociController {
 			@Override
 			protected void succeeded() {
 				
-				//System.out.println("OverviewDistriVociController metodo createWorkerForExcreateWorkerForExecuteDistributionNEWecuteDistribution - succeeded");
-				logger.info("metodo createWorkerForExcreateWorkerForExecuteDistributionNEWecuteDistribution - succeeded");
+				logger.info("metodo createWorkerForExecuteDistribution - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
 				bar.progressProperty().unbind();
@@ -1698,7 +1858,14 @@ public class OverviewDistriVociController {
 			listaDeleteStatement.add(deletestatement);
 			schemaPartenza = deletestatement.getCodiceSchemaOrigine();
 		}
-		storicoDistribuzione.setElencoSchemi(listaSchemiPerStoricoDistribuzione);
+		
+		ArrayList<Schema> elencoSchemi = new ArrayList<Schema>();
+		for (int i = 0; i < listaSchemiPerStoricoDistribuzione.size(); i++) {
+			elencoSchemi.add(new Schema(listaSchemiPerStoricoDistribuzione.get(i).getCodice(),
+					listaSchemiPerStoricoDistribuzione.get(i).getDescrizione()));
+		}
+		
+		storicoDistribuzione.setElencoSchemi(elencoSchemi);
 		
 		ObservableList<Voce> listaVociSelezionate = vociTable.getSelectionModel().getSelectedItems();
 		ArrayList<Voce> elencoVoci = new ArrayList<Voce>();
@@ -1834,6 +2001,7 @@ public class OverviewDistriVociController {
 		alert.setTitle("Conferma Ripristino" + voceDaRipristinare);
 		alert.setHeaderText("Conferma Ripristino" + voceDaRipristinare);
 		alert.setContentText("Confermi il Ripristino" + voceDaRipristinare + "?");
+		alert.initOwner(main.getStagePrincipale());
 		
 		Optional<ButtonType> result = alert.showAndWait();
 		
@@ -1879,6 +2047,7 @@ public class OverviewDistriVociController {
 				textAreaRipristinoInsert.setText("");
 				main.getSchemiRipristino().clear();
 				aggiornaStoricoDistribuzioneRipristinata();
+				VboxNonVisibile(Constants.BOX_ANTEPRIMA_RIPRISTINO);
 				showAlertRipristinoOK();
 				clearRipristinoInfo();
 				mainTree.getSelectionModel().select(1);

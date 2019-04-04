@@ -153,6 +153,14 @@
                               <Insets bottom="10.0" top="10.0" />
                            </VBox.margin>
                         </TableView>
+                        <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                          <buttons>
+                            <Button fx:id="bntDeleteOldest" mnemonicParsing="false" onAction="#handleDeleteOldest" text="Delete Oldest" />
+                          </buttons>
+                           <VBox.margin>
+                              <Insets right="20.0" top="15.0" />
+                           </VBox.margin>
+                        </ButtonBar>
                      </children>
                   </VBox>
                   <VBox fx:id="vboxVoci" prefHeight="200.0" prefWidth="450.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="100.0">

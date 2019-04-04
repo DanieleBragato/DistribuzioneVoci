@@ -871,16 +871,31 @@ public class Main extends Application {
     		if (this.storicoDistribuzione == null || this.storicoDistribuzione.size() == Constants.ZERO) {
     			sequenza++;
     		} else {
-    			sequenza = this.storicoDistribuzione.size() + 1;
+    			sequenza = cercaNumeroSequenza();
     		}
-    		storicoDistribuzione.setSequenceDistribuzione( Integer.toString(sequenza) );	
+    		String numberAsString = String.format ("%08d", sequenza);
+    		storicoDistribuzione.setSequenceDistribuzione( numberAsString );	
     		this.storicoDistribuzione.add(storicoDistribuzione);
     		return true;
     	}
     	return false;
     }
     
-    public boolean clearStoricoDistribuzione () {
+    private int cercaNumeroSequenza() {
+    	
+		int numeroSequenza = 0;
+		
+    	for (int i = 0; i < this.storicoDistribuzione.size(); i++) {
+			if (this.storicoDistribuzione.get(i).getSequenceDistribuzione() != null
+					&& Integer.parseInt(this.storicoDistribuzione.get(i).getSequenceDistribuzione()) > numeroSequenza) {
+    			numeroSequenza = Integer.parseInt(this.storicoDistribuzione.get(i).getSequenceDistribuzione());
+    		}
+    	}
+    	
+		return numeroSequenza + 1;
+	}
+
+	public boolean clearStoricoDistribuzione () {
     	
     	if (this.storicoDistribuzione != null) {
     		this.storicoDistribuzione.clear();
@@ -997,9 +1012,9 @@ public class Main extends Application {
             // Imposta la query nel controller
             DettaglioStoricoDistribuzioneDialogController controller = loader.getController();
             controller.setMain(this);
-            controller.setFilter();
             controller.setDialogStage(dialogStage);
             controller.setStoricoDistribuzione(storicoDistribuzione);
+            controller.setFilter();
 
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();
