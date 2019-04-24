@@ -16,392 +16,404 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.infocamere.sipert.distrivoci.view.OverviewDistriVociController">
    <children>
-      <HBox fx:id="hbox" prefHeight="840.0" prefWidth="1095.0">
+      <AnchorPane fx:id="mainAnchorPane" layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <AnchorPane fx:id="anchorPaneSX" prefWidth="280.0">
-               <HBox.margin>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </HBox.margin></AnchorPane>
-            <AnchorPane fx:id="anchorPaneDX" layoutX="10.0" layoutY="10.0" prefWidth="750.0">
-               <HBox.margin>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </HBox.margin>
+            <HBox fx:id="hbox" prefHeight="840.0" prefWidth="1095.0">
                <children>
-                  <VBox fx:id="vboxSchemi" prefHeight="340.0" prefWidth="600.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="100.0">
+                  <AnchorPane fx:id="anchorPaneSX" prefWidth="280.0">
+                     <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </HBox.margin>
+                  </AnchorPane>
+                  <AnchorPane fx:id="anchorPaneDX" layoutX="10.0" layoutY="10.0" prefWidth="750.0">
+                     <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </HBox.margin>
                      <children>
-                        <Label prefHeight="48.0" prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Schemi sui quali distribuire" textAlignment="CENTER">
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font>
-                           <VBox.margin>
-                              <Insets left="25.0" />
-                           </VBox.margin>
-                        </Label>
-                        <HBox prefHeight="50.0" prefWidth="200.0">
+                        <VBox fx:id="vboxSchemi" prefHeight="340.0" prefWidth="600.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="100.0">
                            <children>
-                              <Label prefHeight="21.0" prefWidth="80.0" styleClass="label-bright" stylesheets="@DarkTheme.css" text="FILTRO:" textAlignment="RIGHT">
-                                 <HBox.margin>
-                                    <Insets left="20.0" top="20.0" />
-                                 </HBox.margin>
-                              </Label>
-                              <TextField fx:id="filterField" prefHeight="30.0" prefWidth="150.0">
-                                 <HBox.margin>
-                                    <Insets bottom="5.0" left="5.0" right="30.0" top="14.0" />
-                                 </HBox.margin>
-                              </TextField>
-                           </children>
-                        </HBox>
-                        <TableView fx:id="schemiTable" prefHeight="400.0" prefWidth="500.0">
-                           <columns>
-                              <TableColumn fx:id="codiceSchemaColumn" prefWidth="150.0" text="Codice" />
-                              <TableColumn fx:id="descrizioneSchemaColumn" prefWidth="545.0" text="Descrizione" />
-                           </columns>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </VBox.margin>
-                        </TableView>
-                        <ButtonBar prefHeight="60.0" prefWidth="200.0">
-                           <buttons>
-                              <Button fx:id="bntSelectAll" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleSelectAllSchemi" text="Select all.." />
-                              <Button fx:id="bntDeselectAll" contentDisplay="CENTER" layoutX="308.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleDeselectAllSchemi" text="Deselect all.." />
-                           </buttons>
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="25.0" />
-                           </VBox.margin>
-                           <padding>
-                              <Insets bottom="10.0" left="10.0" right="40.0" top="10.0" />
-                           </padding>
-                        </ButtonBar>
-                     </children>
-                  </VBox>
-                  <VBox fx:id="vboxPreView" prefHeight="596.0" prefWidth="650.0" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
-                     <children>
-                        <Label prefHeight="48.0" prefWidth="630.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Anteprima e Distribuzione Voci">
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="100.0" right="20.0" top="10.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font>
-                        </Label>
-                        <Label styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Delete">
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Italic" size="16.0" />
-                           </font></Label>
-                        <TableView fx:id="deleteStatementTable" prefHeight="400.0" prefWidth="930.0">
-                           <columns>
-                              <TableColumn fx:id="codiceTabDeleteColumn" prefWidth="100.0" text="Tabella" />
-                              <TableColumn fx:id="statementDeleteColumn" prefWidth="790.0" text="Statements SQL" />
-                           </columns>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" />
-                           </VBox.margin>
-                        </TableView>
-                        <Label fx:id="labelAnteprimaInsert" layoutX="10.0" layoutY="10.0" styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Insert - origine valori Schema di partenza ">
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="20.0" right="10.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Italic" size="16.0" />
-                           </font></Label>
-                        <AnchorPane prefWidth="650.0">
-                           <children>
-                              <TextArea fx:id="textAreaPreviewInsert" editable="false" layoutY="5.0" opacity="0.5" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
-                           </children>
-                        </AnchorPane>
-                        <ButtonBar prefHeight="40.0" prefWidth="200.0">
-                           <buttons>
-                              <ProgressBar fx:id="bar" prefHeight="18.0" prefWidth="421.0" progress="0.0" visible="false" />
-                              <Button fx:id="bntDistribuzioneVoci" mnemonicParsing="false" onAction="#distribuzione" text="Distribuzione Voci">
+                              <Label prefHeight="48.0" prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Schemi sui quali distribuire" textAlignment="CENTER">
                                  <font>
-                                    <Font size="16.0" />
-                                 </font></Button>
-                           </buttons>
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="18.0" right="18.0" top="30.0" />
-                           </VBox.margin>
-                           <padding>
-                              <Insets right="40.0" />
-                           </padding>
-                        </ButtonBar>
-                        <Label fx:id="labelInfoEsecuzione" text="labelInfoEsecuzione" visible="false" />
-                     </children>
-                  </VBox>
-                  <VBox fx:id="vboxStorico" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="100.0">
-                     <children>
-                        <Label styleClass="label-header" stylesheets="@DarkTheme.css" text="Storico Distribuzioni" textAlignment="CENTER">
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
-                           </VBox.margin>
-                        </Label>
-                        <TableView fx:id="storicoDistribuzioneTable" prefHeight="400.0" prefWidth="600.0">
-                           <columns>
-                              <TableColumn fx:id="dataTabStoricoDistribuzioneColumn" prefWidth="140.0" text="Data" />
-                              <TableColumn fx:id="schemaPartenzaTabStoricoDistribuzioneColumn" prefWidth="100.0" text="Origine" />
-                              <TableColumn fx:id="noteTabStoricoDistribuzioneColumn" prefWidth="230.0" text="Note" />
-                              <TableColumn fx:id="ripristinoTabStoricoDistribuzioneColumn" prefWidth="140.0" text="Ripristino" />
-                              <TableColumn fx:id="dummyTabStoricoDistribuzioneColumn" prefWidth="125.0" />
-                              <TableColumn fx:id="sequenceTabStoricoDistribuzioneColumn" prefWidth="0.0" text="Sequence" visible="false" />
-                           </columns>
-                           <VBox.margin>
-                              <Insets bottom="10.0" top="10.0" />
-                           </VBox.margin>
-                        </TableView>
-                        <ButtonBar prefHeight="40.0" prefWidth="200.0">
-                          <buttons>
-                            <Button fx:id="bntDeleteOldest" mnemonicParsing="false" onAction="#handleDeleteOldest" text="Delete Oldest" />
-                          </buttons>
-                           <VBox.margin>
-                              <Insets right="20.0" top="15.0" />
-                           </VBox.margin>
-                        </ButtonBar>
-                     </children>
-                  </VBox>
-                  <VBox fx:id="vboxVoci" prefHeight="200.0" prefWidth="450.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="100.0">
-                     <children>
-                        <Label prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Voci">
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font></Label>
-                        <TableView fx:id="vociTable" prefHeight="400.0" prefWidth="450.0">
-                           <columns>
-                              <TableColumn fx:id="codiceVoceColumn" prefWidth="200.0" text="Codice" />
-                              <TableColumn fx:id="descrizioneVoceColumn" prefWidth="460.0" text="Descrizione" />
-                           </columns>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="60.0" top="10.0" />
-                           </VBox.margin>
-                        </TableView>
-                        <ButtonBar prefHeight="33.0" prefWidth="407.0">
-                           <buttons>
-                              <Button mnemonicParsing="false" onAction="#handleNewVoce" text="New.." />
-                              <Button layoutX="368.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleEditVoce" text="Edit.." />
-                              <Button layoutX="348.0" layoutY="10.0" mnemonicParsing="false" onAction="#handleDeleteVoce" text="Delete" />
-                           </buttons>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="70.0" top="30.0" />
-                           </VBox.margin>
-                        </ButtonBar>
-                     </children>
-                  </VBox>
-                  <VBox fx:id="vboxTabelle" prefHeight="600.0" prefWidth="550.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="100.0">
-                     <children>
-                        <Label prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Tabelle" textAlignment="CENTER">
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font></Label>
-                        <TableView fx:id="tabelledbTable" prefHeight="400.0" prefWidth="450.0">
-                           <columns>
-                              <TableColumn fx:id="codiceTabColumn" prefWidth="200.0" text="Codice" />
-                              <TableColumn fx:id="descrizioneTabColumn" prefWidth="460.0" text="Descrizione" />
-                           </columns>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="60.0" top="10.0" />
-                           </VBox.margin>
-                        </TableView>
-                        <ButtonBar prefHeight="33.0" prefWidth="407.0">
-                           <buttons>
-                              <Button mnemonicParsing="false" onAction="#handleNewTabDB" text="New.." />
-                              <Button layoutX="368.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleEditTabDB" text="Edit.." />
-                              <Button layoutX="348.0" layoutY="10.0" mnemonicParsing="false" onAction="#handleDeleteTabDB" text="Delete" />
-                           </buttons>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="70.0" top="30.0" />
-                           </VBox.margin>
-                        </ButtonBar>
-                     </children>
-                  </VBox>
-                  <VBox fx:id="vboxSchemiPartenza" layoutX="60.0" layoutY="110.0" prefHeight="340.0" prefWidth="600.0" visible="false">
-                     <children>
-                        <HBox prefHeight="50.0" prefWidth="200.0">
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="25.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <HBox prefHeight="50.0" prefWidth="200.0">
+                                 <children>
+                                    <Label prefHeight="21.0" prefWidth="80.0" styleClass="label-bright" stylesheets="@DarkTheme.css" text="FILTRO:" textAlignment="RIGHT">
+                                       <HBox.margin>
+                                          <Insets left="20.0" top="20.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <TextField fx:id="filterField" prefHeight="30.0" prefWidth="150.0">
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" left="5.0" right="30.0" top="14.0" />
+                                       </HBox.margin>
+                                    </TextField>
+                                 </children>
+                              </HBox>
+                              <TableView fx:id="schemiTable" prefHeight="400.0" prefWidth="500.0">
+                                 <columns>
+                                    <TableColumn fx:id="codiceSchemaColumn" prefWidth="150.0" text="Codice" />
+                                    <TableColumn fx:id="descrizioneSchemaColumn" prefWidth="545.0" text="Descrizione" />
+                                 </columns>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </VBox.margin>
+                              </TableView>
+                              <ButtonBar prefHeight="60.0" prefWidth="200.0">
+                                 <buttons>
+                                    <Button fx:id="bntSelectAll" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleSelectAllSchemi" text="Select all.." />
+                                    <Button fx:id="bntDeselectAll" contentDisplay="CENTER" layoutX="308.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleDeselectAllSchemi" text="Deselect all.." />
+                                    <Button fx:id="bntTEST" contentDisplay="CENTER" layoutX="496.0" layoutY="18.0" mnemonicParsing="false" onAction="#handleTEST" text="TEST" />
+                                 </buttons>
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="25.0" />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="40.0" top="10.0" />
+                                 </padding>
+                              </ButtonBar>
+                           </children>
+                        </VBox>
+                        <VBox fx:id="vboxPreView" prefHeight="596.0" prefWidth="650.0" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                            <children>
-                              <Label prefHeight="48.0" prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Schemi di Partenza" textAlignment="CENTER">
-                                 <HBox.margin>
-                                    <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
-                                 </HBox.margin>
+                              <Label prefHeight="48.0" prefWidth="630.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Anteprima e Distribuzione Voci">
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="100.0" right="20.0" top="10.0" />
+                                 </VBox.margin>
                                  <font>
                                     <Font name="System Bold" size="16.0" />
                                  </font>
                               </Label>
-                           </children>
-                        </HBox>
-                        <TableView fx:id="schemiPartenzaTable" prefHeight="400.0" prefWidth="500.0">
-                           <columns>
-                              <TableColumn fx:id="codiceSchemaPartenzaColumn" prefWidth="150.0" text="Codice" />
-                              <TableColumn fx:id="descrizioneSchemaPartenzaColumn" prefWidth="440.0" text="Descrizione" />
-                           </columns>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </VBox.margin>
-                        </TableView>
-                     </children>
-                  </VBox>
-                  <VBox fx:id="vboxRipristino" layoutX="20.0" layoutY="20.0" prefHeight="680.0" prefWidth="680.0" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="10.0">
-                     <children>
-                        <Label fx:id="labelRipristino" prefHeight="26.0" prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Anteprima e Ripristino">
-                           <VBox.margin>
-                              <Insets bottom="10.0" right="3.0" top="5.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font>
-                        </Label>
-                        <Label layoutX="30.0" layoutY="270.0" styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Schemi">
-                           <font>
-                              <Font name="System Italic" size="16.0" />
-                           </font>
-                           <VBox.margin>
-                              <Insets left="15.0" />
-                           </VBox.margin>
-                        </Label>
-                        <TableView fx:id="schemiRipristinoTable" prefHeight="220.0" prefWidth="500.0">
-                           <columns>
-                              <TableColumn fx:id="codiceSchemaRipristinoColumn" prefWidth="150.0" text="Codice" />
-                              <TableColumn fx:id="descrizioneSchemaRipristinoColumn" prefWidth="510.0" text="Descrizione" />
-                           </columns>
-                        </TableView>
-                        <Label styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Delete">
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="20.0" right="10.0" top="5.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Italic" size="16.0" />
-                           </font>
-                        </Label>
-                        <TableView fx:id="deleteStatementRipristinoTable" prefHeight="240.0" prefWidth="930.0">
-                           <columns>
-                              <TableColumn fx:id="codiceTabRipristinoDeleteColumn" prefWidth="100.0" text="Tabella" />
-                              <TableColumn fx:id="statementRipristinoDeleteColumn" prefWidth="790.0" text="Statements SQL" />
-                           </columns>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" />
-                           </VBox.margin>
-                        </TableView>
-                        <Label fx:id="labelRipristinoInsert" layoutX="10.0" layoutY="10.0" styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Insert - valori ante Distribuzione">
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="20.0" right="10.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Italic" size="16.0" />
-                           </font>
-                        </Label>
-                        <AnchorPane prefWidth="650.0">
-                           <children>
-                              <TextArea fx:id="textAreaRipristinoInsert" editable="false" layoutY="5.0" opacity="0.5" prefHeight="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
-                           </children>
-                        </AnchorPane>
-                        <ButtonBar prefHeight="40.0" prefWidth="200.0">
-                           <buttons>
-                              <ProgressBar fx:id="barRipristino" prefHeight="18.0" prefWidth="421.0" progress="0.0" visible="false" />
-                              <Button fx:id="bntRipristinoDistribuzioneVoci" mnemonicParsing="false" onAction="#ripristino" text="Ripristino Distribuzione Voci">
+                              <Label styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Delete">
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+                                 </VBox.margin>
                                  <font>
-                                    <Font size="16.0" />
+                                    <Font name="System Italic" size="16.0" />
                                  </font>
-                              </Button>
-                           </buttons>
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="18.0" right="18.0" top="20.0" />
-                           </VBox.margin>
-                           <padding>
-                              <Insets right="40.0" />
-                           </padding>
-                        </ButtonBar>
-                     </children>
-                  </VBox>
-                  <VBox fx:id="vboxRipristinoVoce" layoutX="30.0" layoutY="20.0" prefHeight="785.0" prefWidth="680.0" visible="false">
-                     <children>
-                        <Label fx:id="labelRipristinoVoce" prefHeight="26.0" prefWidth="625.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="RIPRISTINO DISTRIBUZIONE DEL ">
-                           <VBox.margin>
-                              <Insets left="40.0" right="20.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font>
-                        </Label>
-                        <Label fx:id="labelRipristinoVoce1" layoutX="50.0" layoutY="10.0" prefHeight="26.0" prefWidth="625.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="RIPRISTINO DISTRIBUZIONE DEL ">
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font>
-                           <VBox.margin>
-                              <Insets left="40.0" right="20.0" />
-                           </VBox.margin>
-                        </Label>
-                        <Label layoutX="30.0" layoutY="270.0" styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Schemi">
-                           <font>
-                              <Font name="System Italic" size="16.0" />
-                           </font>
-                           <VBox.margin>
-                              <Insets left="15.0" />
-                           </VBox.margin>
-                        </Label>
-                        <TableView fx:id="schemiRipristinoTableVoce" prefHeight="220.0" prefWidth="500.0">
-                           <columns>
-                              <TableColumn fx:id="codiceSchemaRipristinoVoceColumn" prefWidth="150.0" text="Codice" />
-                              <TableColumn fx:id="descrizioneSchemaRipristinoVoceColumn" prefWidth="510.0" text="Descrizione" />
-                           </columns>
-                        </TableView>
-                        <Label styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Delete">
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="20.0" right="10.0" top="5.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Italic" size="16.0" />
-                           </font>
-                        </Label>
-                        <TableView fx:id="deleteStatementRipristinoVoceTable" prefHeight="240.0" prefWidth="930.0">
-                           <columns>
-                              <TableColumn fx:id="codiceTabRipristinoVoceDeleteColumn" prefWidth="100.0" text="Tabella" />
-                              <TableColumn fx:id="statementRipristinoVoceDeleteColumn" prefWidth="790.0" text="Statements SQL" />
-                           </columns>
-                           <VBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" />
-                           </VBox.margin>
-                        </TableView>
-                        <Label fx:id="labelRipristinoVoceInsert" layoutX="10.0" layoutY="10.0" styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Insert - valori ante Distribuzione">
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="20.0" right="10.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Italic" size="16.0" />
-                           </font>
-                        </Label>
-                        <AnchorPane prefWidth="650.0">
-                           <children>
-                              <TextArea fx:id="textAreaRipristinoVoceInsert" editable="false" layoutY="5.0" opacity="0.5" prefHeight="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
-                           </children>
-                        </AnchorPane>
-                        <ButtonBar prefHeight="40.0" prefWidth="200.0">
-                           <buttons>
-                              <ProgressBar fx:id="barRipristinoVoce" prefHeight="18.0" prefWidth="421.0" progress="0.0" visible="false" />
-                              <Button fx:id="bntRipristinoDistribuzioneVoce" mnemonicParsing="false" onAction="#ripristinoVoce" text="Ripristino Voce">
+                              </Label>
+                              <TableView fx:id="deleteStatementTable" prefHeight="400.0" prefWidth="930.0">
+                                 <columns>
+                                    <TableColumn fx:id="codiceTabDeleteColumn" prefWidth="100.0" text="Tabella" />
+                                    <TableColumn fx:id="statementDeleteColumn" prefWidth="790.0" text="Statements SQL" />
+                                 </columns>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" />
+                                 </VBox.margin>
+                              </TableView>
+                              <Label fx:id="labelAnteprimaInsert" layoutX="10.0" layoutY="10.0" styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Insert - origine valori Schema di partenza ">
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="20.0" right="10.0" />
+                                 </VBox.margin>
                                  <font>
-                                    <Font size="16.0" />
+                                    <Font name="System Italic" size="16.0" />
                                  </font>
-                              </Button>
-                           </buttons>
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="18.0" right="18.0" top="20.0" />
-                           </VBox.margin>
-                           <padding>
-                              <Insets right="40.0" />
-                           </padding>
-                        </ButtonBar>
+                              </Label>
+                              <AnchorPane prefWidth="650.0">
+                                 <children>
+                                    <TextArea fx:id="textAreaPreviewInsert" editable="false" layoutY="5.0" opacity="0.5" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+                                 </children>
+                              </AnchorPane>
+                              <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                                 <buttons>
+                                    <ProgressBar fx:id="bar" prefHeight="18.0" prefWidth="421.0" progress="0.0" visible="false" />
+                                    <Button fx:id="bntDistribuzioneVoci" mnemonicParsing="false" onAction="#distribuzione" text="Distribuzione Voci">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Button>
+                                 </buttons>
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" left="18.0" right="18.0" top="30.0" />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets right="40.0" />
+                                 </padding>
+                              </ButtonBar>
+                              <Label fx:id="labelInfoEsecuzione" text="labelInfoEsecuzione" visible="false" />
+                           </children>
+                        </VBox>
+                        <VBox fx:id="vboxStorico" prefHeight="200.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="100.0">
+                           <children>
+                              <Label styleClass="label-header" stylesheets="@DarkTheme.css" text="Storico Distribuzioni" textAlignment="CENTER">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <TableView fx:id="storicoDistribuzioneTable" prefHeight="400.0" prefWidth="600.0">
+                                 <columns>
+                                    <TableColumn fx:id="dataTabStoricoDistribuzioneColumn" prefWidth="140.0" text="Data" />
+                                    <TableColumn fx:id="schemaPartenzaTabStoricoDistribuzioneColumn" prefWidth="100.0" text="Origine" />
+                                    <TableColumn fx:id="noteTabStoricoDistribuzioneColumn" prefWidth="230.0" text="Note" />
+                                    <TableColumn fx:id="ripristinoTabStoricoDistribuzioneColumn" prefWidth="140.0" text="Ripristino" />
+                                    <TableColumn fx:id="dummyTabStoricoDistribuzioneColumn" prefWidth="125.0" />
+                                    <TableColumn fx:id="sequenceTabStoricoDistribuzioneColumn" prefWidth="0.0" text="Sequence" visible="false" />
+                                 </columns>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" top="10.0" />
+                                 </VBox.margin>
+                              </TableView>
+                              <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                                <buttons>
+                                  <Button fx:id="bntDeleteOldest" mnemonicParsing="false" onAction="#handleDeleteOldest" text="Delete Oldest" />
+                                </buttons>
+                                 <VBox.margin>
+                                    <Insets right="20.0" top="15.0" />
+                                 </VBox.margin>
+                              </ButtonBar>
+                           </children>
+                        </VBox>
+                        <VBox fx:id="vboxVoci" prefHeight="200.0" prefWidth="450.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="100.0">
+                           <children>
+                              <Label prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Voci">
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                              <TableView fx:id="vociTable" prefHeight="400.0" prefWidth="450.0">
+                                 <columns>
+                                    <TableColumn fx:id="codiceVoceColumn" prefWidth="200.0" text="Codice" />
+                                    <TableColumn fx:id="descrizioneVoceColumn" prefWidth="460.0" text="Descrizione" />
+                                 </columns>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="60.0" top="10.0" />
+                                 </VBox.margin>
+                              </TableView>
+                              <ButtonBar prefHeight="33.0" prefWidth="407.0">
+                                 <buttons>
+                                    <Button mnemonicParsing="false" onAction="#handleNewVoce" text="New.." />
+                                    <Button layoutX="368.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleEditVoce" text="Edit.." />
+                                    <Button layoutX="348.0" layoutY="10.0" mnemonicParsing="false" onAction="#handleDeleteVoce" text="Delete" />
+                                 </buttons>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="70.0" top="30.0" />
+                                 </VBox.margin>
+                              </ButtonBar>
+                           </children>
+                        </VBox>
+                        <VBox fx:id="vboxTabelle" prefHeight="600.0" prefWidth="550.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="100.0">
+                           <children>
+                              <Label prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Tabelle" textAlignment="CENTER">
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                              <TableView fx:id="tabelledbTable" prefHeight="400.0" prefWidth="450.0">
+                                 <columns>
+                                    <TableColumn fx:id="codiceTabColumn" prefWidth="200.0" text="Codice" />
+                                    <TableColumn fx:id="descrizioneTabColumn" prefWidth="460.0" text="Descrizione" />
+                                 </columns>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="60.0" top="10.0" />
+                                 </VBox.margin>
+                              </TableView>
+                              <ButtonBar prefHeight="33.0" prefWidth="407.0">
+                                 <buttons>
+                                    <Button mnemonicParsing="false" onAction="#handleNewTabDB" text="New.." />
+                                    <Button layoutX="368.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleEditTabDB" text="Edit.." />
+                                    <Button layoutX="348.0" layoutY="10.0" mnemonicParsing="false" onAction="#handleDeleteTabDB" text="Delete" />
+                                 </buttons>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="70.0" top="30.0" />
+                                 </VBox.margin>
+                              </ButtonBar>
+                           </children>
+                        </VBox>
+                        <VBox fx:id="vboxSchemiPartenza" layoutX="60.0" layoutY="110.0" prefHeight="340.0" prefWidth="600.0" visible="false">
+                           <children>
+                              <HBox prefHeight="50.0" prefWidth="200.0">
+                                 <children>
+                                    <Label prefHeight="48.0" prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Schemi di Partenza" textAlignment="CENTER">
+                                       <HBox.margin>
+                                          <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+                                       </HBox.margin>
+                                       <font>
+                                          <Font name="System Bold" size="16.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <TableView fx:id="schemiPartenzaTable" prefHeight="400.0" prefWidth="500.0">
+                                 <columns>
+                                    <TableColumn fx:id="codiceSchemaPartenzaColumn" prefWidth="150.0" text="Codice" />
+                                    <TableColumn fx:id="descrizioneSchemaPartenzaColumn" prefWidth="440.0" text="Descrizione" />
+                                 </columns>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </VBox.margin>
+                              </TableView>
+                           </children>
+                        </VBox>
+                        <VBox fx:id="vboxRipristino" layoutX="20.0" layoutY="20.0" prefHeight="680.0" prefWidth="680.0" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="10.0">
+                           <children>
+                              <Label fx:id="labelRipristino" prefHeight="26.0" prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Anteprima e Ripristino">
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" right="3.0" top="5.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                              <Label layoutX="30.0" layoutY="270.0" styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Schemi">
+                                 <font>
+                                    <Font name="System Italic" size="16.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <TableView fx:id="schemiRipristinoTable" prefHeight="220.0" prefWidth="500.0">
+                                 <columns>
+                                    <TableColumn fx:id="codiceSchemaRipristinoColumn" prefWidth="150.0" text="Codice" />
+                                    <TableColumn fx:id="descrizioneSchemaRipristinoColumn" prefWidth="510.0" text="Descrizione" />
+                                 </columns>
+                              </TableView>
+                              <Label styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Delete">
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" left="20.0" right="10.0" top="5.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font name="System Italic" size="16.0" />
+                                 </font>
+                              </Label>
+                              <TableView fx:id="deleteStatementRipristinoTable" prefHeight="240.0" prefWidth="930.0">
+                                 <columns>
+                                    <TableColumn fx:id="codiceTabRipristinoDeleteColumn" prefWidth="100.0" text="Tabella" />
+                                    <TableColumn fx:id="statementRipristinoDeleteColumn" prefWidth="790.0" text="Statements SQL" />
+                                 </columns>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" />
+                                 </VBox.margin>
+                              </TableView>
+                              <Label fx:id="labelRipristinoInsert" layoutX="10.0" layoutY="10.0" styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Insert - valori ante Distribuzione">
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" left="20.0" right="10.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font name="System Italic" size="16.0" />
+                                 </font>
+                              </Label>
+                              <AnchorPane prefWidth="650.0">
+                                 <children>
+                                    <TextArea fx:id="textAreaRipristinoInsert" editable="false" layoutY="5.0" opacity="0.5" prefHeight="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+                                 </children>
+                              </AnchorPane>
+                              <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                                 <buttons>
+                                    <ProgressBar fx:id="barRipristino" prefHeight="18.0" prefWidth="421.0" progress="0.0" visible="false" />
+                                    <Button fx:id="bntRipristinoDistribuzioneVoci" mnemonicParsing="false" onAction="#ripristino" text="Ripristino Distribuzione Voci">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Button>
+                                 </buttons>
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" left="18.0" right="18.0" top="20.0" />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets right="40.0" />
+                                 </padding>
+                              </ButtonBar>
+                           </children>
+                        </VBox>
+                        <VBox fx:id="vboxRipristinoVoce" layoutX="30.0" layoutY="20.0" prefHeight="785.0" prefWidth="680.0" visible="false">
+                           <children>
+                              <Label fx:id="labelRipristinoVoce" prefHeight="26.0" prefWidth="625.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="RIPRISTINO DISTRIBUZIONE DEL ">
+                                 <VBox.margin>
+                                    <Insets left="40.0" right="20.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="labelRipristinoVoce1" layoutX="50.0" layoutY="10.0" prefHeight="26.0" prefWidth="625.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="RIPRISTINO DISTRIBUZIONE DEL ">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="40.0" right="20.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <Label layoutX="30.0" layoutY="270.0" styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Schemi">
+                                 <font>
+                                    <Font name="System Italic" size="16.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <TableView fx:id="schemiRipristinoTableVoce" prefHeight="220.0" prefWidth="500.0">
+                                 <columns>
+                                    <TableColumn fx:id="codiceSchemaRipristinoVoceColumn" prefWidth="150.0" text="Codice" />
+                                    <TableColumn fx:id="descrizioneSchemaRipristinoVoceColumn" prefWidth="510.0" text="Descrizione" />
+                                 </columns>
+                              </TableView>
+                              <Label styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Delete">
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" left="20.0" right="10.0" top="5.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font name="System Italic" size="16.0" />
+                                 </font>
+                              </Label>
+                              <TableView fx:id="deleteStatementRipristinoVoceTable" prefHeight="240.0" prefWidth="930.0">
+                                 <columns>
+                                    <TableColumn fx:id="codiceTabRipristinoVoceDeleteColumn" prefWidth="100.0" text="Tabella" />
+                                    <TableColumn fx:id="statementRipristinoVoceDeleteColumn" prefWidth="790.0" text="Statements SQL" />
+                                 </columns>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" />
+                                 </VBox.margin>
+                              </TableView>
+                              <Label fx:id="labelRipristinoVoceInsert" layoutX="10.0" layoutY="10.0" styleClass="label-bright18" stylesheets="@DarkTheme.css" text="Insert - valori ante Distribuzione">
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" left="20.0" right="10.0" />
+                                 </VBox.margin>
+                                 <font>
+                                    <Font name="System Italic" size="16.0" />
+                                 </font>
+                              </Label>
+                              <AnchorPane prefWidth="650.0">
+                                 <children>
+                                    <TextArea fx:id="textAreaRipristinoVoceInsert" editable="false" layoutY="5.0" opacity="0.5" prefHeight="150.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+                                 </children>
+                              </AnchorPane>
+                              <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                                 <buttons>
+                                    <ProgressBar fx:id="barRipristinoVoce" prefHeight="18.0" prefWidth="421.0" progress="0.0" visible="false" />
+                                    <Button fx:id="bntRipristinoDistribuzioneVoce" mnemonicParsing="false" onAction="#ripristinoVoce" text="Ripristino Voce">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Button>
+                                 </buttons>
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" left="18.0" right="18.0" top="20.0" />
+                                 </VBox.margin>
+                                 <padding>
+                                    <Insets right="40.0" />
+                                 </padding>
+                              </ButtonBar>
+                           </children>
+                        </VBox>
                      </children>
-                  </VBox>
-               </children></AnchorPane>
+                  </AnchorPane>
+               </children>
+            </HBox>
          </children>
-      </HBox>
+      </AnchorPane>
    </children>
 </AnchorPane>

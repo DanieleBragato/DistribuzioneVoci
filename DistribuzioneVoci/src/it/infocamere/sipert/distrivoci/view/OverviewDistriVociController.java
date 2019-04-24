@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.ToIntFunction;
 
 import org.apache.log4j.Logger;
 
@@ -22,25 +24,32 @@ import it.infocamere.sipert.distrivoci.model.Schema;
 import it.infocamere.sipert.distrivoci.model.StoricoDistribuzione;
 import it.infocamere.sipert.distrivoci.model.Tabella;
 import it.infocamere.sipert.distrivoci.model.Voce;
+import it.infocamere.sipert.distrivoci.util.BackgroundTask;
 import it.infocamere.sipert.distrivoci.util.ColumnsType;
 import it.infocamere.sipert.distrivoci.util.Constants;
 import it.infocamere.sipert.distrivoci.util.EsitoTestConnessioniPresenzaTabelle;
 import it.infocamere.sipert.distrivoci.util.InsertStatement;
+import it.infocamere.sipert.distrivoci.util.WorkIndicatorDialog;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -52,11 +61,20 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.Window;
 import javafx.util.Callback;
 
 public class OverviewDistriVociController {
+
+	protected static final Integer Integer = 69;
+	
+	private ToIntFunction<Integer> func = null;
 
 	@FXML
 	private TableView<Tabella> tabelledbTable;
@@ -135,6 +153,9 @@ public class OverviewDistriVociController {
 	private Button bntSelectAll;
 	@FXML
 	private Button bntDeselectAll;
+	
+	@FXML
+	private Button bntTEST;
 
     @FXML
     private Label labelInfoEsecuzione;
@@ -228,7 +249,9 @@ public class OverviewDistriVociController {
     
     @FXML
     private Button bntDeleteOldest;
-    
+
+    @FXML
+    private AnchorPane mainAnchorPane;
     
 	// Referimento al main
 	private Main main;
@@ -266,6 +289,24 @@ public class OverviewDistriVociController {
 	private TreeView<String> mainTree;
 	
 	private EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabellePerTask = new EsitoTestConnessioniPresenzaTabelle();
+	
+	private WorkIndicatorDialog wd = null;
+
+    private Task animationWorker;
+    private Task<Integer> taskWorker;
+ 
+    private final ProgressIndicator progressIndicator = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
+    private final Stage dialog = new Stage(StageStyle.UNDECORATED);
+    private final Label label = new Label();
+    private final Group root = new Group();
+    private final Scene scene = new Scene(root, 330, 120, Color.WHITE);
+    private final BorderPane mainPane = new BorderPane();
+    private final VBox vbox = new VBox();
+ 
+    /** Placing a listener on this list allows to get notified BY the result when the task has finished. */
+    public ObservableList<Integer> resultNotificationList=FXCollections.observableArrayList();
+ 
+    public Integer resultValue;
 	
 	static Logger logger = Logger.getLogger(OverviewDistriVociController.class);
 
@@ -729,6 +770,34 @@ public class OverviewDistriVociController {
 
 	}
 
+	@FXML
+	private void handleTEST(ActionEvent event) {
+		
+		System.out.println("handleTEST");
+		wd = new WorkIndicatorDialog(main.getStagePrincipale().getScene().getWindow(), "Loading Project Files...");
+		 
+	    wd.addTaskEndNotification(result -> {
+	       System.out.println(result);
+	       wd=null; // don't keep the object, cleanup
+	    });
+	 
+	    wd.exec("123", inputParam -> {
+	       // Thinks to do...
+	       // NO ACCESS TO UI ELEMENTS!
+	       for (int i = 0; i < 9; i++) {
+	           System.out.println("Loading data... '123' =->"+inputParam);
+	           try {
+	              Thread.sleep(1000);
+	           }
+	           catch (InterruptedException e) {
+	              e.printStackTrace();
+	           }
+	       }
+	       return new Integer(1);
+	    });
+		
+	}
+	
 	/**
 	 * chiamata quando l'utente fa click sul bottone Apri Dettaglio (Storico > Distribuzioni)
 	 */
@@ -908,16 +977,24 @@ public class OverviewDistriVociController {
 
 	private void handleAnteprimaDistribuzione() {
 
+		disabledView(true);
+		mainAnchorPane.setVisible(false);
 		if (isInputValidForAnteprimaDistribuzione()) {
 			try {
 				VboxVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
 		    	bar.setVisible(true);
 				anteprimaDistribuzione();
+				disabledView(false);
+				mainAnchorPane.setVisible(true);
 			} catch (Exception e) {
 				VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
 				showAlert(AlertType.ERROR, "Error", "", e.toString(), main.getStagePrincipale());
+				disabledView(false);
+				mainAnchorPane.setVisible(true);
 			}
 		} else {
+			disabledView(false);
+			mainAnchorPane.setVisible(true);
 			VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
 		}
 
@@ -1484,17 +1561,16 @@ public class OverviewDistriVociController {
 			listaQueryDB.add(queryDB);
 
 		}
-
+		
 		// lancio su apposito Task Thread del check sulle connessioni e le tabelle
+		try {
+			BackgroundTask bt = new BackgroundTask();
+			copyWorkerForCheckConnessioniTabelle = createcopyWorkerForCheckConnessioniTabelle(listaSchemi, listaQueryDB);
+			bt.execTask(copyWorkerForCheckConnessioniTabelle);
+		} catch (InterruptedException e) {
+			System.out.println("eccezione sul try di BackgroundTask: " + e.toString());
+		}	
 		
-		copyWorkerForCheckConnessioniTabelle = createcopyWorkerForCheckConnessioniTabelle(listaSchemi, listaQueryDB);
-		
-//        labelInfoEsecuzione.textProperty().unbind();
-//        labelInfoEsecuzione.textProperty().bind(copyWorkerForCheckConnessioniTabelle.messageProperty());
-//
-//        bar.progressProperty().unbind();
-//        bar.progressProperty().bind(copyWorkerForCheckConnessioniTabelle.progressProperty());
-
         copyWorkerForCheckConnessioniTabelle.messageProperty().addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 //System.out.println("newValue " + newValue);
@@ -1512,10 +1588,7 @@ public class OverviewDistriVociController {
 			if (exception != null) {
 				logger.error("metodo isSchemiTabelleOK Task copyWorkerForCheckConnessioniTabelle - setOnFailed - no eccezione");
 				copyWorkerForCheckConnessioniTabelle.cancel(true);
-//				bar.progressProperty().unbind();
-//				bar.setProgress(0);
 				disabledView(false);
-//				bar.setVisible(false);
 				showAlert(AlertType.ERROR, "Error", "", "Errore " + exception.toString(), main.getStagePrincipale());
 			} else {
 				logger.error("metodo isSchemiTabelleOK Task copyWorkerForCheckConnessioniTabelle - setOnFailed - eccezione = " + exception.toString());
@@ -1537,37 +1610,6 @@ public class OverviewDistriVociController {
             return esitoTestConnessioniPresenzaTabellePerTask.isEsitoGlobale();
         }
 		
-		
-		
-		//*******************************************************************************************************************
-		
-//		for (Schema s : listaSchemi) {
-//			SchemaDTO schemaDTO = searchSchemaDTO(s.getCodice());
-//			if (schemaDTO != null) {
-//				
-//				EsitoTestConnessioniPresenzaTabelle esitoTestConnessioniPresenzaTabelle = model
-//						.testConnessionePresenzaTabelle(schemaDTO, listaQueryDB);
-//				
-//				if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()
-//						&& "".equalsIgnoreCase(esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO())) {
-//					
-//					showAlert(AlertType.ERROR, "Error", "", "Non riuscita connessione allo schema " + s.getCodice(),
-//							main.getStagePrincipale());
-//					return false;
-//				}
-//				if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()) {
-//					
-//					showAlert(AlertType.ERROR, "Error", "",  esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO() ,
-//							main.getStagePrincipale());
-//					return false;
-//				}
-//			} else {
-//				showAlert(AlertType.ERROR, "Error", "",
-//						"Non trovati dati di connessione relativi allo schema " + s.getCodice(), main.getStagePrincipale());
-//				return false;
-//			}
-//		}
-//		return true;
 	}
 
 	private Task createcopyWorkerForCheckConnessioniTabelle(ObservableList<Schema> listaSchemi,
@@ -1593,31 +1635,21 @@ public class OverviewDistriVociController {
 							
 							esitoTestConnessioniPresenzaTabellePerTask.setEsitoGlobale(false);
 							esitoTestConnessioniPresenzaTabellePerTask.setCausaEsitoKO("Non riuscita connessione allo schema " + s.getCodice());
-							
-//							showAlert(AlertType.ERROR, "Error", "", "Non riuscita connessione allo schema " + s.getCodice(),
-//									main.getStagePrincipale());
-//							return false;
 						}
 						if (!esitoTestConnessioniPresenzaTabelle.isEsitoGlobale()) {
 							
 							esitoTestConnessioniPresenzaTabellePerTask.setEsitoGlobale(false);
 							esitoTestConnessioniPresenzaTabellePerTask.setCausaEsitoKO(esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO());
-							
-//							showAlert(AlertType.ERROR, "Error", "",  esitoTestConnessioniPresenzaTabelle.getCausaEsitoKO() ,
-//									main.getStagePrincipale());
-//							return false;
 						}
 					} else {
 						esitoTestConnessioniPresenzaTabellePerTask.setEsitoGlobale(false);
 						esitoTestConnessioniPresenzaTabellePerTask.setCausaEsitoKO("Non trovati dati di connessione relativi allo schema " + s.getCodice());
-						
-//						showAlert(AlertType.ERROR, "Error", "",
-//								"Non trovati dati di connessione relativi allo schema " + s.getCodice(), main.getStagePrincipale());
-//						return false;
 					}
 				}
 				
 				return true;
+				
+				//return func.applyAsInt(Integer);
 			}
 
 			@Override
@@ -1626,20 +1658,13 @@ public class OverviewDistriVociController {
 				logger.info("metodo createcopyWorkerForCheckConnessioniTabelle - succeeded");
 				super.succeeded();
 				updateMessage("Done!");
-//				bar.progressProperty().unbind();
-//				bar.setProgress(0);
 				disabledView(false);
-//				VboxNonVisibile(Constants.BOX_ANTEPRIMA_DISTRIBUZIONE);
-//				showAlertDistribuzioneOK(aggiornaStoricoDistribuzione());
-//				clearDistributionInfo();
-				//mainTree.getSelectionModel().select(1);
 				if (!esitoTestConnessioniPresenzaTabellePerTask.isEsitoGlobale()) {
 					showAlert(AlertType.ERROR, "Error", "",  esitoTestConnessioniPresenzaTabellePerTask.getCausaEsitoKO() ,
 					main.getStagePrincipale());
 				}
 			}
 		};
-		
 	}
 
 	private void anteprimaDistribuzione() {
@@ -1654,8 +1679,15 @@ public class OverviewDistriVociController {
 		
 		bar.setProgress(0);
 		
-		copyWorkerForGenInserts = createWorkerForGenInserts();
-		
+		try {
+			BackgroundTask bt = new BackgroundTask();
+			copyWorkerForGenInserts = createWorkerForGenInserts();	
+			bt.execTask(copyWorkerForGenInserts);
+		} catch (InterruptedException e) {
+			System.out.println("eccezione sul try di BackgroundTask: " + e.toString());
+		}	
+
+
         bar.progressProperty().unbind();
         bar.progressProperty().bind(copyWorkerForGenInserts.progressProperty());
 				
@@ -1706,7 +1738,13 @@ public class OverviewDistriVociController {
 		
 		bar.setProgress(0);
 		
-		copyWorkerForExecuteDistribution = createWorkerForExecuteDistribution();
+		try {
+			BackgroundTask bt = new BackgroundTask();
+			copyWorkerForExecuteDistribution = createWorkerForExecuteDistribution();
+			bt.execTask(copyWorkerForExecuteDistribution);
+		} catch (InterruptedException e) {
+			System.out.println("eccezione sul try di BackgroundTask: " + e.toString());
+		}	
 		
         labelInfoEsecuzione.textProperty().unbind();
         labelInfoEsecuzione.textProperty().bind(copyWorkerForExecuteDistribution.messageProperty());
@@ -1956,7 +1994,13 @@ public class OverviewDistriVociController {
 			main.addDeleteStatementForRipristino(deleteStatement);	
 		}
 		
-		copyWorkerForExecuteRipristino = createWorkerForExecuteRipristino();
+		try {
+			BackgroundTask bt = new BackgroundTask();
+			copyWorkerForExecuteRipristino = createWorkerForExecuteRipristino();
+			bt.execTask(copyWorkerForExecuteRipristino);
+		} catch (InterruptedException e) {
+			System.out.println("eccezione sul try di BackgroundTask: " + e.toString());
+		}	
 
         barRipristino.progressProperty().unbind();
         barRipristino.progressProperty().bind(copyWorkerForExecuteRipristino.progressProperty());
@@ -2110,7 +2154,13 @@ public class OverviewDistriVociController {
 			main.addDeleteStatementForRipristino(deleteStatement);	
 		}
 		
-		copyWorkerForExecuteRipristinoVoce = createWorkerForExecuteRipristinoVoce(main.getVoceDaRipristinare());
+		try {
+			BackgroundTask bt = new BackgroundTask();
+			copyWorkerForExecuteRipristinoVoce = createWorkerForExecuteRipristinoVoce(main.getVoceDaRipristinare());
+			bt.execTask(copyWorkerForExecuteRipristinoVoce);
+		} catch (InterruptedException e) {
+			System.out.println("eccezione sul try di BackgroundTask: " + e.toString());
+		}	
 
         barRipristinoVoce.progressProperty().unbind();
         barRipristinoVoce.progressProperty().bind(copyWorkerForExecuteRipristinoVoce.progressProperty());
@@ -2199,4 +2249,70 @@ public class OverviewDistriVociController {
 		alert.showAndWait();
 	}
 
+    private void WorkIndicatorDialog(Window owner, String label) {
+    	System.out.println("metodo WorkIndicatorDialog");
+        dialog.initModality(Modality.WINDOW_MODAL);
+        dialog.initOwner(owner);
+        dialog.setResizable(false);
+        this.label.setText(label);
+    }
+    
+    private void setupDialog() {
+    	System.out.println("metodo setupDialog");
+        root.getChildren().add(mainPane);
+        vbox.setSpacing(5);
+        vbox.setAlignment(Pos.CENTER);
+        vbox.setMinSize(330, 120);
+        vbox.getChildren().addAll(label,progressIndicator);
+        mainPane.setTop(vbox);
+        dialog.setScene(scene);
+ 
+        dialog.setOnHiding(event -> { /* Gets notified when task ended, but BEFORE 
+                     result value is attributed. Using the observable list above is 
+                     recommended. */ });
+         
+        dialog.show();
+    }
+    
+    private void addTaskEndNotification(Consumer<Integer> c) {
+    	System.out.println("metodo addTaskEndNotification");
+        resultNotificationList.addListener((ListChangeListener<? super Integer>) n -> {
+            resultNotificationList.clear();
+            c.accept(resultValue);
+        });
+    }
+    
+    private void setupAnimationThread() {
+    	 
+    	System.out.println("metodo setupAnimationThread");
+        animationWorker = new Task() {
+            @Override
+            protected Object call() throws Exception {
+                /*
+                This is activated when we have a "progressing" indicator.
+                This thread is used to advance progress every XXX milliseconds.
+                In case of an INDETERMINATE_PROGRESS indicator, it's not of use.
+                for (int i=1;i<=100;i++) {
+                    Thread.sleep(500);
+                    updateMessage();
+                    updateProgress(i,100);
+                }
+                */
+                return true;
+            }
+        };
+ 
+        progressIndicator.setProgress(0);
+        progressIndicator.progressProperty().unbind();
+        progressIndicator.progressProperty().bind(animationWorker.progressProperty());
+ 
+        animationWorker.messageProperty().addListener((observable, oldValue, newValue) -> {
+            // Do something when the animation value ticker has changed
+        });
+ 
+        new Thread(animationWorker).start();
+    }
+	
+    
+    
 }
