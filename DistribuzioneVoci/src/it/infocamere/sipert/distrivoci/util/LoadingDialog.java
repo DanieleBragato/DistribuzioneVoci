@@ -32,7 +32,7 @@ public class LoadingDialog {
         progressIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
         
         // changing color with css
-        progressIndicator.setStyle(" -fx-progress-color: intense blue;");
+        progressIndicator.setStyle(" -fx-progress-color: blue;");
         // changing size without css
         progressIndicator.setMinWidth(250);
         progressIndicator.setMinHeight(250);

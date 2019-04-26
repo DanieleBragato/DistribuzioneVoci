@@ -16,6 +16,14 @@ public class BackgroundTask {
         loadingDialog.getDialogStage().show();
         Thread thread = new Thread(task);
         thread.start();
+        
+        synchronized(thread){
+            try{        
+            	thread.wait();
+            }catch(InterruptedException e){
+                e.printStackTrace();
+            }
+        }
     }
 
 }

@@ -49,6 +49,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
@@ -139,6 +140,8 @@ public class Main extends Application {
     private Map <String, String> mapProvince = new HashMap<String, String>();
     
     private Voce voceDaRipristinare = new Voce();
+    
+    private Image imgSetup = new Image("file:resources/images/SETUP.png");
     
 //    private Image nodeImageSetup = new Image(
 //            getClass().getResourceAsStream("file:resources/images/ICO_SETUP.png"));
@@ -612,16 +615,19 @@ public class Main extends Application {
             loader.setLocation(Main.class.getResource("view/OverviewDistriVoci.fxml"));
             AnchorPane overview = (AnchorPane) loader.load();
             
+            //Image imgSetup = new Image("file:resources/images/SETUP.png");
+            //ImageView imgViewSetup = new ImageView(imgSetup);
             //Image img = new Image("file:resources/images/SETUP.png");
             
-            rootNode.setExpanded(true);
+            //rootNode.setExpanded(true);
             for (DistributionStep step : distributionStep) {
             	TreeItem<String> stepLeaf;
-//            	if ("Parametri".equalsIgnoreCase(step.getStep())) {
-//            		stepLeaf = new TreeItem<>(step.getName(), new ImageView(img));
-//            	} else {
+            	if ("Parametri".equalsIgnoreCase(step.getStep())) {
+            		stepLeaf = new TreeItem<>(step.getName(), new ImageView(imgSetup));
+            		//stepLeaf.setGraphic(openView);
+            	} else {
             		stepLeaf = new TreeItem<>(step.getName());	
-//            	}
+            	}
                 
                 boolean found = false;
                 for (TreeItem<String> stepNode : rootNode.getChildren()) {
@@ -637,6 +643,10 @@ public class Main extends Application {
                             step.getStep()
                     );
                     rootNode.getChildren().add(stepNode);
+                    if ("Schemi di Partenza".equalsIgnoreCase(stepLeaf.getValue())) {
+                    	stepLeaf.setGraphic(new ImageView(imgSetup));
+                    	stepNode.setGraphic(new ImageView(imgSetup));
+                    }
                     stepNode.getChildren().add(stepLeaf);
                 }
             }
