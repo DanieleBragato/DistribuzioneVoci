@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="1.0" xmlns:jfx="http://javafx.com" href="DistribuzioneVoci.jnlp">
+  <information>
+    <title>DistribuzioneVoci</title>
+    <vendor>infocamere.it</vendor>
+    <description>DistribuzioneVoci</description>
+    <offline-allowed/>
+  </information>
+  <resources>
+    <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
+    <jar href="DistribuzioneVoci.jar" size="104398" download="eager" />
+    <jar href="libs\apache-logging-log4j.jar" size="481534" download="eager" />
+    <jar href="libs\jmetro-5.2.jar" size="63519" download="eager" />
+    <jar href="libs\jxl.jar" size="725735" download="eager" />
+    <jar href="libs\ojdbc7.jar" size="3698857" download="eager" />
+  </resources>
+  <jfx:javafx-desc  width="0" height="0" main-class="it.infocamere.sipert.distrivoci.Main"  name="DistribuzioneVoci" />
+  <update check="background"/>
+</jnlp>
