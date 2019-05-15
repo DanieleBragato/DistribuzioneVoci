@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="DistribuzioneVoci.jar" size="104398" download="eager" />
+    <jar href="DistribuzioneVoci.jar" size="104401" download="eager" />
     <jar href="libs\apache-logging-log4j.jar" size="481534" download="eager" />
     <jar href="libs\jmetro-5.2.jar" size="63519" download="eager" />
     <jar href="libs\jxl.jar" size="725735" download="eager" />
