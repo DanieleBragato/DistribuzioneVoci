@@ -43,6 +43,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -234,6 +235,10 @@ public class OverviewDistriVociController {
 
 	@FXML
 	private Button bntDeleteOldest;
+	
+	@FXML
+	private RadioButton radioAmbienteProd;	
+	
 
 //    @FXML
 //    private AnchorPane mainAnchorPane;
@@ -305,6 +310,8 @@ public class OverviewDistriVociController {
 		assert labelRipristino != null : "fx:id=\"labelRipristino\" was not injected: check your FXML file 'OverviewDistriVoci.fxml'.";
 		assert labelRipristinoInsert != null : "fx:id=\"labelRipristinoInsert\" was not injected: check your FXML file 'OverviewDistriVoci.fxml'.";
 
+		assert radioAmbienteProd != null : "fx:id=\"radioAmbienteProd\" was not injected: check your FXML file 'OverviewDistriVoci.fxml'.";
+		
 		// Initializza la lista delle tabelle con 2 colonne - codice e descrizione
 		codiceTabColumn.setCellValueFactory(cellData -> cellData.getValue().codiceProperty());
 		descrizioneTabColumn.setCellValueFactory(cellData -> cellData.getValue().descrizioneProperty());

@@ -32,7 +32,7 @@
                      <children>
                         <VBox fx:id="vboxSchemi" prefHeight="340.0" prefWidth="600.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="100.0">
                            <children>
-                              <Label prefHeight="48.0" prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Schemi sui quali distribuire" textAlignment="CENTER">
+                              <Label prefHeight="48.0" prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri - Schemi sui quali distribuire" textAlignment="CENTER">
                                  <font>
                                     <Font name="System Bold" size="16.0" />
                                  </font>
@@ -40,7 +40,7 @@
                                     <Insets left="25.0" />
                                  </VBox.margin>
                               </Label>
-                              <HBox prefHeight="50.0" prefWidth="200.0">
+                              <HBox fx:id="hboxSchemiArrivo" prefHeight="50.0" prefWidth="200.0">
                                  <children>
                                     <Label prefHeight="21.0" prefWidth="80.0" styleClass="label-bright" stylesheets="@DarkTheme.css" text="FILTRO:" textAlignment="RIGHT">
                                        <HBox.margin>
@@ -171,7 +171,7 @@
                         </VBox>
                         <VBox fx:id="vboxVoci" prefHeight="200.0" prefWidth="450.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="100.0">
                            <children>
-                              <Label prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Voci">
+                              <Label prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri - Voci">
                                  <VBox.margin>
                                     <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
                                  </VBox.margin>
@@ -202,7 +202,7 @@
                         </VBox>
                         <VBox fx:id="vboxTabelle" prefHeight="600.0" prefWidth="550.0" visible="false" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="100.0">
                            <children>
-                              <Label prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Tabelle" textAlignment="CENTER">
+                              <Label prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri - Tabelle" textAlignment="CENTER">
                                  <VBox.margin>
                                     <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
                                  </VBox.margin>
@@ -235,7 +235,7 @@
                            <children>
                               <HBox prefHeight="50.0" prefWidth="200.0">
                                  <children>
-                                    <Label prefHeight="48.0" prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri Schemi di Partenza" textAlignment="CENTER">
+                                    <Label prefHeight="48.0" prefWidth="700.0" styleClass="label-header" stylesheets="@DarkTheme.css" text="Parametri - Schemi di Partenza" textAlignment="CENTER">
                                        <HBox.margin>
                                           <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
                                        </HBox.margin>

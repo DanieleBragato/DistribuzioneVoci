@@ -229,7 +229,7 @@ public class RootLayoutController {
     	Alert alert = new Alert(AlertType.INFORMATION);
     	alert.setTitle("Distribuzione Voci");
     	alert.setHeaderText("info");
-    	alert.setContentText("Procedere con l'impostazione dei parametri (tabelle/voci/schemi) relativi alla Distribuzione delle Voci, successivamente è possibile accedere alla fase di Anteprima ed effettiva Distribuzione. Le elaborazioni vengono storicizzate con la possibilità di Ripristinare i valori ante Distribuzione");
+    	alert.setContentText("Procedere con l'impostazione dei parametri (tabelle/voci/schema da partenza e schema/i di arrivo) relativi alla Distribuzione delle Voci, successivamente è possibile accedere alla fase di Anteprima ed effettiva Distribuzione. Le elaborazioni vengono storicizzate con la possibilità di Ripristinare i valori ante Distribuzione");
 
     	alert.showAndWait();	
     }
